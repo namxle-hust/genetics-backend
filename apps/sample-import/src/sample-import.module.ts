@@ -1,9 +1,11 @@
-import { MongodbModule, SampleSchema } from '@app/common';
-import { SampleRepository, Sample } from '@app/common';
+import { MAIL_SERVICE, RmqModule } from '@app/common';
+import { MongoModule } from '@app/common/mongodb/mongo.module';
+import { PrismaModule } from '@app/prisma';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi'
+import { DBModule, MongoConfigService } from './mongo-config.service';
 import { SampleImportController } from './sample-import.controller';
 import { SampleImportService } from './sample-import.service';
 
@@ -12,14 +14,33 @@ import { SampleImportService } from './sample-import.service';
         ConfigModule.forRoot({
             isGlobal: true,
             validationSchema: Joi.object({
-                MONGODB_URI: Joi.string().required
+                MONGODB_URI: Joi.string().required(),
+                RABBIT_MQ_URI: Joi.string().required(),
+                RABBIT_MQ_MAIL_SERVICE_QUEUE: Joi.string().required(),
+                POSTGRES_URI: Joi.string().required()
             }),
-            envFilePath: './apps/sample-import/.env'
+            envFilePath: '.env',
         }),
-        MongodbModule,
-        MongooseModule.forFeature([{ name: Sample.name, schema: SampleSchema }])
+        RmqModule.register({
+            name: MAIL_SERVICE
+        }),
+        PrismaModule.forRootAsync({
+            isGlobal: true,
+            useFactory: async (configService: ConfigService) => {
+                return {
+                    prismaOptions: {
+                        log: ['query']
+                    },
+                };
+            },
+            inject: [ConfigService],
+        }),
+        MongoModule.forRootAsync({
+            imports: [DBModule],
+            useExisting: MongoConfigService
+        }),
     ],
     controllers: [SampleImportController],
-    providers: [SampleImportService, SampleRepository],
+    providers: [SampleImportService],
 })
 export class SampleImportModule { }

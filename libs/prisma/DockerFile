@@ -1,0 +1,20 @@
+FROM node:alpine
+
+RUN apk update \
+	&& apk add --no-cache openssl\
+	&& rm -rf /var/lib/apt/lists/* \
+	&& rm -rf /var/cache/apk/*
+
+RUN uname -a
+
+RUN echo $DATABASE_URI
+
+# Create app directory
+WORKDIR /app
+
+RUN mkdir /app/prisma
+
+# Install prisma for the migration
+RUN yarn global add prisma
+
+

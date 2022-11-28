@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../src/generated/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("POSTGRES_URI")
+}
+
+enum Role {
+    NORMAL
+    ADMIN
+}
+
+enum SampleType {
+    FASTQ
+    VCF
+}
+
+enum VcfType {
+    WGS
+    WES
+}
+
+enum SampleStatus {
+    FASTQ_QUEUING
+    FASTQ_ANALYZING
+    VCF_QUEUING
+    VCF_ANALYZING
+    IMPORT_QUEUING
+    ANALYZED
+    ERROR
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    UNKNOWN
+}
+
+model User {
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    firstName String?
+    lastName  String?
+    email     String    @unique
+    hash      String
+    role      Role      @default(NORMAL)
+    lastLogin DateTime
+    Project   Project[]
+    Batch     Batch[]
+
+    @@map("users")
+}
+
+model Project {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name   String   @unique
+    user   User     @relation(fields: [userId], references: [id])
+    userId Int
+    Sample Sample[]
+
+    @@map("projects")
+}
+
+model Batch {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    userId Int
+    user   User @relation(fields: [userId], references: [id])
+
+    type SampleType @default(VCF)
+
+    files  File[]
+    Sample Sample[]
+
+    @@map("batch")
+}
+
+model File {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name         String
+    uploadedName String
+    size         Int
+    batchId      Int
+    batch        Batch  @relation(fields: [batchId], references: [id])
+
+    @@map("uploaded_files")
+}
+
+model Sample {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId Int
+    project   Project @relation(fields: [projectId], references: [id])
+
+    batchId Int
+    batch   Batch @relation(fields: [batchId], references: [id])
+
+    status    SampleStatus @default(VCF_QUEUING)
+    isDeleted Boolean      @default(false)
+
+    vcfFilePath String?
+
+    totalVariants Int
+    totalGenes    Int
+
+    description String
+
+    vcfType VcfType @default(WES)
+
+    gender Gender?
+
+    @@map("samples")
+}

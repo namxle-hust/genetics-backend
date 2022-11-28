@@ -24,10 +24,16 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
+    "@nestjs/microservices": "^9.2.0",
     "@nestjs/mongoose": "^9.2.1",
     "@nestjs/platform-express": "^9.0.0",
+    "@prisma/client": "^4.6.1",
+    "@yarnpkg/pnpify": "^4.0.0-rc.31",
+    "amqp-connection-manager": "^4.1.9",
+    "amqplib": "^0.10.3",
     "joi": "^17.7.0",
     "mongoose": "^6.7.2",
+    "object-hash": "^3.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"
@@ -76,7 +82,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
+      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1"
     }
   }
 }

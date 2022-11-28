@@ -44,6 +44,51 @@
       "compilerOptions": {
         "tsConfigPath": "apps/sample-import/tsconfig.app.json"
       }
+    },
+    "sample-status-processor": {
+      "type": "application",
+      "root": "apps/sample-status-processor",
+      "entryFile": "main",
+      "sourceRoot": "apps/sample-status-processor/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/sample-status-processor/tsconfig.app.json"
+      }
+    },
+    "fastq-analyzer": {
+      "type": "application",
+      "root": "apps/fastq-analyzer",
+      "entryFile": "main",
+      "sourceRoot": "apps/fastq-analyzer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/fastq-analyzer/tsconfig.app.json"
+      }
+    },
+    "vcf-analyzer": {
+      "type": "application",
+      "root": "apps/vcf-analyzer",
+      "entryFile": "main",
+      "sourceRoot": "apps/vcf-analyzer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/vcf-analyzer/tsconfig.app.json"
+      }
+    },
+    "mail-service": {
+      "type": "application",
+      "root": "apps/mail-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/mail-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/mail-service/tsconfig.app.json"
+      }
+    },
+    "prisma": {
+      "type": "library",
+      "root": "libs/prisma",
+      "entryFile": "index",
+      "sourceRoot": "libs/prisma/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/prisma/tsconfig.lib.json"
+      }
     }
   }
 }
