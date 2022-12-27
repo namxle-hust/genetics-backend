@@ -35,3 +35,11 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Cromwell
+
+cromwell/cromwell-executions/*
+!cromwell/cromwell-executions/.gitignore
+
+cromwell/compose/mysql/data/*
+!cromwell/compose/mysql/data/.gitignore

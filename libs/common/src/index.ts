@@ -3,3 +3,5 @@ export * from './rmq/rmq.service'
 
 export * from './constants/service'
 export * from './constants/event'
+
+export * from './shared/type'

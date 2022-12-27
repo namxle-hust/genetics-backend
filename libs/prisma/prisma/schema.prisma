@@ -51,24 +51,26 @@ model User {
     email     String    @unique
     hash      String
     role      Role      @default(NORMAL)
-    lastLogin DateTime
-    Project   Project[]
-    Batch     Batch[]
+    lastLogin DateTime?
+
+    workspaces Workspace[]
+    batches    Batch[]
 
     @@map("users")
 }
 
-model Project {
+model Workspace {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    name   String   @unique
-    user   User     @relation(fields: [userId], references: [id])
-    userId Int
-    Sample Sample[]
+    name    String
+    userId  Int
+    user    User?    @relation(fields: [userId], references: [id])
+    samples Sample[]
 
-    @@map("projects")
+    @@unique([userId, name])
+    @@map("workspaces")
 }
 
 model Batch {
@@ -76,15 +78,16 @@ model Batch {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    name String
+    name     String
+    isDelete Boolean @default(false)
 
     userId Int
     user   User @relation(fields: [userId], references: [id])
 
     type SampleType @default(VCF)
 
-    files  File[]
-    Sample Sample[]
+    files   File[]
+    samples Sample[]
 
     @@map("batch")
 }
@@ -108,8 +111,10 @@ model Sample {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    projectId Int
-    project   Project @relation(fields: [projectId], references: [id])
+    name String
+
+    workspaceId Int
+    workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
     batchId Int
     batch   Batch @relation(fields: [batchId], references: [id])
@@ -119,10 +124,10 @@ model Sample {
 
     vcfFilePath String?
 
-    totalVariants Int
-    totalGenes    Int
+    totalVariants Int?
+    totalGenes    Int?
 
-    description String
+    description String?
 
     vcfType VcfType @default(WES)
 

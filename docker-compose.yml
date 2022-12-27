@@ -1,25 +1,25 @@
 version: '2'
 
 services:
-  sample-import:
-    container_name: genetics_sample_import
-    build:
-      context: .
-      dockerfile: ./apps/sample-import/DockerFile
-      target: development
-    command: npm run start:dev sample-import
-    env_file:
-      - ./apps/sample-import/.env
-    depends_on:
-      - mongodb
-      - prisma-migration
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - '3000:3000'
-    networks:
-      - genetics
+  # sample-import:
+  #   container_name: genetics_sample_import
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/sample-import/DockerFile
+  #     target: development
+  #   command: npm run start:dev sample-import
+  #   env_file:
+  #     - ./apps/sample-import/.env
+  #   depends_on:
+  #     - mongodb
+  #     - prisma-migration
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   ports:
+  #     - '3000:3000'
+  #   networks:
+  #     - genetics
 
   # samples-handler:
   #   container_name: genetics_samples-handler
@@ -40,22 +40,23 @@ services:
   #   networks:
   #     - genetics
 
-  # sample-status-processor:
-  #   container_name: genetics_sample_status_processor
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/sample-status-processor/DockerFile
-  #     target: development
-  #   command: npm run start:dev sample-status-processor
-  #   env_file:
-  #     - ./apps/sample-status-processor/.env
-  #   volumes:
-  #     - .:/usr/src/app
-  #     - /usr/src/app/node_modules
-  #   depends_on:
-  #     - rabbitmq
-  #   networks:
-  #     - genetics
+  sample-status-processor:
+    container_name: genetics_sample_status_processor
+    build:
+      context: .
+      dockerfile: ./apps/sample-status-processor/DockerFile
+      target: development
+    command: npm run start:dev sample-status-processor
+    env_file:
+      - ./apps/sample-status-processor/.env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - prisma-migration
+      - rabbitmq
+    networks:
+      - genetics
 
   # fastq-analyzer-service:
   #   container_name: genetics_fastq_analyzer
@@ -95,17 +96,17 @@ services:
   #   networks:
   #     - genetics
 
-  # rabbitmq:
-  #   container_name: genetics_rabbitmq
-  #   image: rabbitmq
-  #   ports:
-  #     - 5672:5672
-  #     - 15672:15672
-  #   volumes:
-  #     - /var/lib/rabbitmq
-  #     - /var/log/rabbitmq
-  #   networks:
-  #     - genetics
+  rabbitmq:
+    container_name: genetics_rabbitmq
+    image: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - /var/lib/rabbitmq
+      - /var/log/rabbitmq
+    networks:
+      - genetics
 
   postgres-db:
     image: postgres:13
@@ -117,7 +118,7 @@ services:
       - POSTGRES_DB=genetics
     networks:
       - genetics
-  
+
   prisma-migration:
     container_name: genetics_prisma_migration
     tty: true
@@ -136,19 +137,40 @@ services:
     networks:
       - genetics
 
-  mongodb:
-    container_name: genetics_mongodb
-    image: docker.io/bitnami/mongodb:5.0
-    ports:
-      - "27017:27017"
-    volumes:
-      - 'mongodb_data:/bitnami/mongodb'
-    environment:
-      - MONGODB_ROOT_USER=root
-      - MONGODB_ROOT_PASSWORD=password123
-      - MONGODB_DATABASE=genetics
-    networks:
-      - genetics
+  # mongodb:
+  #   container_name: genetics_mongodb
+  #   image: docker.io/bitnami/mongodb:5.0
+  #   ports:
+  #     - '27017:27017'
+  #   volumes:
+  #     - 'mongodb_data:/bitnami/mongodb'
+  #   environment:
+  #     - MONGODB_ROOT_USER=root
+  #     - MONGODB_ROOT_PASSWORD=password123
+  #     - MONGODB_DATABASE=genetics
+  #   networks:
+  #     - genetics
+
+  # information-service:
+  #   container_name: genetics_information
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/information/DockerFile
+  #     target: development
+  #   command: npm run start:dev information
+  #   env_file:
+  #     - ./apps/information/.env
+  #   depends_on:
+  #     - mongodb
+  #     - prisma-migration
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   ports:
+  #     - '3000:3000'
+  #   networks:
+  #     - genetics
+
 volumes:
   mongodb_data:
     driver: local

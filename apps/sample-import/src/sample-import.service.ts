@@ -21,17 +21,17 @@ export class SampleImportService {
             setTimeout(() => {
                 return resolve(true);
             }, 10000)
-        }) 
+        })
         return 'users count:' + count;
     }
 
     async test(): Promise<any> {
-        const user = await this.prisma.user.create({
-            data: {
-                email: 'namledz707@gmail.com',
-                hash: "abc"
-            },
-        })
-        return user;
+        // const user = await this.prisma.user.create({
+        //     data: {
+        //         email: 'namledz707@gmail.com',
+        //         hash: "abc"
+        //     }
+        // })
+        // return user;
     }
 }
