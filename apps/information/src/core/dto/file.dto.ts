@@ -2,6 +2,11 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
 import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, ValidateIf, ValidateNested } from "class-validator"
 import { BatchExists, Trim } from "../decorators";
+import { IFileFilter } from "../models";
+
+export class FileFilterDTO implements IFileFilter {
+    
+}
 
 export class FileCreateWithBatchDTO {
     @IsString()

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { BatchPossession, GetUser } from '../core/decorators';
-import { BatchCreateDTO, BatchDeleteManyDTO, BatchUpdateDTO, TableDTO } from '../core/dto';
+import { BatchCreateDTO, BatchDeleteManyDTO, BatchFilterDTO, BatchUpdateDTO, TableDTO } from '../core/dto';
 import { BatchEntity, TableOutputEntity } from '../core/entities';
 import { JwtGuard } from '../core/guards';
 import { BatchService } from '../core/services';
@@ -21,7 +21,7 @@ export class BatchController {
 
     @Post('find')
     @ApiCreatedResponse({ type: TableOutputEntity })
-    async getBatches(@GetUser('id') userId: number, @Body() dto: TableDTO) {
+    async getBatches(@GetUser('id') userId: number, @Body() dto: TableDTO<BatchFilterDTO>) {
         const data = await this.batchService.getBatches(dto, userId);
         return new TableOutputEntity<BatchEntity>(data)
     }

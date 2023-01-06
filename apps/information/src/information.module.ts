@@ -2,7 +2,7 @@ import { MongoModule } from '@app/common/mongodb/mongo.module';
 import { PrismaModule } from '@app/prisma';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DBModule, MongoConfigService } from 'apps/sample-import/src/mongo-config.service';
+import { DBModule, MongoConfigService } from '@app/common/mongodb';
 import * as Joi from 'joi'
 import { WorkspaceController } from './workspace/workspace.controller';
 import { AuthModule } from './auth/auth.module';

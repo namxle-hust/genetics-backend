@@ -1,6 +1,6 @@
 import { File } from '@app/prisma';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { FileCreateDTO, TableDTO } from '../dto';
+import { FileCreateDTO, FileFilterDTO, TableDTO } from '../dto';
 import { FileEntity, TableOutputEntity } from '../entities';
 import { IFileCreateInput, IFileFindInput, TableFindInput } from '../models';
 import { FileRepository } from '../repository';
@@ -9,13 +9,13 @@ import { FileRepository } from '../repository';
 export class FileService {
     constructor(private readonly fileRepository: FileRepository) {}
 
-    async getFiles(dto: TableDTO, batchId: number): Promise<TableOutputEntity<FileEntity>> {
+    async getFiles(dto: TableDTO<FileFilterDTO>, batchId: number): Promise<TableOutputEntity<FileEntity>> {
         let result: TableOutputEntity<FileEntity> = {
             items: [],
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<IFileFindInput>(dto, { batchId: batchId });
+        let tableFindDto = new TableFindInput<IFileFindInput, FileFilterDTO>(dto, { batchId: batchId });
 
         const total = await this.fileRepository.count(tableFindDto);
 

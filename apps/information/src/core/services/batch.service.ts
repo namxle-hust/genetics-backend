@@ -1,7 +1,7 @@
 import { Batch } from '@app/prisma';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BatchCreateDTO, BatchUpdateDTO, FileCreateDTO, TableDTO } from '../dto';
-import { IBatchCreateInput, IBatchFindInput, IBatchUpdateInput, TableFindInput } from '../models';
+import { BatchCreateDTO, BatchFilterDTO, BatchUpdateDTO, FileCreateDTO, TableDTO } from '../dto';
+import { IBatchCreateInput, IBatchFilter, IBatchFindInput, IBatchUpdateInput, TableFindInput } from '../models';
 import { TableOutputEntity, BatchEntity } from '../entities';
 import { BatchRepository } from '../repository';
 import { FileService } from './file.service';
@@ -10,13 +10,13 @@ import { FileService } from './file.service';
 export class BatchService {
     constructor(private readonly batchRepository: BatchRepository, private readonly fileService: FileService) { }
 
-    async getBatches(dto: TableDTO, userId: number): Promise<TableOutputEntity<BatchEntity>> {
+    async getBatches(dto: TableDTO<BatchFilterDTO>, userId: number): Promise<TableOutputEntity<BatchEntity>> {
         let result: TableOutputEntity<BatchEntity> = {
             items: [],
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<IBatchFindInput>(dto, { userId: userId, isDelete: false });
+        let tableFindDto = new TableFindInput<IBatchFindInput, IBatchFilter>(dto, { userId: userId, isDelete: false });
 
         const total = await this.batchRepository.count(tableFindDto);
 

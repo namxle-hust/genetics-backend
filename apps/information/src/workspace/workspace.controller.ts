@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../core/decorators';
-import { WorkspaceUpdateDTO, WorkspaceCreateDTO, TableDTO } from '../core/dto';
+import { WorkspaceUpdateDTO, WorkspaceCreateDTO, TableDTO, WorkspaceFilterDTO } from '../core/dto';
 import { TableOutputEntity, WorkspaceEntity } from '../core/entities';
 import { JwtGuard } from '../core/guards';
 import { WorkspaceService } from '../core/services';
@@ -22,7 +22,7 @@ export class WorkspaceController {
 
     @Post('find')
     @ApiCreatedResponse({ type: TableOutputEntity })
-    async getWorkspaces(@GetUser('id') userId: number, @Body() dto: TableDTO) {
+    async getWorkspaces(@GetUser('id') userId: number, @Body() dto: TableDTO<WorkspaceFilterDTO>) {
         const data =  await this.workspaceService.getWorkspaces(dto, userId);
         return new TableOutputEntity<WorkspaceEntity>(data)
     }

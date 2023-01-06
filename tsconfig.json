@@ -17,6 +17,9 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "plugins": [
+      { "transform": "ts-transformer-keys/transformer" }
+    ],
     "paths": {
       "@app/common": [
         "libs/common/src"
@@ -29,6 +32,12 @@
       ],
       "@app/prisma/*": [
         "libs/prisma/src/*"
+      ],
+      "@app/core": [
+        "libs/core/src"
+      ],
+      "@app/core/*": [
+        "libs/core/src/*"
       ]
     }
   }

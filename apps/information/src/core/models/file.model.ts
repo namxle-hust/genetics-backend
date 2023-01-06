@@ -1,5 +1,9 @@
 import { File } from "@app/prisma"
 
+export interface IFileFilter {
+    
+}
+
 export interface IAWSCredentialOuput {
     AccessKeyId: string,
     SecretAccessKey: string

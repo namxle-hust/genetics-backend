@@ -1,0 +1,85 @@
+import { Service } from "@app/common/shared/service";
+import { Injectable, Logger } from "@nestjs/common";
+import { VariantProjection } from "../constants";
+import { VariantFilterDTO } from "../dto";
+import { IVariantFilter, TableFindInput, VariantFilterConditionModel } from "../models";
+import { VariantRepository } from "../repository/variant.repository";
+
+@Injectable()
+export class VariantService extends Service {
+
+    constructor() {
+        super()
+    }
+
+    buildOffset(criteria: TableFindInput<IVariantFilter, IVariantFilter>) {
+        return {
+            $skip: criteria.skip
+        }
+    }
+
+    buildLimit(criteria: TableFindInput<IVariantFilter, IVariantFilter>) {
+        return {
+            $limit: criteria.take
+        }
+    }
+
+    buildMatchAndCondition(filter: IVariantFilter | undefined) {
+        if (!filter) {
+            return null
+        }
+        let conditions: VariantFilterConditionModel = new VariantFilterConditionModel(filter);
+        let clause = Object.values(conditions)
+
+        if (clause.length > 0) {
+            return {
+                $match: {
+                    $and: clause
+                }
+            }
+        }
+        return null
+    }
+
+    buildCountPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
+        const $project = { $project: VariantProjection };
+        const $match = this.buildMatchAndCondition(criteria.where)
+        const $count = { $group: { _id: null, count: { $sum: 1 } } }
+
+        let pipe = [];
+        if ($match) {
+            pipe.push($match)
+        }
+
+        pipe = [
+            ...pipe,
+            $project,
+            $count
+        ]
+
+        return pipe
+    }
+
+    buildPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
+        const $project = { $project: VariantProjection };
+        const $match = this.buildMatchAndCondition(criteria.where)
+        const $offset = this.buildOffset(criteria);
+        const $limit = this.buildLimit(criteria);
+
+        let pipeFind = [];
+
+        if ($match) {
+            pipeFind.push($match)
+        }
+
+        pipeFind = [
+            ...pipeFind,
+            $project,
+            $offset,
+            $limit
+        ]
+
+        return pipeFind
+    }
+
+}

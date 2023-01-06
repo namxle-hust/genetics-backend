@@ -1,7 +1,7 @@
 import { Batch, PrismaService } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import { IBatchCreateInput, IBatchFindInput, IBatchRemoveInput, IBatchUpdateInput, TableFindInput } from "../models";
+import { IBatchCreateInput, IBatchFilter, IBatchFindInput, IBatchRemoveInput, IBatchUpdateInput, TableFindInput } from "../models";
 
 @Injectable()
 export class BatchRepository {
@@ -45,14 +45,14 @@ export class BatchRepository {
         return batch;
     }
 
-    async count(criteria: TableFindInput<IBatchFindInput>): Promise<number> {
+    async count(criteria: TableFindInput<IBatchFindInput, IBatchFilter>): Promise<number> {
         const total = await this.prisma.batch.count({
             where: criteria.where,
         })
         return total
     }
 
-    async findMany(criteria: TableFindInput<IBatchFindInput>): Promise<Batch[]> {
+    async findMany(criteria: TableFindInput<IBatchFindInput, IBatchFilter>): Promise<Batch[]> {
         const batches = await this.prisma.batch.findMany({
             where: criteria.where,
             orderBy: criteria.orderBy,

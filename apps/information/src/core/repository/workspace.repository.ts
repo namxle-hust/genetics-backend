@@ -1,7 +1,7 @@
 import { PrismaService, User, Workspace } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import { TableFindInput } from "../models";
+import { IWorkspaceFilter, TableFindInput } from "../models";
 import { IWorkspaceCreateInput, IWorkspaceFindInput, IWorkspaceUpdateInput } from "../models";
 
 @Injectable()
@@ -40,7 +40,7 @@ export class WorkspaceRepository {
         return workspace;
     }
 
-    async count(criteria: TableFindInput<IWorkspaceFindInput>): Promise<number> {
+    async count(criteria: TableFindInput<IWorkspaceFindInput, IWorkspaceFilter>): Promise<number> {
         const total = await this.prisma.workspace.count({
             where: criteria.where,
         })
@@ -55,7 +55,7 @@ export class WorkspaceRepository {
         })
     }
 
-    async findMany(criteria: TableFindInput<IWorkspaceFindInput>): Promise<Workspace[]> {
+    async findMany(criteria: TableFindInput<IWorkspaceFindInput, IWorkspaceFilter>): Promise<Workspace[]> {
         const workspaces = await this.prisma.workspace.findMany({
             where: criteria.where,
             orderBy: criteria.orderBy,

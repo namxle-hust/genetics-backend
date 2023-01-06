@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { BatchExistsRule, WorkspaceExistRule } from '../core/constraints';
 import { BatchExists } from '../core/decorators';
 import { BatchRepository, SampleRepository, WorkspaceRepository } from '../core/repository';
-import { SampleService } from '../core/services';
+import { VariantRepository } from '../core/repository/variant.repository';
+import { VariantService, SampleDetailService, SampleService } from '../core/services';
 import { SamplesController } from './samples.controller';
 
 @Module({
@@ -13,7 +14,10 @@ import { SamplesController } from './samples.controller';
         BatchRepository,
         WorkspaceRepository,
         BatchExistsRule,
-        WorkspaceExistRule
+        WorkspaceExistRule,
+        SampleDetailService,
+        VariantService,
+        VariantRepository
     ]
 
 })

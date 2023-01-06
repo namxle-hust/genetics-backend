@@ -1,7 +1,7 @@
 import { File, PrismaService, User } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import { IFileCreateInput, IFileFindInput, TableFindInput, UserFindCriteria } from "../models";
+import { IFileCreateInput, IFileFilter, IFileFindInput, TableFindInput, UserFindCriteria } from "../models";
 
 @Injectable()
 export class FileRepository {
@@ -23,7 +23,7 @@ export class FileRepository {
         }
     }
 
-    async count(criteria: TableFindInput<IFileFindInput>): Promise<number> {
+    async count(criteria: TableFindInput<IFileFindInput, IFileFilter>): Promise<number> {
         const total = await this.prisma.batch.count({
             where: criteria.where,
         })
@@ -38,7 +38,7 @@ export class FileRepository {
         return file;
     }
 
-    async findMany(criteria: TableFindInput<IFileFindInput>): Promise<File[]> {
+    async findMany(criteria: TableFindInput<IFileFindInput, IFileFilter>): Promise<File[]> {
         const files = await this.prisma.file.findMany({
             where: criteria.where,
             orderBy: criteria.orderBy,

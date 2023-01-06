@@ -1,6 +1,8 @@
-import { IsNotEmpty, IsNotEmptyObject, IsNumber } from "class-validator"
+import { Exclude, Type } from "class-transformer"
+import { IsNotEmpty, IsNotEmptyObject, IsNumber, IsOptional, ValidateNested } from "class-validator"
+import { IPaginator, ISorting, ITable } from "../models"
 
-class PaginatorDTO {
+class PaginatorDTO implements IPaginator {
     @IsNumber()
     page: number
 
@@ -14,7 +16,7 @@ class PaginatorDTO {
     total: number
 }
 
-class SortingDTO {
+class SortingDTO implements ISorting {
     @IsNotEmpty()
     column: string
 
@@ -22,13 +24,14 @@ class SortingDTO {
     direction: "asc" | "desc"
 }
 
-export class TableDTO {
-    @IsNotEmpty()
-    filter: object
+export class TableDTO<T> implements ITable<T> {
+    @IsOptional()
+    filter: T
 
     @IsNotEmpty()
     paginator: PaginatorDTO
 
+    @IsOptional()
     searchTerm: string
 
     @IsNotEmpty()

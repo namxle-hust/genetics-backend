@@ -1,7 +1,9 @@
 import { PrismaService, Sample } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import { ISampleCreateInput, ISampleFindInput, ISampleUpdateInput, TableFindInput } from "../models";
+import { SampleFilterDTO } from "../dto";
+import { SampleEntity } from "../entities";
+import { ISampleCreateInput, ISampleFilter, ISampleFindInput, ISampleUpdateInput, TableFindInput } from "../models";
 
 @Injectable()
 export class SampleRepository {
@@ -30,7 +32,29 @@ export class SampleRepository {
                 batch: {
                     select: {
                         id: true,
+                        name: true,
+                        userId: true
+                    }
+                },
+                workspace: {
+                    select: {
                         name: true
+                    }
+                }
+            },
+        })
+
+        return sample;
+    }
+    async findByIdOrFail(id: number): Promise<Sample> {
+        const sample = await this.prisma.sample.findUniqueOrThrow({
+            where: { id: id },
+            include: {
+                batch: {
+                    select: {
+                        id: true,
+                        name: true,
+                        userId: true
                     }
                 },
                 workspace: {
@@ -44,14 +68,14 @@ export class SampleRepository {
         return sample;
     }
 
-    async count(criteria: TableFindInput<ISampleFindInput>): Promise<number> {
+    async count(criteria: TableFindInput<ISampleFindInput, ISampleFilter>): Promise<number> {
         const total = await this.prisma.sample.count({
             where: criteria.where,
         })
         return total
     }
 
-    async findMany(criteria: TableFindInput<ISampleFindInput>): Promise<Sample[]> {
+    async findMany(criteria: TableFindInput<ISampleFindInput, ISampleFilter>): Promise<Sample[]> {
         const sample = await this.prisma.sample.findMany({
             where: criteria.where,
             orderBy: criteria.orderBy,

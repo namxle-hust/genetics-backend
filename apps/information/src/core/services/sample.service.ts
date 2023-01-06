@@ -1,20 +1,20 @@
-import { Batch, Sample, SampleStatus } from '@app/prisma';
+import { Batch, NotFoundError, Sample, SampleStatus } from '@app/prisma';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { SampleCreateDTO, SampleUpdateDTO, TableDTO } from '../dto';
+import { SampleCreateDTO, SampleFilterDTO, SampleUpdateDTO, TableDTO } from '../dto';
 import { ISampleCreateInput, ISampleFindInput, ISampleUpdateInput, TableFindInput } from '../models';
-import { TableOutputEntity, BatchEntity, SampleEntity } from '../entities';
+import { TableOutputEntity, BatchEntity, SampleEntity, VariantQCUrlEntity } from '../entities';
 import { BatchRepository, SampleRepository } from '../repository';
 @Injectable({})
 export class SampleService {
     constructor(private readonly sampleRepository: SampleRepository, private readonly batchRepository: BatchRepository) { }
-
-    async getSamples(dto: TableDTO, userId: number): Promise<TableOutputEntity<SampleEntity>> {
+    
+    async getSamples(dto: TableDTO<SampleFilterDTO>, userId: number): Promise<TableOutputEntity<SampleEntity>> {
         let result: TableOutputEntity<SampleEntity> = {
             items: [],
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<ISampleFindInput>(dto, { isDeleted: false });
+        let tableFindDto = new TableFindInput<ISampleFindInput, SampleFilterDTO>(dto, { isDeleted: false });
 
         const total = await this.sampleRepository.count(tableFindDto);
 
@@ -60,9 +60,9 @@ export class SampleService {
             status = SampleStatus.VCF_QUEUING
         }
 
-        let data: ISampleCreateInput = { 
-            status: status,  
-            ...dto 
+        let data: ISampleCreateInput = {
+            status: status,
+            ...dto
         };
 
         const sample = await this.sampleRepository.create(data);
@@ -74,5 +74,24 @@ export class SampleService {
         const sample = await this.sampleRepository.findById(id);
         return await this.sampleRepository.update(id, { isDeleted: true });
     }
+
+    async getSampleDetail(userId: number, id: number): Promise<SampleEntity> {
+        try {
+            const sample = await this.sampleRepository.findByIdOrFail(id);
+
+            const data = new SampleEntity(sample);
+            if (data.batch.userId != userId) {
+                throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+            }
+            return data;
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                console.log(123);
+                throw new HttpException('Sample Not Found', HttpStatus.NOT_FOUND)
+            }
+            throw error;
+        }
+    }
+
 
 }

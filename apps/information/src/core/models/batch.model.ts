@@ -1,5 +1,9 @@
 import { SampleType } from "@app/prisma"
 
+export interface IBatchFilter {
+    
+}
+
 export interface IBatchFindInput {
     name?: string
     isDelete: boolean

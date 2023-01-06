@@ -2,7 +2,11 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator"
 import { BatchExists, Trim, WorkspaceExist } from "../decorators";
 import { Gender, VcfType } from "@app/prisma";
+import { ISampleFilter } from "../models";
 
+export class SampleFilterDTO implements ISampleFilter {
+    
+}
 
 export class SampleCreateDTO {
     @ApiProperty()

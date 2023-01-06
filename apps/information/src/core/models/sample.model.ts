@@ -1,5 +1,9 @@
 import { Gender, SampleStatus, VcfType } from "@app/prisma"
 
+export interface ISampleFilter {
+    
+}
+
 export interface ISampleFindInput {
     name?: string
     isDeleted: boolean

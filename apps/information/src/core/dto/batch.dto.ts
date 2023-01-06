@@ -4,7 +4,11 @@ import { Trim } from "../decorators";
 import { SampleType } from "@app/prisma";
 import { Type } from "class-transformer";
 import { FileCreateWithBatchDTO } from "./file.dto";
+import { IBatchFilter } from "../models";
 
+export class BatchFilterDTO implements IBatchFilter {
+    
+}
 
 export class BatchCreateDTO {
     @IsString()

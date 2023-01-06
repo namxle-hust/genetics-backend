@@ -1,4 +1,8 @@
 
+export interface IWorkspaceFilter {
+    
+}
+
 export interface IWorkspaceFindInput {
     name?: string
     userId: number
