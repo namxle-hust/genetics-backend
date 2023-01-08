@@ -15,7 +15,8 @@ export class RmqService {
             options: {
                 urls: [this.configService.get<string>('RABBIT_MQ_URI')],
                 queue: this.configService.get<string>(`RABBIT_MQ_${queue}_QUEUE`),
-                noAck: noAck
+                noAck: noAck,
+                prefetchCount: 1
             }
         }
     }
@@ -24,5 +25,11 @@ export class RmqService {
         const channel = context.getChannelRef()
         const originalMessage = context.getMessage();
         channel.ack(originalMessage)
+    }
+
+    nack(context: RmqContext) {
+        const channel = context.getChannelRef()
+        const originalMessage = context.getMessage();
+        channel.nack(originalMessage)
     }
 }

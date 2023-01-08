@@ -1,15 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
-import { BatchRepository } from "../repository";
+import { SampleRepository } from "../repository";
 
-@ValidatorConstraint({ name: 'BatchExists', async: true })
+@ValidatorConstraint({ name: 'SampleExists', async: true })
 @Injectable()
-export class BatchExistsRule implements ValidatorConstraintInterface {
-    constructor(protected readonly batchRepository: BatchRepository) { }
+export class SampleExistsRule implements ValidatorConstraintInterface {
+    constructor(protected readonly sampleRepository: SampleRepository) { }
 
     async validate(value: number) {
         try {
-            await this.batchRepository.findById(value);
+            await this.sampleRepository.findById(value);
         } catch (e) {
             console.log(e);
             return false;
@@ -19,21 +19,21 @@ export class BatchExistsRule implements ValidatorConstraintInterface {
     }
 
     defaultMessage(args: ValidationArguments) {
-        return `Batch doesn't exist`;
+        return `Sample doesn't exist`;
     }
 }
 
 
-@ValidatorConstraint({ name: 'BatchPossession', async: true })
+@ValidatorConstraint({ name: 'SamplePosession', async: true })
 @Injectable()
-export class BatchPossessionRule implements ValidatorConstraintInterface {
-    constructor(private batchRepository: BatchRepository) { }
+export class SamplePosessionRule implements ValidatorConstraintInterface {
+    constructor(private sampleRepository: SampleRepository) { }
 
     async validate(value: number, args: ValidationArguments) {
         try {
-            let batch = await this.batchRepository.findById(value);
+            let sample = await this.sampleRepository.findById(value);
 
-            if (batch.userId != args.value) {
+            if (sample.userId != args.value) {
                 return false
             }
         } catch (e) {

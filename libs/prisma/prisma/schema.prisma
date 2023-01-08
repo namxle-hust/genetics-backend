@@ -26,10 +26,12 @@ enum VcfType {
     WES
 }
 
-enum SampleStatus {
+enum AnalysisStatus {
     FASTQ_QUEUING
+    FASTQ_RABBITMQ_QUEING
     FASTQ_ANALYZING
     VCF_QUEUING
+    VCF_RABBITMQ_QUEUING
     VCF_ANALYZING
     IMPORT_QUEUING
     ANALYZED
@@ -54,7 +56,7 @@ model User {
     lastLogin DateTime?
 
     workspaces Workspace[]
-    batches    Batch[]
+    samples    Sample[]
 
     @@map("users")
 }
@@ -67,13 +69,13 @@ model Workspace {
     name    String
     userId  Int
     user    User?    @relation(fields: [userId], references: [id])
-    samples Sample[]
+    analyses Analysis[]
 
     @@unique([userId, name])
     @@map("workspaces")
 }
 
-model Batch {
+model Sample {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -87,9 +89,9 @@ model Batch {
     type SampleType @default(VCF)
 
     files   File[]
-    samples Sample[]
+    analyses Analysis[]
 
-    @@map("batch")
+    @@map("samples")
 }
 
 model File {
@@ -100,13 +102,13 @@ model File {
     name         String
     uploadedName String
     size         Int
-    batchId      Int
-    batch        Batch  @relation(fields: [batchId], references: [id])
+    sampleId      Int
+    sample        Sample  @relation(fields: [sampleId], references: [id])
 
     @@map("uploaded_files")
 }
 
-model Sample {
+model Analysis {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -116,10 +118,10 @@ model Sample {
     workspaceId Int
     workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-    batchId Int
-    batch   Batch @relation(fields: [batchId], references: [id])
+    sampleId Int
+    sample   Sample @relation(fields: [sampleId], references: [id])
 
-    status    SampleStatus @default(VCF_QUEUING)
+    status    AnalysisStatus @default(VCF_QUEUING)
     isDeleted Boolean      @default(false)
 
     vcfFilePath String?
@@ -133,5 +135,5 @@ model Sample {
 
     gender Gender?
 
-    @@map("samples")
+    @@map("analyses")
 }

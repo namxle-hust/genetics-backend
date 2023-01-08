@@ -9,13 +9,13 @@ import { FileRepository } from '../repository';
 export class FileService {
     constructor(private readonly fileRepository: FileRepository) {}
 
-    async getFiles(dto: TableDTO<FileFilterDTO>, batchId: number): Promise<TableOutputEntity<FileEntity>> {
+    async getFiles(dto: TableDTO<FileFilterDTO>, sampleId: number): Promise<TableOutputEntity<FileEntity>> {
         let result: TableOutputEntity<FileEntity> = {
             items: [],
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<IFileFindInput, FileFilterDTO>(dto, { batchId: batchId });
+        let tableFindDto = new TableFindInput<IFileFindInput, FileFilterDTO>(dto, { sampleId: sampleId });
 
         const total = await this.fileRepository.count(tableFindDto);
 
@@ -31,17 +31,17 @@ export class FileService {
         return result
     }
 
-    async getFile(id: number, batchId: number): Promise<File> {
+    async getFile(id: number, sampleId: number): Promise<File> {
         let file = await this.fileRepository.findById(id);
-        if (file.batchId != batchId) {
+        if (file.sampleId != sampleId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         return file;
     }
 
-    async createBatch(dto: FileCreateDTO) {
+    async createSample(dto: FileCreateDTO) {
         let data: IFileCreateInput = {
-            batchId: dto.batchId,
+            sampleId: dto.sampleId,
             size: dto.size,
             uploadedName: dto.uploadedName,
             name: dto.name
@@ -52,7 +52,7 @@ export class FileService {
 
     }
 
-    async removeBatch(id: number) {
+    async removeSample(id: number) {
         // return this.workspaceRepository.update()
     }
 }

@@ -24,7 +24,7 @@ export class FileRepository {
     }
 
     async count(criteria: TableFindInput<IFileFindInput, IFileFilter>): Promise<number> {
-        const total = await this.prisma.batch.count({
+        const total = await this.prisma.sample.count({
             where: criteria.where,
         })
         return total
@@ -45,7 +45,7 @@ export class FileRepository {
             skip: criteria.skip,
             take: criteria.take,
             include: {
-                batch: {
+                sample: {
                     select: {
                         name: true,
                         userId: true

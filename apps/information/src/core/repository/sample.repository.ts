@@ -1,9 +1,7 @@
 import { PrismaService, Sample } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import { SampleFilterDTO } from "../dto";
-import { SampleEntity } from "../entities";
-import { ISampleCreateInput, ISampleFilter, ISampleFindInput, ISampleUpdateInput, TableFindInput } from "../models";
+import { ISampleCreateInput, ISampleFilter, ISampleFindInput, ISampleRemoveInput, ISampleUpdateInput, TableFindInput } from "../models";
 
 @Injectable()
 export class SampleRepository {
@@ -29,37 +27,16 @@ export class SampleRepository {
         const sample = await this.prisma.sample.findUnique({
             where: { id: id },
             include: {
-                batch: {
+                files: {
                     select: {
                         id: true,
-                        name: true,
-                        userId: true
-                    }
-                },
-                workspace: {
-                    select: {
                         name: true
                     }
-                }
-            },
-        })
-
-        return sample;
-    }
-    async findByIdOrFail(id: number): Promise<Sample> {
-        const sample = await this.prisma.sample.findUniqueOrThrow({
-            where: { id: id },
-            include: {
-                batch: {
-                    select: {
-                        id: true,
-                        name: true,
-                        userId: true
-                    }
                 },
-                workspace: {
+                user: {
                     select: {
-                        name: true
+                        firstName: true,
+                        lastName: true
                     }
                 }
             },
@@ -76,28 +53,34 @@ export class SampleRepository {
     }
 
     async findMany(criteria: TableFindInput<ISampleFindInput, ISampleFilter>): Promise<Sample[]> {
-        const sample = await this.prisma.sample.findMany({
+        const samples = await this.prisma.sample.findMany({
             where: criteria.where,
             orderBy: criteria.orderBy,
             skip: criteria.skip,
             take: criteria.take,
             include: {
-                batch: {
+                user: {
                     select: {
-                        name: true
-                    }
-                },
-                workspace: {
-                    select: {
-                        name: true
+                        firstName: true,
+                        lastName: true
                     }
                 }
             },
         })
-        return sample
+        return samples
     }
 
-    async update(id: number, data: ISampleUpdateInput | ISampleFindInput): Promise<Sample> {
+    async findByUserId(data: ISampleFindInput): Promise<Sample[]> {
+        const samples = await this.prisma.sample.findMany({
+            where: {
+                userId: data.userId,
+                isDelete: data.isDelete
+            }
+        })
+        return samples;
+    }
+
+    async update(id: number, data: ISampleUpdateInput | ISampleRemoveInput): Promise<Sample> {
         try {
             const sample = await this.prisma.sample.update({
                 where: { id: id }, data: data
@@ -105,6 +88,11 @@ export class SampleRepository {
             return sample;
         }
         catch (error) {
+            if (error instanceof PrismaClientKnownRequestError) {
+                if (error.code === 'P2002') { // Duplicate fields
+                    throw new ForbiddenException('This sample already existed!')
+                }
+            }
             throw error;
         }
     }

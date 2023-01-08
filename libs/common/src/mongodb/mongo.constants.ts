@@ -9,4 +9,4 @@ export const DEFAULT_MONGO_CONTAINER_NAME = 'DefaultMongo';
 export const DEFAULT_MONGO_CONNECTION_NAME = 'DefaultMongo';
 export const DEFAULT_MONGO_CLIENT_OPTIONS: MongoClientOptions = {};
 
-export const SAMPLE_COLLECTION_PREFIX = "sample_collection"
+export const ANALYSIS_COLLECTION_PREFIX = "analysis_collection"

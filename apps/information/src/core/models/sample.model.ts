@@ -1,4 +1,4 @@
-import { Gender, SampleStatus, VcfType } from "@app/prisma"
+import { SampleType } from "@app/prisma"
 
 export interface ISampleFilter {
     
@@ -6,19 +6,14 @@ export interface ISampleFilter {
 
 export interface ISampleFindInput {
     name?: string
-    isDeleted: boolean
-    workspaceId?: number
+    isDelete: boolean
+    userId: number
 }
 
 export interface ISampleCreateInput {
     name: string
-    workspaceId: number
-    batchId: number
-    description?: string
-    vcfType: VcfType
-    status: SampleStatus
-    gender?: Gender
-    vcfFilePath?: string
+    userId: number
+    type: SampleType
 }
 
 export interface ISampleUpdateInput {
@@ -26,5 +21,5 @@ export interface ISampleUpdateInput {
 }
 
 export interface ISampleRemoveInput {
-    isDeleted: boolean;
+    isDelete: boolean;
 }

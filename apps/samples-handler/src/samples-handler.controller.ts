@@ -12,6 +12,6 @@ export class SamplesHandlerController {
 
     @Post('analyze-fastq')
     signup(@Body() request: any) {
-        return this.samplesHandlerService.analyzeFastq(request)
+        return this.samplesHandlerService.sendFastqToQueue(request)
     }
 }

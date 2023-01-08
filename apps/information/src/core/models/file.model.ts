@@ -12,12 +12,12 @@ export interface IAWSCredentialOuput {
 
 export interface IFileFindInput {
     name?: string
-    batchId: number
+    sampleId: number
 }
 
 export interface IFileCreateInput {
     name: string
     uploadedName: string
     size: number
-    batchId: number
+    sampleId: number
 }

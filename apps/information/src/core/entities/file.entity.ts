@@ -1,4 +1,4 @@
-import { Batch, File } from "@app/prisma";
+import { Sample, File } from "@app/prisma";
 import { ApiProperty } from "@nestjs/swagger";
 import { DateTransform } from "../decorators";
 import { IAWSCredentialOuput } from "../models";
@@ -26,10 +26,10 @@ export class FileEntity implements File {
     size: number;
 
     @ApiProperty()
-    batchId: number;
+    sampleId: number;
     
     @ApiProperty()
-    batch: Batch
+    sample: Sample
 
 
     constructor(partial: Partial<FileEntity>) {

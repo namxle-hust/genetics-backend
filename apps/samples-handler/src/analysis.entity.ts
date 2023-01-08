@@ -1,8 +1,8 @@
-import { Batch, Gender, Sample, SampleStatus, VcfType, Workspace } from "@app/prisma";
+import { Gender, Sample, AnalysisStatus, VcfType, Workspace, Analysis } from "@app/prisma";
 import { Exclude } from "class-transformer";
 
 
-export class SampleEntity implements Sample {
+export class AnalysisEntity implements Analysis {
     id: number;
     
     @Exclude()
@@ -19,11 +19,11 @@ export class SampleEntity implements Sample {
     workspace: Workspace
 
     @Exclude()
-    batchId: number;
+    sampleId: number;
     
-    batch: Batch    
+    sample: Sample    
 
-    status: SampleStatus;
+    status: AnalysisStatus;
 
     isDeleted: boolean;
 

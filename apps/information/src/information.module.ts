@@ -8,8 +8,8 @@ import { WorkspaceController } from './workspace/workspace.controller';
 import { AuthModule } from './auth/auth.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { FileModule } from './file/file.module';
-import { BatchModule } from './batch/batch.module';
-import { SamplesModule } from './samples/samples.module';
+import { SampleModule } from './sample/sample.module';
+import { AnalysisModule } from './analysis/analysis.module';
 
 @Module({
     imports: [
@@ -20,7 +20,8 @@ import { SamplesModule } from './samples/samples.module';
                 POSTGRES_URI: Joi.string().required(),
                 S3_UPLOADER_ACCESS_KEY: Joi.string().required(),
                 S3_UPLOADER_SECRET_KEY: Joi.string().required(),
-                S3_BUCKET: Joi.string().required()
+                S3_BUCKET: Joi.string().required(),
+                VCF_IOBIO_HOST: Joi.string().required()
             }),
             envFilePath: '.env',
         }),
@@ -42,8 +43,8 @@ import { SamplesModule } from './samples/samples.module';
         AuthModule,
         WorkspaceModule,
         FileModule,
-        BatchModule,
-        SamplesModule
+        SampleModule,
+        AnalysisModule
     ],
     controllers: []
 })

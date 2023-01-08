@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { WorkspaceRepository } from "../repository";
 
-@ValidatorConstraint({ name: 'BatchExists', async: true })
+@ValidatorConstraint({ name: 'WorkspaceExists', async: true })
 @Injectable()
 export class WorkspaceExistRule implements ValidatorConstraintInterface {
     constructor(private workspaceRepository: WorkspaceRepository) { }

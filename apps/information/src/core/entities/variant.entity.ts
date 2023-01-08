@@ -2,6 +2,10 @@ import { VariantModel } from "../models"
 
 export class VariantQCUrlEntity {
     url: string
+
+    constructor(url) {
+        this.url = url
+    }
 }
 
 export interface IVariant {

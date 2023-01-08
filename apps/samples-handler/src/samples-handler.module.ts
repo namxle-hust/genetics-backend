@@ -1,10 +1,10 @@
-import { FASTQ_ANALYZING, RmqModule } from '@app/common';
+import { FASTQ_ANALYZING, RmqModule, VCF_ANALYZING } from '@app/common';
 import { PrismaModule } from '@app/prisma';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import * as Joi from 'joi'
-import { SampleRepository } from './sample.repository';
+import { AnalysisRepository } from './analysis.repository';
 import { SamplesHandlerController } from './samples-handler.controller';
 import { SamplesHandlerService } from './samples-handler.service';
 
@@ -20,6 +20,9 @@ import { SamplesHandlerService } from './samples-handler.service';
         RmqModule.register({
             name: FASTQ_ANALYZING
         }),
+        RmqModule.register({
+            name: VCF_ANALYZING
+        }),
         PrismaModule.forRootAsync({
             isGlobal: true,
             useFactory: async (configService: ConfigService) => {
@@ -34,6 +37,6 @@ import { SamplesHandlerService } from './samples-handler.service';
         ScheduleModule.forRoot()
     ],
     controllers: [SamplesHandlerController],
-    providers: [SamplesHandlerService, SampleRepository],
+    providers: [SamplesHandlerService, AnalysisRepository],
 })
 export class SamplesHandlerModule { }

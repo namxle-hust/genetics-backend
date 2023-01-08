@@ -1,27 +1,27 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 import { registerDecorator, ValidationOptions } from "class-validator";
-import { BatchExistsRule, BatchPossessionRule } from "../constraints";
+import { SampleExistsRule, SamplePosessionRule } from "../constraints";
 
-export function BatchExists(validationOptions?: ValidationOptions) {
+export function SampleExists(validationOptions?: ValidationOptions) {
     return function (object: any, propertyName: string) {
         registerDecorator({
-            name: 'BatchExists',
+            name: 'SampleExists',
             target: object.constructor,
             propertyName: propertyName,
             options: validationOptions,
-            validator: BatchExistsRule,
+            validator: SampleExistsRule,
         });
     };
 }
 
-export function BatchPossession(validationOptions?: ValidationOptions) {
+export function SamplePosession(validationOptions?: ValidationOptions) {
     return function (object: any, propertyName: string) {
         registerDecorator({
-            name: 'BatchPossession',
+            name: 'SamplePosession',
             target: object.constructor,
             propertyName: propertyName,
             options: validationOptions,
-            validator: BatchPossessionRule,
+            validator: SamplePosessionRule,
         });
     };
 }

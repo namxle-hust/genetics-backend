@@ -59,24 +59,24 @@ services:
   #   networks:
   #     - genetics
 
-  # fastq-analyzer-service:
-  #   container_name: genetics_fastq_analyzer
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/fastq-analyzer/DockerFile
-  #     target: development
-  #   command: npm run start:dev fastq-analyzer
-  #   env_file:
-  #     - ./apps/fastq-analyzer/.env
-  #   volumes:
-  #     - .:/usr/src/app
-  #     - /usr/src/app/node_modules
-  #   ports:
-  #     - '4000:4000'
-  #   depends_on:
-  #     - rabbitmq
-  #   networks:
-  #     - genetics
+  fastq-analyzer-service:
+    container_name: genetics_fastq_analyzer
+    build:
+      context: .
+      dockerfile: ./apps/fastq-analyzer/DockerFile
+      target: development
+    command: npm run start:dev fastq-analyzer
+    env_file:
+      - ./apps/fastq-analyzer/.env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '4000:4000'
+    depends_on:
+      - rabbitmq
+    networks:
+      - genetics
 
   # vcf-analyzer-service:
   #   container_name: genetics_vcf-analyzer
@@ -99,7 +99,7 @@ services:
 
   rabbitmq:
     container_name: genetics_rabbitmq
-    image: rabbitmq
+    image: rabbitmq:3.8-management-alpine
     ports:
       - 5672:5672
       - 15672:15672
@@ -138,39 +138,39 @@ services:
     networks:
       - genetics
 
-  mongodb:
-    container_name: genetics_mongodb
-    image: docker.io/bitnami/mongodb:5.0
-    ports:
-      - '27017:27017'
-    volumes:
-      - 'mongodb_data:/bitnami/mongodb'
-    environment:
-      - MONGODB_ROOT_USER=root
-      - MONGODB_ROOT_PASSWORD=password123
-      - MONGODB_DATABASE=genetics
-    networks:
-      - genetics
+  # mongodb:
+  #   container_name: genetics_mongodb
+  #   image: docker.io/bitnami/mongodb:5.0
+  #   ports:
+  #     - '27017:27017'
+  #   volumes:
+  #     - 'mongodb_data:/bitnami/mongodb'
+  #   environment:
+  #     - MONGODB_ROOT_USER=root
+  #     - MONGODB_ROOT_PASSWORD=password123
+  #     - MONGODB_DATABASE=genetics
+  #   networks:
+  #     - genetics
 
-  information-service:
-    container_name: genetics_information
-    build:
-      context: .
-      dockerfile: ./apps/information/DockerFile
-      target: development
-    command: npm run start:dev information
-    env_file:
-      - ./apps/information/.env
-    depends_on:
-      - mongodb
-      - prisma-migration
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - '3900:3900'
-    networks:
-      - genetics
+  # information-service:
+  #   container_name: genetics_information
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/information/DockerFile
+  #     target: development
+  #   command: npm run start:dev information
+  #   env_file:
+  #     - ./apps/information/.env
+  #   depends_on:
+  #     - mongodb
+  #     - prisma-migration
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   ports:
+  #     - '3900:3900'
+  #   networks:
+  #     - genetics
 
 volumes:
   mongodb_data:

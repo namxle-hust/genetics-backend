@@ -3,7 +3,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../core/decorators';
 import { AWSCredentialEntity } from '../core/entities';
 import { JwtGuard } from '../core/guards';
-import { UploadService } from '../core/services';
+import { S3Service } from '../core/services';
 
 
 @UseGuards(JwtGuard)
@@ -11,13 +11,13 @@ import { UploadService } from '../core/services';
 @ApiTags('file')
 export class FileController {
 
-    constructor(private uploadService: UploadService) {
+    constructor(private s3Service: S3Service) {
     }
 
     @Get('aws-credentials')
     @ApiOkResponse({ type: AWSCredentialEntity })
     async getAwsCredentials(): Promise<AWSCredentialEntity> {
-        const data = await this.uploadService.getAwsTemporaryCredential();
+        const data = await this.s3Service.getAwsTemporaryCredential();
         return new AWSCredentialEntity(data)
     }
 }
