@@ -1,6 +1,7 @@
 import { PrismaService, User, Workspace } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
+import { WorkspaceEntity } from "../entities";
 import { IWorkspaceFilter, TableFindInput } from "../models";
 import { IWorkspaceCreateInput, IWorkspaceFindInput, IWorkspaceUpdateInput } from "../models";
 
@@ -47,8 +48,21 @@ export class WorkspaceRepository {
         return total
     }
 
-    async findByUserId(userId: number): Promise<Workspace[]> {
+    async findByUserId(userId: number): Promise<WorkspaceEntity[]> {
         return await this.prisma.workspace.findMany({
+            select: {
+                createdAt: true,
+                id: true,
+                name: true,
+                updatedAt: true,
+                userId: true,
+                user: true,
+                _count: {
+                    select: {
+                        analyses: true
+                    },
+                }
+            },
             where: {
                 userId: userId
             }
@@ -61,12 +75,17 @@ export class WorkspaceRepository {
             orderBy: criteria.orderBy,
             skip: criteria.skip,
             take: criteria.take,
-            include: {
-                user: {
+            select: {
+                createdAt: true,
+                id: true,
+                name: true,
+                updatedAt: true,
+                userId: true,
+                user: true,
+                _count: {
                     select: {
-                        firstName: true,
-                        lastName: true
-                    }
+                        analyses: true
+                    },
                 }
             },
         })

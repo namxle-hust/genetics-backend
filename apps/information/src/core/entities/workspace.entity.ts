@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Workspace, User } from '@app/prisma';
 import { Exclude, Transform } from 'class-transformer';
 import { DateTransform } from '../decorators';
+import { UserEntity } from './user.entity';
 
 export class WorkspaceEntity implements Workspace {
     @ApiProperty()
@@ -22,7 +23,10 @@ export class WorkspaceEntity implements Workspace {
     userId: number;
    
     @ApiProperty()
-    user: User
+    user: UserEntity
+
+    @ApiProperty()
+    totalAnalysis?: number
 
     constructor(partial: Partial<WorkspaceEntity>) {
         Object.assign(this, partial);
