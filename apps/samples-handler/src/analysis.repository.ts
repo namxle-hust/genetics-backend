@@ -12,7 +12,11 @@ export class AnalysisRepository {
                 status: status
             },
             include: {
-                sample: true,
+                sample: {
+                    include: {
+                        files: true
+                    }
+                },
                 workspace: true
             }
         })
