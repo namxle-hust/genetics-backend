@@ -158,7 +158,7 @@ services:
     build:
       context: .
       dockerfile: ./apps/information/DockerFile
-      target: production
+      target: development
     env_file:
       - ./apps/information/.env
     depends_on:
