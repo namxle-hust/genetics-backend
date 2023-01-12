@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY package.json yarn.lock ./
 
-RUN yarn install
+RUN yarn install --production=false
 
 COPY . .
 
@@ -25,4 +25,6 @@ COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/information/main"]
+# CMD ["node", "dist/apps/information/main"]
+
+CMD ["/bin/bash"]
