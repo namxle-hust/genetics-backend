@@ -10,7 +10,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:16.17.1-alpine as production
+FROM node:16.17.1-alpine As production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -23,8 +23,6 @@ RUN yarn install --only=production
 
 COPY . .
 
-# COPY --from=development /usr/src/app/dist ./dist
-
-RUN npm run build
+COPY --from=development /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/information/main"]
