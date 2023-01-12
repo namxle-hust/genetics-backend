@@ -23,6 +23,6 @@ RUN yarn install --only=production
 
 COPY . .
 
-COPY --from=development /usr/src/app/dist ./dist
+RUN npm run build
 
 CMD ["node", "dist/apps/information/main"]
