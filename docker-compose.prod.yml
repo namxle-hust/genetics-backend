@@ -158,7 +158,6 @@ services:
       context: .
       dockerfile: ./apps/information/DockerFile
       target: production
-    command: npm run start:prod information
     env_file:
       - ./apps/information/.env
     depends_on:
