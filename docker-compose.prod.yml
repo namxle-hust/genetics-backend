@@ -92,17 +92,17 @@ services:
   #   networks:
   #     - genetics
 
-  # rabbitmq:
-  #   container_name: genetics_rabbitmq
-  #   image: rabbitmq:3.8-management-alpine
-  #   ports:
-  #     - 5672:5672
-  #     - 15672:15672
-  #   volumes:
-  #     - /var/lib/rabbitmq
-  #     - /var/log/rabbitmq
-  #   networks:
-  #     - genetics
+  rabbitmq:
+    container_name: genetics_rabbitmq
+    image: rabbitmq:3.8-management-alpine
+    ports:
+      - 5677:5672
+      - 15672:15672
+    volumes:
+      - /var/lib/rabbitmq
+      - /var/log/rabbitmq
+    networks:
+      - genetics
 
   postgres-db:
     image: postgres:13
