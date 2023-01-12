@@ -4,11 +4,11 @@ WORKDIR /usr/src/app
 
 COPY package.json yarn.lock ./
 
-RUN yarn install
+RUN yarn install --production=false
 
 COPY . .
 
-RUN npm run build
+RUN yarn build:fastq
 
 FROM node:16.17.1-alpine as production
 
@@ -19,7 +19,7 @@ WORKDIR /usr/src/app
 
 COPY package.json yarn.lock ./
 
-RUN npm install --only=production
+RUN yarn install --prod
 
 COPY . .
 
