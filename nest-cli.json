@@ -1,7 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/samples-handler/src",
   "monorepo": true,
+  "root": "apps/samples-handler",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/samples-handler/tsconfig.app.json"
+  },
   "projects": {
     "samples-handler": {
       "type": "application",
