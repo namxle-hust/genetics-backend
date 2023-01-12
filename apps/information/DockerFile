@@ -19,10 +19,10 @@ WORKDIR /usr/src/app
 
 COPY package.json yarn.lock ./
 
-RUN yarn install
+RUN yarn install --only=production
 
 COPY . .
 
-RUN npm run build
+COPY --from=development /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/information/main"]
