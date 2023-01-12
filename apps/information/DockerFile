@@ -8,7 +8,7 @@ RUN yarn install --production=false
 
 COPY . .
 
-RUN npm run build
+RUN yarn build:information
 
 FROM node:16.17.1-alpine As production
 
