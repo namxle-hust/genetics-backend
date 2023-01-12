@@ -153,6 +153,7 @@ services:
       - genetics
 
   information-service:
+    tty: true
     container_name: genetics_information
     build:
       context: .
