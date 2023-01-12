@@ -165,7 +165,6 @@ services:
       - mongodb
       - prisma-migration
     volumes:
-      - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - '3900:3900'

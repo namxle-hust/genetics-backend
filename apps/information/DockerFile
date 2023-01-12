@@ -2,9 +2,9 @@ FROM node:16.17.1-alpine As development
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
-RUN npm install
+RUN yarn install --production=false
 
 COPY . .
 
@@ -17,9 +17,9 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
-RUN npm install --only=production
+RUN yarn install --prod
 
 COPY . .
 
