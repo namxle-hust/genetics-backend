@@ -27,4 +27,4 @@ COPY --from=development /usr/src/app/dist ./dist
 
 # CMD ["node", "dist/apps/information/main"]
 
-CMD ["/bin/bash"]
+CMD ["/bin/sh"]
