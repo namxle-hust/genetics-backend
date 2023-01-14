@@ -13,6 +13,7 @@ module.exports = {
                 "S3_PROFILE": "varigenes",
                 "ANALYSIS_FOLDER": "/data/genetics/analyses",
                 "INTERVAR_FILE": "/apps/sentieon/xgen-inherited-diseases-targets-05112018.bed",
+                "WES_SENTIEON": "/home/user/genetics/genetics-backend/pipelines/wes.sh"
             }
         }
     ]
