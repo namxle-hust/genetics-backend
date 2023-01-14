@@ -3,8 +3,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi'
 import { FastqAnalyzingController } from './fastq-analyzing.controller';
-import { FastqAnalyzingService } from './fastq-analyzing.service';
-import { CommunicationService } from './communication/communication.service';
+import { FastqAnalyzingService, CommunicationService, AnalyzeService } from './services';
+import { VcfService } from './services/vcf.service'
+import { CommonService } from './services/common.service';
 
 @Module({
     imports: [
@@ -22,6 +23,12 @@ import { CommunicationService } from './communication/communication.service';
         })
     ],
     controllers: [FastqAnalyzingController],
-    providers: [FastqAnalyzingService, CommunicationService],
+    providers: [
+        FastqAnalyzingService, 
+        CommunicationService,
+        AnalyzeService,
+        VcfService,
+        CommonService
+    ],
 })
 export class FastqAnalyzingModule { }

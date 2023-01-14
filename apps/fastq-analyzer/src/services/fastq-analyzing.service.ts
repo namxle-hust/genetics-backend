@@ -1,20 +1,25 @@
 import { Analysis, VcfType } from '@app/prisma';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import * as child from 'child_process';
 import { ConfigService } from '@nestjs/config';
-import { AnalysisModel } from './analysis.model';
+import { AnalysisModel } from '../models';
+import { AnalyzeService } from '../services';
+import { CommonService } from './common.service';
 
-@Injectable()
+@Injectable({})
 export class FastqAnalyzingService {
 
     protected S3_BUCKET;
     protected S3_UPLOAD_FOLDER;
-    protected ANALYSIS_FOLDER;
     protected S3_PROFILE;
+    protected ANALYSIS_FOLDER;
 
     private readonly logger = new Logger(FastqAnalyzingService.name)
-    
-    constructor(private configService: ConfigService){
+
+    constructor(
+        private configService: ConfigService,
+        private commonService: CommonService,
+        private analyzeService: AnalyzeService,
+    ) {
         this.S3_BUCKET = this.configService.get<string>('S3_BUCKET')
         this.S3_UPLOAD_FOLDER = this.configService.get<string>('S3_UPLOAD_FOLDER')
         this.ANALYSIS_FOLDER = this.configService.get<string>('ANALYSIS_FOLDER')
@@ -27,18 +32,19 @@ export class FastqAnalyzingService {
         this.logger.log(analysis)
 
         // Create folder
-        await this.runCommand(`mkdir -p ${this.ANALYSIS_FOLDER}/${analysis.id}`)
+        await this.createAnalysisFolder(analysis.id)
 
         // Download Fastq for analyzing
         await this.downloadFastQFiles(analysis);
 
         // Analyze
         if (analysis.vcfType == VcfType.WES) {
-            await this.analyzeWES()
+            await this.analyzeService.analyzeWES(analysis)
         } else {
-            await this.analyzeWGS()
+            await this.analyzeService.analyzeWGS(analysis)
         }
 
+        // Create some fake delay
         await new Promise((resolve, reject) => {
             setTimeout(() => {
                 resolve(true);
@@ -48,11 +54,15 @@ export class FastqAnalyzingService {
         this.logger.log(`Done ${analysis.id}`);
     }
 
+    async createAnalysisFolder(id) {
+        await this.commonService.runCommand(`mkdir -p ${this.ANALYSIS_FOLDER}/${id}`)
+    }
+
 
     async downloadFastQFiles(analysis: AnalysisModel) {
         const files = analysis.sample.files;
         const s3FolderPath = `s3://${this.S3_BUCKET}/${this.S3_UPLOAD_FOLDER}`
-        const destinationFolder = `${this.ANALYSIS_FOLDER}/${analysis.id}`
+        const destinationFolder = this.commonService.getAnalysisDestinationFolder(analysis)
 
         let downloadCommands = files.map(file => {
             return `aws s3 cp ${s3FolderPath}/${file.uploadedName} ${destinationFolder}/ --profile ${this.S3_PROFILE}`
@@ -60,31 +70,6 @@ export class FastqAnalyzingService {
 
         let command = downloadCommands.join(' && ');
 
-        await this.runCommand(command);
-    }
-
-    async analyzeWES() {
-        this.logger.log('Analyze WES')
-    }
-    
-    async analyzeWGS() {
-        this.logger.log('Analyze WGS')
-
-    }
-
-    async runCommand(command): Promise<any> {
-        return new Promise((resolve, reject) => {
-            child.exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    return reject(error)
-                }
-                return resolve(true);
-            });
-        })
-    }
-
-
-    getHello(): string {
-        return 'Hello World!';
+        await this.commonService.runCommand(command);
     }
 }

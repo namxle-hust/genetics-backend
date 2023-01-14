@@ -2,8 +2,8 @@ import { RmqService, FASTQ_ANALYZE_EVENT } from '@app/common';
 import { Analysis } from '@app/prisma';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
-import { AnalysisModel } from './analysis.model';
-import { FastqAnalyzingService } from './fastq-analyzing.service';
+import { AnalysisModel } from './models';
+import { FastqAnalyzingService } from './services';
 
 @Controller('fastq')
 export class FastqAnalyzingController {
