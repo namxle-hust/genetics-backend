@@ -37,6 +37,8 @@ export class AnalyzeService {
 
         const vcfHcFilterOuput = `${this.analysisFolder}/output-hc-filter.vcf`;
 
+        this.logger.log('Run Sentieon')
+
         await this.runSentieonWES(analysis);
 
         await this.vcfService.removeLowQuality(this.vcfOutputTmp, vcfHcFilterOuput)
@@ -73,8 +75,10 @@ export class AnalyzeService {
 
         const cmd = listCommands.join(' && ');
 
-        await this.commonService.runCommand(cmd);
+        this.logger.log(cmd)
 
+        await this.commonService.runCommand(cmd);
+        
         if (!fs.existsSync(`${this.analysisFolder}/${VcfHcOutput}`)) {
             throw new Error('Run Sentieon Error!');
         }
