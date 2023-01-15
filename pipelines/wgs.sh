@@ -4,7 +4,6 @@
 # using a single sample with fastq files
 # named 1.fastq.gz and 2.fastq.gz
 # *******************************************
-
 # Update with the fullpath location of your sample fastq
 fastq_folder=$PWD
 fastq_1=$1 # "$fastq_folder/1.fastq.gz"

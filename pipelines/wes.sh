@@ -4,7 +4,6 @@
 # using a single sample with fastq files
 # named 1.fastq.gz and 2.fastq.gz
 # *******************************************
-
 # Update with the fullpath location of your sample fastq
 export PATH=/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin:$PATH
 fastq_folder=$PWD
