@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi'
 import { SampleStatusProcessorController } from './sample-status-processor.controller';
 import { SampleStatusProcessorService } from './sample-status-processor.service';
+import { AnalysisRepository } from './status-processor.repository';
 
 @Module({
     imports: [
@@ -21,6 +22,6 @@ import { SampleStatusProcessorService } from './sample-status-processor.service'
         })
     ],
     controllers: [SampleStatusProcessorController],
-    providers: [SampleStatusProcessorService],
+    providers: [SampleStatusProcessorService, AnalysisRepository],
 })
 export class SampleStatusProcessorModule { }
