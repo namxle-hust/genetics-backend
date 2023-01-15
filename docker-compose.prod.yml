@@ -44,8 +44,7 @@ services:
     build:
       context: .
       dockerfile: ./apps/sample-status-processor/DockerFile
-      target: development
-    command: npm run start:dev sample-status-processor
+      target: production
     env_file:
       - ./apps/sample-status-processor/.env
     volumes:
