@@ -4,6 +4,7 @@
 # using a single sample with fastq files
 # named 1.fastq.gz and 2.fastq.gz
 # *******************************************
+
 # Update with the fullpath location of your sample fastq
 export PATH=/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin:$PATH
 fastq_folder=$PWD
@@ -38,7 +39,7 @@ release_dir="/apps/sentieon/201808.08"
 export SENTIEON_LICENSE=/apps/sentieon/lic/Breakthrough_Genomics_eval.lic
 
 # Other settings
-nt=30 #number of threads to use in computation
+nt=100 #number of threads to use in computation
 workdir="$PWD" #/test/DNAseq" #Determine where the output files will be stored
 
 # ******************************************
@@ -48,6 +49,13 @@ mkdir -p $workdir
 logfile=$workdir/run.log
 exec >$logfile 2>&1
 cd $workdir
+
+echo "Starting"
+prev=`date +%s`
+current=`date +%s`
+duration=0
+
+echo date
 
 # ******************************************
 # 1. Mapping reads with BWA-MEM, sorting
@@ -205,7 +213,7 @@ echo "Duration: $duration"
 echo "Start 6c merge VCF"
 
 # 6c merge VCF
-java -jar $release_dir/../../GATK/3.7/GenomeAnalysisTK.jar -T CombineVariants  -R $fasta  --variant output-ug.vcf.gz --variant output-hc.vcf.gz -o output-merged.vcf -genotypeMergeOptions UNIQUIFY
+java -jar $release_dir/../../GATK/3.7/GenomeAnalysisTK.jar -T CombineVariants  -R $fasta  --variant  output-ug.vcf.gz --variant output-hc.vcf.gz -o output-merged.vcf -genotypeMergeOptions UNIQUIFY
 
 echo "Finish 6c merge VCF"
 prev=$current
@@ -257,7 +265,7 @@ fi
 
 # *****************************************
 
-/apps/bedtools/bedtools-2.17.0/bin/coverageBed  -abam bwa.bam -b /home/dev/genesets/wes_wellness.bed -d > wellness.depth
+/apps/bedtools/bedtools-2.17.0/bin/coverageBed  -abam bwa.bam -b /home/user/genesets/wes_wellness.bed -d > wellness.depth
 
 echo "Finish wellness.depth"
 prev=$current
@@ -309,14 +317,3 @@ if [ "$run_vqsr" = "NO" ]; then
 
 	echo "Finish 7. Variant Recalibration"
 fi
-
-/home/dev/apps/deeptools/bin/bamCoverage  -b realigned.bam -o coverage.bigWig -p 20 --ignoreDuplicates --minMappingQuality 20
-
-# ******************************************
-# Run Mito Script
-# ******************************************
-
-/apps/sentieon/run_v3/sentieon_run_mito.sh sorted.bam mito
-
-/apps/sentieon/run_v3/update_wes_vcf_file.sh mito
-

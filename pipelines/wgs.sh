@@ -4,6 +4,7 @@
 # using a single sample with fastq files
 # named 1.fastq.gz and 2.fastq.gz
 # *******************************************
+
 # Update with the fullpath location of your sample fastq
 fastq_folder=$PWD
 fastq_1=$1 # "$fastq_folder/1.fastq.gz"
@@ -36,7 +37,7 @@ release_dir="/apps/sentieon/201808.08"
 export SENTIEON_LICENSE=/apps/sentieon/lic/Breakthrough_Genomics_eval.lic
 
 # Other settings
-nt=50 #number of threads to use in computation
+nt=100 #number of threads to use in computation
 workdir="$PWD" #/test/DNAseq" #Determine where the output files will be stored
 
 # ******************************************
@@ -229,17 +230,17 @@ fi
 mkdir CNV
 cd CNV
 
-dotnet /apps/Canvas/Canvas-1.40.0.1613+master_x64/Canvas.dll  SmallPedigree-WGS  -b ../realigned.bam  --sample-b-allele-vcf  ../vqsr_SNP_INDEL.hc.recaled.vcf.gz -r /apps/sentieon/references/hs37d5/hs37d5.fa  -g /apps/sentieon/references/hs37d5/ -f /apps/sentieon/references/canvas/filter13.bed -o ./ 
+dotnet /apps/Canvas/Canvas-1.40.0.1613+master_x64/Canvas.dll  SmallPedigree-WGS  -b ../realigned.bam  --sample-b-allele-vcf  ../vqsr_SNP_INDEL.hc.recaled.vcf.gz -r $ref/hs37d5/hs37d5.fa  -g $ref/hs37d5/ -f $ref/canvas/filter13.bed -o ./ 
 
 #QC FILES
 
 cd ../ && mkdir QC && cd QC
 
 export SENTIEON_LICENSE=/apps/sentieon/lic/Breakthrough_Genomics_eval.lic
-/apps/sentieon/201808.08/bin/sentieon driver -r /apps/sentieon/references/hs37d5/hs37d5.fa -i ../deduped.bam  --algo WgsMetricsAlgo deduped_wgs_metrics.txt
+/apps/sentieon/201808.08/bin/sentieon driver -r $ref/hs37d5/hs37d5.fa -i ../deduped.bam  --algo WgsMetricsAlgo deduped_wgs_metrics.txt
 samtools flagstat ../bwa.bam -@40 > flagstat
-nohup /apps/bedtools/tmp/2/bin/coverageBed -abam ../realigned.bam  -b /data/WGS/BED/Homo_sapiens.GRCh37.75.genes.UTR.Agilent_v6.intersect_GIAB_highconf.veritas_snps.p_lp_risk_Y_MT_20200222.bed -d >every-nt
-perl /apps/sentieon/run_v2/OnTargetReadDepth.pl  every-nt every-nt  >every-nt.depth
+nohup /apps/bedtools/tmp/2/bin/coverageBed -abam ../realigned.bam  -b /apps/sentieon/run_v3/bed/Homo_sapiens.GRCh37.75.genes.UTR.Agilent_v6.intersect_GIAB_highconf.veritas_snps.p_lp_risk_Y_MT_20200222.bed -d > every-nt
+perl /apps/sentieon/run_v3/OnTargetReadDepth.pl  every-nt every-nt  > every-nt.depth
 
 
 less deduped_wgs_metrics.txt | awk -F"\t" '{if(NR==3){print $0}}' > data_deduped.tsv
@@ -263,8 +264,3 @@ cd ../
 cd $workdir
 
 /apps/sentieon/run_v3/annotate_cnv_by_split_reads CNV/CNV.vcf.gz split_reads.bam /apps/sentieon/run_v3/conf.sr
-
-
-/apps/sentieon/run_v3/sentieon_run_mito.sh sorted.bam $sample
-
-/apps/sentieon/run_v3/update_wgs_vcf_file.sh $sample
