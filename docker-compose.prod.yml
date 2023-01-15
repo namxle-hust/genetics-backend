@@ -39,22 +39,22 @@ services:
   #   networks:
   #     - genetics
 
-  # sample-status-processor:
-  #   container_name: genetics_sample_status_processor
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/sample-status-processor/DockerFile
-  #     target: development
-  #   command: npm run start:dev sample-status-processor
-  #   env_file:
-  #     - ./apps/sample-status-processor/.env
-  #   volumes:
-  #     - /usr/src/app/node_modules
-  #   depends_on:
-  #     - prisma-migration
-  #     - rabbitmq
-  #   networks:
-  #     - genetics
+  sample-status-processor:
+    container_name: genetics_sample_status_processor
+    build:
+      context: .
+      dockerfile: ./apps/sample-status-processor/DockerFile
+      target: development
+    command: npm run start:dev sample-status-processor
+    env_file:
+      - ./apps/sample-status-processor/.env
+    volumes:
+      - /usr/src/app/node_modules
+    depends_on:
+      - prisma-migration
+      - rabbitmq
+    networks:
+      - genetics
 
   # fastq-analyzer-service:
   #   container_name: genetics_fastq_analyzer

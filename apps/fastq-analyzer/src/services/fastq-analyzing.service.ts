@@ -1,8 +1,8 @@
-import { Analysis, VcfType } from '@app/prisma';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { AnalysisStatus, VcfType } from '@app/prisma';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AnalysisModel } from '../models';
-import { AnalyzeService } from '../services';
+import { AnalyzeService, CommunicationService } from '../services';
 import { CommonService } from './common.service';
 
 @Injectable({})
@@ -19,6 +19,7 @@ export class FastqAnalyzingService {
         private configService: ConfigService,
         private commonService: CommonService,
         private analyzeService: AnalyzeService,
+        private communicationService: CommunicationService
     ) {
         this.S3_BUCKET = this.configService.get<string>('S3_BUCKET')
         this.S3_UPLOAD_FOLDER = this.configService.get<string>('S3_UPLOAD_FOLDER')
@@ -43,6 +44,10 @@ export class FastqAnalyzingService {
         } else {
             await this.analyzeService.analyzeWGS(analysis)
         }
+
+        this.logger.log('FASTQ Analyzed!')
+
+        await this.communicationService.updateSampleStatusStatus(AnalysisStatus.VCF_QUEUING, analysis.id)
 
         // Create some fake delay
         await new Promise((resolve, reject) => {

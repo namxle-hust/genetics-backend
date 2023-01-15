@@ -1,6 +1,8 @@
-import { SAMPLE_STATUS_PROCESSOR } from '@app/common';
+import { SAMPLE_STATUS_PROCESSOR, UPDATE_SAMPLE_STATUS_EVENT } from '@app/common';
+import { AnalysisStatus } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class CommunicationService {
@@ -9,14 +11,15 @@ export class CommunicationService {
     }
 
 
-    // async updateSampleStatusStatus() {
-    //     try {
-    //         await lastValueFrom(this.sampleStatusClient.emit(UPDATE_SAMPLE_STATUS_EVENT, {
-    //             id: 3120
-    //         }))
-    //         return { id: 3120 }
-    //     } catch (error) {
-    //         throw error
-    //     }
-    // }
+    async updateSampleStatusStatus(status: AnalysisStatus, id: number
+    ) {
+        try {
+            await lastValueFrom(this.sampleStatusClient.emit(UPDATE_SAMPLE_STATUS_EVENT, {
+                id: id,
+                status: status
+            }))
+        } catch (error) {
+            throw error;
+        }
+    }
 }

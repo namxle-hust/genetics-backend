@@ -1,3 +1,4 @@
+import { AnalysisStatus } from '@app/prisma';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -9,7 +10,7 @@ export class SampleStatusProcessorService {
         return 'Hello World!';
     }
 
-    updateStatus(data: any) {
+    updateStatus(data: { id: number, status: AnalysisStatus }) {
         this.logger.log('Update status: ', data);
     }
 }
