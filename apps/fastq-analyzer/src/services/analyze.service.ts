@@ -48,11 +48,17 @@ export class AnalyzeService {
     }
 
     async runSentieonWES(analysis: AnalysisModel) {
-        const IntervalFile = this.configService.get<String>('INTERVAR_FILE')
-
         const VcfHcOutput = `output-hc.vcf.gz`
 
         const VcfOutputMerged = 'output-merged.vcf';
+
+        const IntervalFile = `${this.analysisFolder}/formated.bed`
+
+        const gensetPath = this.configService.get<string>('DEFAULT_BED')
+        const picardScript = this.configService.get<string>('PICARD_SCRIPT')
+        const intervalSD = this.configService.get<string>('INTERVAL_SD')
+
+        const formatBedCommand = `awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$1"-"$2"-"$3}' ${gensetPath} > ${IntervalFile} && java -jar ${picardScript}  BedToIntervalList I=${IntervalFile} O=${IntervalFile}.interval SD=${intervalSD}`;
 
         const files = analysis.sample.files;
 
@@ -68,6 +74,7 @@ export class AnalyzeService {
         const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${SampleName} ${IntervalFile} ${this.removeDuplicate}`
 
         const listCommands = [
+            formatBedCommand,
             changeDirCommand,
             sentieonCommand,
             mergeVCFCommand
