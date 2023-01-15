@@ -60,6 +60,7 @@ export class FastqAnalyzingService {
 
 
     async downloadFastQFiles(analysis: AnalysisModel) {
+        this.logger.log('Downloading Fastq Files')
         const files = analysis.sample.files;
         const s3FolderPath = `s3://${this.S3_BUCKET}/${this.S3_UPLOAD_FOLDER}`
         const destinationFolder = this.commonService.getAnalysisDestinationFolder(analysis)

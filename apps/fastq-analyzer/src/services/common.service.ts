@@ -1,12 +1,13 @@
 import { Global, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as child from 'child_process';
 import { AnalysisModel } from "../models";
 
 @Injectable()
 export class CommonService {
-    // constructor(private configService: ConfigService) {
+    constructor(private configService: ConfigService) {
 
-    // }
+    }
 
     async runCommand(command): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -20,8 +21,8 @@ export class CommonService {
     }
 
     getAnalysisDestinationFolder(analysis: AnalysisModel): string {
-        // const AnalysisFolder = this.configService.get<string>('ANALYSIS_FOLDER')
-        // return `${AnalysisFolder}/${analysis.id}`
+        const AnalysisFolder = this.configService.get<string>('ANALYSIS_FOLDER')
+        return `${AnalysisFolder}/${analysis.id}`
         return ''
     }
 }
