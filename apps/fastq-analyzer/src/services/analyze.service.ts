@@ -71,7 +71,7 @@ export class AnalyzeService {
 
         const mergeVCFCommand = `less ${VcfOutputMerged} | awk -F"\t" 'BEGIN{OFS="\t"}{if (index($1, "#") == 1) {print} else { if ($10 !="./.") { print $0 } else { $10 = $11; print $0;}}}' > ${this.vcfOutputTmp}`
 
-        const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${SampleName} ${IntervalFile} ${this.removeDuplicate}`
+        const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${IntervalFile} ${SampleName} ${this.removeDuplicate}`
 
         const listCommands = [
             formatBedCommand,
