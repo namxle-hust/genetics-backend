@@ -55,24 +55,6 @@ services:
     networks:
       - genetics
 
-  # fastq-analyzer-service:
-  #   container_name: genetics_fastq_analyzer
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/fastq-analyzer/DockerFile
-  #     target: development
-  #   command: npm run start:dev fastq-analyzer
-  #   env_file:
-  #     - ./apps/fastq-analyzer/.env
-  #   volumes:
-  #     - /usr/src/app/node_modules
-  #   ports:
-  #     - '4000:4000'
-  #   depends_on:
-  #     - rabbitmq
-  #   networks:
-  #     - genetics
-
   # vcf-analyzer-service:
   #   container_name: genetics_vcf-analyzer
   #   build:
