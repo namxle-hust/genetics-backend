@@ -20,24 +20,23 @@ services:
   #   networks:
   #     - genetics
 
-  # samples-handler:
-  #   container_name: genetics_samples-handler
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/samples-handler/DockerFile
-  #     target: development
-  #   command: npm run start:dev samples-handler
-  #   env_file:
-  #     - ./apps/samples-handler/.env
-  #   volumes:
-  #     - /usr/src/app/node_modules
-  #   ports:
-  #     - '3000:3000'
-  #   depends_on:
-  #     - prisma-migration
-  #     - rabbitmq
-  #   networks:
-  #     - genetics
+  samples-handler:
+    container_name: genetics_samples-handler
+    build:
+      context: .
+      dockerfile: ./apps/samples-handler/DockerFile
+      target: production
+    env_file:
+      - ./apps/samples-handler/.env
+    volumes:
+      - /usr/src/app/node_modules
+    ports:
+      - '3000:3000'
+    depends_on:
+      - prisma-migration
+      - rabbitmq
+    networks:
+      - genetics
 
   sample-status-processor:
     container_name: genetics_sample_status_processor

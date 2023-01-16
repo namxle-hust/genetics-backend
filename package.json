@@ -10,6 +10,7 @@
     "build": "nest build",
     "build:information": "nest build information",
     "build:fastq": "nest build fastq-analyzer",
+    "build:samples-handler": "nest build samples-handler",
     "build:status-processor": "nest build sample-status-processor",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
