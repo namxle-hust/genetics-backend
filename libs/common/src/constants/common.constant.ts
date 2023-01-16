@@ -1,0 +1,1 @@
+export const FASTQ_OUTPUT_VCF = 'output.vcf.gz';

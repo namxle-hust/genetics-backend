@@ -1,3 +1,4 @@
+import { FASTQ_OUTPUT_VCF } from "@app/common";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as fs from 'fs';
@@ -9,11 +10,6 @@ import { CommonService } from "./common.service";
 export class AnalyzeService {
 
     private readonly logger = new Logger(AnalyzeService.name)
-
-    private vcfOutputName: string = 'output.vcf.gz';
-    private vcfOutputPath: string;
-
-    private vcfOutputTmp: string;
 
     private analysisFolder: string;
 
@@ -28,26 +24,25 @@ export class AnalyzeService {
 
     async analyzeWES(analysis: AnalysisModel) {
         this.analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis)
-
-        this.vcfOutputPath = `${this.analysisFolder}/${this.vcfOutputName}`;
-
-        this.vcfOutputTmp = `${this.analysisFolder}/output-merged-tmp.vcf`
+        const filterOutput = `${this.analysisFolder}/output-hc-filter.vcf`;
 
         this.sentieonScript = this.configService.get<string>('WES_SENTIEON');
 
-        const vcfHcFilterOuput = `${this.analysisFolder}/output-hc-filter.vcf`;
-
         this.logger.log('Run Sentieon')
 
-        await this.runSentieonWES(analysis);
+        let tmpOutput = await this.runSentieonWES(analysis);
 
-        await this.vcfService.removeLowQuality(this.vcfOutputTmp, vcfHcFilterOuput)
+        await this.vcfService.removeLowQuality(tmpOutput, filterOutput)
+
+        await this.vcfService.archiveOutput(filterOutput, analysis)
 
         return true;
 
     }
 
-    async runSentieonWES(analysis: AnalysisModel) {
+    async runSentieonWES(analysis: AnalysisModel): Promise<string> {
+        const tmpOutput = `${this.analysisFolder}/output-merged-tmp.vcf`;
+        
         const VcfHcOutput = `output-hc.vcf.gz`
 
         const VcfOutputMerged = 'output-merged.vcf';
@@ -69,7 +64,7 @@ export class AnalyzeService {
 
         const changeDirCommand = `cd ${this.analysisFolder}`
 
-        const mergeVCFCommand = `less ${VcfOutputMerged} | awk -F"\t" 'BEGIN{OFS="\t"}{if (index($1, "#") == 1) {print} else { if ($10 !="./.") { print $0 } else { $10 = $11; print $0;}}}' > ${this.vcfOutputTmp}`
+        const mergeVCFCommand = `less ${VcfOutputMerged} | awk -F"\t" 'BEGIN{OFS="\t"}{if (index($1, "#") == 1) {print} else { if ($10 !="./.") { print $0 } else { $10 = $11; print $0;}}}' > ${tmpOutput}`
 
         const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${IntervalFile} ${SampleName} ${this.removeDuplicate}`
 
@@ -82,13 +77,13 @@ export class AnalyzeService {
 
         const cmd = listCommands.join(' && ');
 
-        this.logger.log(cmd)
-
         await this.commonService.runCommand(cmd);
         
         if (!fs.existsSync(`${this.analysisFolder}/${VcfHcOutput}`)) {
             throw new Error('Run Sentieon Error!');
         }
+
+        return tmpOutput
     }
 
     async runSentieonWGS(analysis: AnalysisModel) {
@@ -98,4 +93,5 @@ export class AnalyzeService {
     async analyzeWGS(analysis: AnalysisModel) {
 
     }
+    
 }

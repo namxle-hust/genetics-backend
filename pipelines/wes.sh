@@ -238,12 +238,6 @@ $release_dir/../run_v3/get_QC.sh bwa.bam sorted_ali.bam deduped.bam deduped_mQ$M
 /apps/bedtools/bedtools-2.17.0/bin/coverageBed  -abam realigned.bam  -b $BED  -d  >every-nt
 perl /apps/sentieon/run_v3/OnTargetReadDepth.pl  every-nt $sample >every-nt.depth
 
-if [[ "$BED" == *"GeneCoverage_formated"* ]]; then
-	#statements
-	/apps/bedtools/bedtools-2.17.0/bin/coverageBed  -abam realigned.bam  -b $BED.genes.bed  -d  >every-nt-genes
-	perl /apps/sentieon/run_v3/OnTargetReadDepth.pl  every-nt-genes $sample >every-nt-genes.depth
-fi
-
 $release_dir/bin/sentieon driver -r $fasta -i deduped.bam  --algo HsMetricAlgo --targets_list $BED.interval --baits_list $BED.interval  hs_metrics.txt
 
 echo "Finish 6.0 QC read count"
@@ -272,48 +266,3 @@ prev=$current
 current=`date +%s`
 duration=$(($current - $prev))
 echo "Duration: $duration"
-
-# ******************************************
-# 7. Variant Recalibration
-# ******************************************
-if [ "$run_vqsr" = "NO" ]; then
-
-	echo "Start 7. Variant Recalibration"
-	#for SNP
-	#create the resource argument
-	resource_text="--resource $vqsr_1000G_phase1 --resource_param 1000G,known=false,training=true,truth=false,prior=10.0 "
-	resource_text="$resource_text --resource $vqsr_1000G_omni --resource_param omni,known=false,training=true,truth=true,prior=12.0 "
-	resource_text="$resource_text --resource $vqsr_dbsnp --resource_param dbsnp,known=true,training=false,truth=false,prior=2.0 "
-	resource_text="$resource_text --resource $vqsr_hapmap --resource_param hapmap,known=false,training=true,truth=true,prior=15.0"
-	#create the annotation argument
-	annotation_array="QD MQ MQRankSum ReadPosRankSum FS"
-	for annotation in $annotation_array; do
-	  annotate_text="$annotate_text --annotation $annotation"
-	done
-	#Run the VQSR
-	$release_dir/bin/sentieon driver -r $fasta --algo VarCal -v output-hc.vcf.gz $resource_text $annotate_text --var_type SNP --plot_file vqsr_SNP.hc.plot_file.txt --max_gaussians 8 --srand 47382911 --tranches_file vqsr_SNP.hc.tranches vqsr_SNP.hc.recal
-	#apply the VQSR
-	$release_dir/bin/sentieon driver -r $fasta --algo ApplyVarCal -v output-hc.vcf.gz --var_type SNP --recal vqsr_SNP.hc.recal --tranches_file vqsr_SNP.hc.tranches --sensitivity 99.5 vqsr_SNP.hc.recaled.vcf.gz
-	#plot the report
-	$release_dir/bin/sentieon plot vqsr -o vqsr_SNP.VQSR.pdf vqsr_SNP.hc.plot_file.txt
-
-	#for indels after SNPs
-	#create the resource argument
-	resource_text="--resource $vqsr_1000G_phase1_indel --resource_param 1000G,known=false,training=true,truth=false,prior=10.0 "
-	resource_text="$resource_text --resource $vqsr_Mill --resource_param Mills,known=false,training=true,truth=true,prior=12.0 "
-	resource_text="$resource_text --resource $vqsr_dbsnp --resource_param dbsnp,known=true,training=false,truth=false,prior=2.0 "
-	#create the annotation argument
-	annotation_array="QD MQ ReadPosRankSum FS"
-	annotate_text=""
-	for annotation in $annotation_array; do
-	  annotate_text="$annotate_text --annotation $annotation"
-	done
-	#Run the VQSR
-	$release_dir/bin/sentieon driver -r $fasta --algo VarCal -v vqsr_SNP.hc.recaled.vcf.gz $resource_text $annotate_text --var_type INDEL --plot_file vqsr_SNP_INDEL.hc.plot_file.txt --max_gaussians 4 --srand 47382911 --tranches_file vqsr_SNP_INDEL.hc.tranches vqsr_SNP_INDEL.hc.recal
-	#apply the VQSR
-	$release_dir/bin/sentieon driver -r $fasta --algo ApplyVarCal -v vqsr_SNP.hc.recaled.vcf.gz --var_type INDEL --recal vqsr_SNP_INDEL.hc.recal --tranches_file vqsr_SNP_INDEL.hc.tranches --sensitivity 99.5 vqsr_SNP_INDEL.hc.recaled.vcf.gz
-	#plot the report
-	$release_dir/bin/sentieon plot vqsr -o vqsr_SNP_INDEL.VQSR.pdf vqsr_SNP_INDEL.hc.plot_file.txt
-
-	echo "Finish 7. Variant Recalibration"
-fi
