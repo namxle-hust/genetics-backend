@@ -32,6 +32,8 @@ export class FastqAnalyzingService {
         this.logger.log('Analyzing')
         this.logger.log(analysis)
 
+        await this.communicationService.updateSampleStatusStatus(AnalysisStatus.FASTQ_ANALYZING, analysis.id)
+
         // Create folder
         await this.createAnalysisFolder(analysis.id)
 
