@@ -6,7 +6,10 @@ import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(InformationModule);
-    app.enableCors();
+    app.enableCors({
+        origin: false
+    }
+    );
     
     app.useGlobalPipes(new ValidationPipe({
         whitelist: true
