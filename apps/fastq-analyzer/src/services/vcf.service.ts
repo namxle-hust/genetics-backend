@@ -42,7 +42,8 @@ export class VcfService {
         let analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis);
         let destination = `${analysisFolder}/${this.vcfOutput}`
 
-        let bgzipCommand = `bgzip -c ${source} > ${destination}`
+        // Sort vcf
+        let bgzipCommand = ` sort -k1,1 -k2,2n ${source} | bgzip -c > ${destination}`
         let tabixCommand = `tabix -f ${destination}`
 
         let commands = [
