@@ -49,13 +49,6 @@ export class FastqAnalyzingService {
 
         await this.communicationService.updateSampleStatusStatus(AnalysisStatus.VCF_QUEUING, analysis.id)
 
-        // Create some fake delay
-        await new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve(true);
-            }, 50000)
-        })
-
         this.logger.log(`Done ${analysis.id}`);
     }
 
