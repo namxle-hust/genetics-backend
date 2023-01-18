@@ -7,7 +7,12 @@ import { useContainer } from 'class-validator';
 async function bootstrap() {
   const app = await NestFactory.create(InformationModule);
     app.enableCors({
-        origin: false
+        origin: [
+            'http://localhost:4200',
+            'http://localhost:3000',
+            'http://apps.genetics.vn',
+            'http://www.apps.genetics.vn'
+        ]
     }
     );
     
