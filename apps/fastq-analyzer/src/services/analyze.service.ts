@@ -88,10 +88,33 @@ export class AnalyzeService {
 
     async runSentieonWGS(analysis: AnalysisModel) {
         
+        const files = analysis.sample.files;
+
+        const R1Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
+        const R2Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
+
+        const SampleName = analysis.name.replace(' ', '_');
+
+        const VcfHcOutput = 'vqsr_SNP_INDEL.hc.recaled.vcf.gz'
+
+        const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${SampleName}`
+
+        this.commonService.runCommand(sentieonCommand);
+
+        return `${this.analysisFolder}/${VcfHcOutput}`
     }
 
     async analyzeWGS(analysis: AnalysisModel) {
+        this.analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis)
+        this.sentieonScript = this.configService.get<string>('WGS_SENTIEON');
 
+        this.logger.log('Run Sentieon')
+
+        let output = await this.runSentieonWGS(analysis);
+
+        await this.vcfService.renameOutput(output, analysis);
+
+        return true;   
     }
     
 }

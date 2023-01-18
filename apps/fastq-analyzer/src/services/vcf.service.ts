@@ -55,6 +55,23 @@ export class VcfService {
         await this.commonService.runCommand(command);
     }
 
+    async renameOutput(source: string, analysis: AnalysisModel) {
+        let analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis);
+        let destination = `${analysisFolder}/${this.vcfOutput}`
+
+        let renameCommand = `mv ${source} ${destination}`;
+        let tabixCommand = `tabix -f ${destination}`;
+
+        let commands = [
+            renameCommand,
+            tabixCommand
+        ]
+
+        let command = commands.join(" && ");
+
+        await this.commonService.runCommand(command);
+    }
+
     async removeLowQuality(vcfFile: string, output: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.VcfStream = fs.createReadStream(vcfFile)
