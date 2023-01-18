@@ -11,12 +11,14 @@ export class VcfService {
 
     VcfStream: any;
 
+    private s3Bucket: string
     private s3AnalysesFolder: string
     private vcfOutput = FASTQ_OUTPUT_VCF
 
 
     constructor(private commonService: CommonService, private configService: ConfigService) {
         this.s3AnalysesFolder = this.configService.get<string>('S3_ANALYSES_FOLDER')
+        this.s3Bucket = this.configService.get<string>('S3_BUCKET');
     }
 
     async uploadVcfFiles(analysis: AnalysisModel) {
