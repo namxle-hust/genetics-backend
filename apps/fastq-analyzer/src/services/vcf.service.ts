@@ -22,11 +22,13 @@ export class VcfService {
     }
 
     async uploadVcfFiles(analysis: AnalysisModel) {
-        const destinationFolder = `s3://${this.s3Bucket}/${this.s3AnalysesFolder}/`
         let analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis);
         
-        let uploadVcfCmd = `aws s3 cp ${analysisFolder}/${this.vcfOutput} ${destinationFolder}`
-        let uploadTbiCmd = `aws s3 cp ${this.commonService.getTbiFile(`${analysisFolder}/${this.vcfOutput}`)} ${destinationFolder}`
+        let vcfFilePath = `${analysisFolder}/${this.vcfOutput}`
+        let tbiFilePath = `${this.commonService.getTbiFile(`${analysisFolder}/${this.vcfOutput}`)}`
+
+        let uploadVcfCmd = this.commonService.getUploadCmd(vcfFilePath, this.s3AnalysesFolder)
+        let uploadTbiCmd = this.commonService.getUploadCmd(tbiFilePath, this.s3AnalysesFolder)
 
         let commands = [
             uploadVcfCmd,

@@ -10,6 +10,7 @@ module.exports = {
                 "RABBIT_MQ_FASTQ_ANALYZING_QUEUE": "fastq_analyzing",
                 "S3_BUCKET": "varigenes-storage",
                 "S3_UPLOAD_FOLDER": "uploads",
+                "S3_ANALYSES_FOLDER": 'analyses',
                 "S3_PROFILE": "varigenes",
                 "ANALYSIS_FOLDER": "/data/genetics/analyses",
                 "INTERVAR_FILE": "/apps/sentieon/xgen-inherited-diseases-targets-05112018.bed",
