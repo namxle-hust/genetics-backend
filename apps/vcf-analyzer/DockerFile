@@ -149,16 +149,17 @@ RUN ln -s /home/ubuntu/apps/bcftools-1.9/bcftools /home/ubuntu/bin
 
 WORKDIR /home/ubuntu/genetics
 
-RUN source $NVM_DIR/nvm.sh && nvm use default && node --version && npm --version
-
-RUN npm install --global yarn
-
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
 COPY package.json yarn.lock ./
 
-RUN yarn install --prod
+
+
+RUN source $NVM_DIR/nvm.sh && \
+    nvm use default && \
+    npm install --global yarn \
+    yarn install --prod 
 
 COPY . .
 
