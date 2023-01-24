@@ -149,7 +149,7 @@ RUN ln -s /home/ubuntu/apps/bcftools-1.9/bcftools /home/ubuntu/bin
 
 WORKDIR /home/ubuntu/genetics
 
-RUN source $NVM_DIR/nvm.sh && nvm use default
+RUN source $NVM_DIR/nvm.sh && nvm use default && node --version
 
 RUN npm install --global yarn
 
