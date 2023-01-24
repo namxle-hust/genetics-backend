@@ -59,6 +59,7 @@ services:
       context: .
       dockerfile: ./apps/vcf-analyzer/DockerFile
       target: production
+    entrypoint: ./deployment/run/run-vcf.sh
     env_file:
       - ./apps/vcf-analyzer/.env
     volumes:
