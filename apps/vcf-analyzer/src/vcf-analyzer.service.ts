@@ -17,7 +17,7 @@ export class VcfAnalyzerService {
 
     private uploadFolder: string
 
-    private analysisBed: string = VCF_APPLIED_BED
+    private analysisBed: string;
 
     private analysis: AnalysisModel
 
@@ -38,7 +38,11 @@ export class VcfAnalyzerService {
 
         this.analysis = analysis;
 
+        this.analysisBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
+
         await this.preprocess();
+
+        await this.applyBedFile();
     }
 
     async preprocess() {
@@ -52,30 +56,45 @@ export class VcfAnalyzerService {
             // Check if it is vcf.gz file
             if (uploadPath.indexOf('vcf.gz') != -1) {
                 this.isGZ = true;
-                command = `cp ${uploadPath} ${VCF_INPUT_ZIP}`             
+                this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_ZIP}`
             } else {
                 this.isGZ = false;
-                command = `cp ${uploadPath} ${VCF_INPUT_NO_ZIP}`
+                this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_NO_ZIP}`
             }
+
+            command = `cp ${uploadPath} ${this.inputVcf}`  
         }
 
         await this.commonService.runCommand(command);
     }
 
-    async applyBedFile(analysis: AnalysisModel) {
+    async applyBedFile() {
         
-        let count = await this.annovarService.getRowCount(analysis);
+        let count = await this.annovarService.getRowCount(this.inputVcf);
 
         let options = [
             `-b ${this.defaultBedFile}`,
             `-a ${this.inputVcf}`
         ]
 
-        let commands = `${INTERSECT_BED_CMD} ${options.join(' ')} && grep -v "0/0" > `
+        let zipFileCommand = ''
 
-        if (analysis.vcfType == VcfType.WGS) {
-            commands
+        if (this.isGZ) {
+            zipFileCommand = `bgzip -f ${this.analysisBed}`
         }
+
+        let commands = [
+            `${INTERSECT_BED_CMD} ${options.join(' ')}`,
+            `grep -v "0/0" > ${this.inputVcf}.body`,
+            `less ${this.inputVcf} | awk '{if (index($0, "#") == 1) print $0}' > ${this.inputVcf}.header`,
+            `cat ${this.inputVcf}.header ${this.inputVcf}.body > ${this.analysisBed}`,
+            zipFileCommand
+        ]
+
+        let command = commands.join(' && ');
+
+        this.commonService.runCommand(command);
+
     }
 
 
