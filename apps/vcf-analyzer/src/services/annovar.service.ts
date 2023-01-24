@@ -19,8 +19,6 @@ export class AnnovarService {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
     }
 
-
-    
     async getRowCount(vcfFilePath: string) {
         let command = `less ${vcfFilePath} | awk -F"\t" '{ if (index($0, "#") != 1) { split($5,a,","); col8 = $8; for (i in a){ $5=a[i]; $8=col8";VARINDEX="i; print }  }}' | wc -l`
 
