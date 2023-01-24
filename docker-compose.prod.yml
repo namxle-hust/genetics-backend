@@ -54,6 +54,7 @@ services:
 
   vcf-analyzer-service:
     tty: true
+    privileged: true
     container_name: genetics_vcf_analyzer
     build:
       context: .
