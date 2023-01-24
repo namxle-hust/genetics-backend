@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
-import { AnnovarService } from './services/annovar.service';
+import { AnnovarService } from './services';
 import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_INPUT_NO_ZIP, VCF_INPUT_ZIP } from '@app/common';
 import { SampleType, VcfType } from '@app/prisma';
 

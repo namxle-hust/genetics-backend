@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { CommonService } from "apps/fastq-analyzer/src/services/common.service";
+import { CommonService } from "../services/common.service";
 import { AnalysisModel } from "../models";
 
 @Injectable()
