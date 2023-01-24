@@ -57,7 +57,9 @@ ENV PATH $NVM_DIR/v$NODE_VERSION/bin:$PATH
 RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.30.1/install.sh | bash \
     && source $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION
+    && nvm alias default $NODE_VERSION \
+    && nvm use default \
+    && npm install --global yarn 
 
 
 ## Create user ubuntu
@@ -159,7 +161,6 @@ COPY package.json yarn.lock ./
 
 RUN source $NVM_DIR/nvm.sh && \
     nvm use default && \
-    npm install --global yarn \
     yarn install --prod 
 
 COPY . .
