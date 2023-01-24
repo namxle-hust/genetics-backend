@@ -149,6 +149,8 @@ RUN ln -s /home/ubuntu/apps/bcftools-1.9/bcftools /home/ubuntu/bin
 
 WORKDIR /home/ubuntu/genetics
 
+RUN npm install --global yarn
+
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
