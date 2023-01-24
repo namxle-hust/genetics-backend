@@ -1,4 +1,4 @@
-FROM node:16.17.1-alpine As development
+FROM node:16.17.1-alpine as development
 
 WORKDIR /usr/src/app
 
@@ -10,12 +10,145 @@ COPY . .
 
 RUN yarn build
 
-FROM node:16.17.1-alpine as production
+FROM ensemblorg/ensembl-vep:release_101.0 as production
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+USER root
+
+SHELL [ "/bin/bash", "-c" ]
+
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+## Install essential
+RUN apt-get update -y && apt-get install -y lsb-release  git automake build-essential \
+    libfuse-dev libcurl4-openssl-dev libxml2-dev pkg-config libssl-dev  libtool \
+    software-properties-common
+
+## Install R
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+RUN apt update -y && apt install -y r-base
+
+## Redis
+RUN curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
+
+RUN apt-get update -y && apt-get install -y sudo fuse nano \
+    python2.7 wget unzip autoconf csvtool redis
+
+RUN ln -s /usr/bin/python2.7 /usr/bin/python
+
+## Install S3 Fuse
+RUN rm -rf /usr/src/s3fs-fuse
+RUN git clone https://github.com/s3fs-fuse/s3fs-fuse/ /usr/src/s3fs-fuse
+WORKDIR /usr/src/s3fs-fuse
+### Only use V1.90
+RUN git checkout cd466eb
+RUN ./autogen.sh && ./configure && make && make install
+
+RUN echo "user_allow_other" >> /etc/fuse.conf
+
+## Install nvm
+ENV NVM_DIR /usr/local/nvm
+ENV NODE_VERSION 16.17.1
+
+RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.30.1/install.sh | bash \
+    && source $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION
+
+
+## Create user ubuntu
+RUN useradd -m ubuntu && \
+    usermod -aG sudo ubuntu && \
+    echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    cp /root/.bashrc /home/ubuntu/ && \
+    chown -R --from=root ubuntu /opt/vep && \
+    chown -R --from=root ubuntu /home/ubuntu
+
+ENV HOME /home/ubuntu
+ENV USER ubuntu
+
+WORKDIR /home
+RUN mkdir s3
+RUN chown -R ubuntu:ubuntu /home/s3
+
+USER ubuntu
+
+RUN mkdir /home/ubuntu/bin
+
+WORKDIR /home/ubuntu
+
+## sudo success
+ENV PATH /home/ubuntu/bin:$PATH
+RUN touch $HOME/.sudo_as_admin_successful
+
+RUN mkdir -p /home/ubuntu/apps && \
+    mkdir -p /home/ubuntu/apps/InterVar && \
+    mkdir -p /home/ubuntu/apps/ANNOVAR && \
+    mkdir -p /home/ubuntu/info && \
+    mkdir -p /home/ubuntu/info/tmp && \
+    mkdir -p /home/ubuntu/info/logs && \
+    mkdir -p /home/ubuntu/genetics
+
+## Create VEP folder
+RUN ln -s /opt/vep/.vep /home/ubuntu/.vep
+
+## Install htslib
+USER root
+WORKDIR /home/ubuntu/apps
+
+RUN  wget https://btgenomics-s3-prod.s3.us-west-2.amazonaws.com/public/htslib-1.3.2.zip && unzip htslib-1.3.2.zip && cd htslib-1.3.2 \
+    && make && make install && rm ../htslib-1.3.2.zip
+
+USER ubuntu
+
+## Install bedtools
+WORKDIR /home/ubuntu/apps
+
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.29.1/bedtools-2.29.1.tar.gz && \
+    tar -zxvf bedtools-2.29.1.tar.gz && \
+    cd bedtools2 && \
+    make && \
+    rm ../bedtools-2.29.1.tar.gz
+
+ENV PATH /home/ubuntu/apps/bedtools2/bin:$PATH
+
+## Install vcftools
+WORKDIR /home/ubuntu/apps
+
+RUN git clone https://github.com/vcftools/vcftools.git
+RUN cd vcftools && ./autogen.sh && ./configure --prefix=/home/ubuntu/apps/vcftools && make && make install
+
+ENV PATH /home/ubuntu/apps/vcftools/bin:$PATH
+
+## S3fs-fuse credential config
+RUN echo "alias python=python3" >> /home/ubuntu/.bashrc
+RUN source /home/ubuntu/.bashrc
+
+## Install Automap
+WORKDIR /home/ubuntu/apps
+
+RUN git clone https://github.com/mquinodo/AutoMap.git
+RUN cd AutoMap && chmod 777 AutoMap_v1.2.sh
+
+## Install bcftools
+WORKDIR /home/ubuntu/apps
+
+RUN wget https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2 && \
+    tar -vxjf bcftools-1.9.tar.bz2 && \
+    cd bcftools-1.9 && \
+    make && \
+    cd .. && \
+    rm bcftools-1.9.tar.bz2
+
+RUN ln -s /home/ubuntu/apps/bcftools-1.9/bcftools /home/ubuntu/bin
+
+
+WORKDIR /home/ubuntu/genetics
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /usr/src/app
 
 COPY package.json yarn.lock ./
 
@@ -25,4 +158,6 @@ COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/vcf-analyzer/main"]
+CMD ["/bin/bash"]
+
+# CMD ["node", "/home/ubuntu/genetics/dist/apps/vcf-analyzer/main"]

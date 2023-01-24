@@ -52,23 +52,23 @@ services:
     networks:
       - genetics
 
-  # vcf-analyzer-service:
-  #   container_name: genetics_vcf-analyzer
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/vcf-analyzer/DockerFile
-  #     target: development
-  #   command: npm run start:dev vcf-analyzer
-  #   env_file:
-  #     - ./apps/vcf-analyzer/.env
-  #   volumes:
-  #     - /usr/src/app/node_modules
-  #   ports:
-  #     - '4500:4500'
-  #   depends_on:
-  #     - rabbitmq
-  #   networks:
-  #     - genetics
+  vcf-analyzer-service:
+    tty: true
+    container_name: genetics_vcf_analyzer
+    build:
+      context: .
+      dockerfile: ./apps/vcf-analyzer/DockerFile
+      target: production
+    env_file:
+      - ./apps/vcf-analyzer/.env
+    volumes:
+      - /usr/src/app/node_modules
+    ports:
+      - '4500:4500'
+    depends_on:
+      - rabbitmq
+    networks:
+      - genetics
 
   rabbitmq:
     container_name: genetics_rabbitmq
