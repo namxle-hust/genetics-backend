@@ -63,6 +63,10 @@ services:
       - ./apps/vcf-analyzer/.env
     volumes:
       - /usr/src/app/node_modules
+      - annovar_volume:/home/ubuntu/apps/ANNOVAR
+      - intervar_volume:/home/ubuntu/apps/InterVar
+      - vep_data_volume:/opt/vep/.vep
+      - genetics_vep_info_volume:/home/ubuntu/info
     ports:
       - '4500:4500'
     depends_on:
@@ -147,5 +151,25 @@ services:
 volumes:
   mongodb_data:
     driver: local
+  annovar_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /apps/ANNOVAR/032020
+  intervar_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/user/vep/InterVar
+  vep_data_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/user/vep/vep_data
+  genetics_vep_info_volume:
+    
 networks:
   genetics:
