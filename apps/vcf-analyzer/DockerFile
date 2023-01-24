@@ -67,7 +67,7 @@ RUN useradd -m ubuntu && \
     cp /root/.bashrc /home/ubuntu/ && \
     chown -R --from=root ubuntu /opt/vep && \
     chown -R --from=root ubuntu /home/ubuntu && \
-    chown -R --from=root ubuntu /usr/local/nvm/
+    chown -R --from=root ubuntu $NVM_DIR
 
 ENV HOME /home/ubuntu
 ENV USER ubuntu
