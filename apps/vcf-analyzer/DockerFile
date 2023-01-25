@@ -12,6 +12,8 @@ RUN yarn build:vcf
 
 FROM namxle/vep:latest as production
 
+USER ubuntu
+
 WORKDIR /home/ubuntu/genetics
 
 ARG NODE_ENV=production
@@ -23,7 +25,7 @@ RUN source $NVM_DIR/nvm.sh && \
     nvm use default && \
     yarn install --production=false
 
-COPY . .
+COPY --chown=ubuntu:ubuntu  . .
 
 RUN source $NVM_DIR/nvm.sh && \
     nvm use default && \
