@@ -27,8 +27,8 @@ export class VcfService {
         let vcfFilePath = `${analysisFolder}/${this.vcfOutput}`
         let tbiFilePath = `${this.commonService.getTbiFile(`${analysisFolder}/${this.vcfOutput}`)}`
 
-        let uploadVcfCmd = this.commonService.getUploadCmd(vcfFilePath, `${this.s3AnalysesFolder}/${analysis.id}`)
-        let uploadTbiCmd = this.commonService.getUploadCmd(tbiFilePath, `${this.s3AnalysesFolder}/${analysis.id}`)
+        let uploadVcfCmd = this.commonService.getUploadCmd(vcfFilePath, `${this.s3AnalysesFolder}/${analysis.id}/`)
+        let uploadTbiCmd = this.commonService.getUploadCmd(tbiFilePath, `${this.s3AnalysesFolder}/${analysis.id}/`)
 
         let commands = [
             uploadVcfCmd,
