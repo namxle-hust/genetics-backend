@@ -29,4 +29,19 @@ export class CommonService {
         
         return `${s3Dir}/${analysesFolder}/${analysis.id}`
     }
+
+    escapeFileName(name) {
+        let options = [
+            [/"/g, '\\"'],
+            [/\s/g, '\\ '],
+            [/\(/g, '\\('],
+            [/\)/g, '\\)']
+        ]
+
+        for (var key in options) {
+            name = name.replace(options[key][0], options[key][1])
+        }
+
+        return name
+    }
 }
