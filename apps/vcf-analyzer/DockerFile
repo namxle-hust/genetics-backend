@@ -25,6 +25,8 @@ RUN source $NVM_DIR/nvm.sh && \
 
 COPY . .
 
-RUN yarn build:vcf
+RUN source $NVM_DIR/nvm.sh && \
+    nvm use default && \
+    yarn build:vcf
 
 # CMD ["node", "/home/ubuntu/genetics/dist/apps/vcf-analyzer/main"]
