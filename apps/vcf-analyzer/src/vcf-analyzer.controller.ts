@@ -14,7 +14,9 @@ export class VcfAnalyzerController {
         private readonly vcfAnalyzerService: VcfAnalyzerService,
         private readonly rmqService: RmqService,
         private readonly communicationService: CommunicationService
-    ) { }
+    ) { 
+        this.logger.log(VCF_ANALYZE_EVENT)
+    }
 
     @EventPattern(VCF_ANALYZE_EVENT)
     async getVcfAnalysis(@Payload() data: AnalysisModel, @Ctx() context: RmqContext) {

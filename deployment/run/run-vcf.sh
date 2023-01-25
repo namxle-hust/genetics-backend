@@ -5,12 +5,4 @@ chmod 600 /home/ubuntu/.passwd-s3fs
 
 s3fs varigenes-storage /home/s3  -o passwd_file=${HOME}/.passwd-s3fs -o allow_other
 
-nvm use default
-
-cd /home/ubuntu/genetics
-
-yarn install
-
-yarn build:vcf
-
 /bin/bash
