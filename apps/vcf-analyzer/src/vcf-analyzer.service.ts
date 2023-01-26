@@ -42,6 +42,7 @@ export class VcfAnalyzerService {
 
         this.analysis = analysis;
 
+        this.inputVcf = `${this.analysisFolder}/`
         this.vcfBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
         this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
         this.vcfFile = `${this.analysisFolder}/${VCF_FILE}`
@@ -59,7 +60,13 @@ export class VcfAnalyzerService {
     async preprocess() {
         let command = ''
         if (this.analysis.sample.type == SampleType.FASTQ) {
+            this.isGZ = true;
+            
+            this.vcfOriginal = `${this.analysisFolder}/${VCF_ORIGINAL_ZIP_FILE}`
+            this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_ZIP}`
+
             command = `mv ${this.analysisFolder}/${FASTQ_OUTPUT_VCF} ${this.analysisFolder}/${VCF_INPUT_ZIP}`
+
         } else {
             // Get only first element because vcf only allow upload 1 file
             let uploadPath = `${this.uploadFolder}/${this.analysis.sample.files[0].uploadedName}`
