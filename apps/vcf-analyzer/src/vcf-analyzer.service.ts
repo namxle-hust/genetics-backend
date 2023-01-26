@@ -45,6 +45,8 @@ export class VcfAnalyzerService {
 
         await this.preprocess();
 
+        await this.fomatVcfFile();
+
         await this.applyBedFile();
 
         await this.prepareFile();
@@ -76,18 +78,36 @@ export class VcfAnalyzerService {
 
         this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_COMPRESSED_FILE : VCF_ORIGINAL_FILE}`
         
-        let command = `cp ${uploadPath} ${this.vcfOriginal} && less ${this.vcfOriginal} > ${this.vcfFile}`
+        let command = `cp ${uploadPath} ${this.vcfOriginal}`
 
         await this.commonService.runCommand(command);
     }
 
+    async fomatVcfFile() {
+        let zipFileCommand = 'ls'
+
+        if (this.isGZ) {
+            zipFileCommand = `bgzip -f ${this.vcfFile}`
+        }
+
+        let commands = [
+            `less ${this.vcfOriginal} | awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' > ${this.vcfFile}`,
+            zipFileCommand
+        ]
+
+        let command = commands.join(' && ');
+
+        await this.commonService.runCommand(command);
+
+    }
+
     async applyBedFile() {
         
-        let count = await this.annovarService.getRowCount(this.vcfFile);
+        let count = await this.annovarService.getRowCount(this.vcfOriginal);
 
         let options = [
             `-b ${this.defaultBedFile}`,
-            `-a ${this.vcfFile}`
+            `-a ${this.isGZ ? this.vcfFile : `${this.vcfFile}.gz`}`
         ]
 
         let zipFileCommand = 'ls'
@@ -97,9 +117,9 @@ export class VcfAnalyzerService {
         }
 
         let commands = [
-            `${INTERSECT_BED_CMD} ${options.join(' ')} | grep -v "0/0" > ${this.vcfFile}.body`,
-            `less ${this.vcfFile} | awk '{if (index($0, "#") == 1) print $0}' > ${this.vcfFile}.header`,
-            `cat ${this.vcfFile}.header ${this.vcfFile}.body > ${this.vcfBed}`,
+            `${INTERSECT_BED_CMD} ${options.join(' ')} | grep -v "0/0" > ${this.vcfOriginal}.body`,
+            `less ${this.vcfOriginal} | awk '{if (index($0, "#") == 1) print $0}' > ${this.vcfOriginal}.header`,
+            `cat ${this.vcfOriginal}.header ${this.vcfOriginal}.body > ${this.vcfBed}`,
             zipFileCommand
         ]
 
