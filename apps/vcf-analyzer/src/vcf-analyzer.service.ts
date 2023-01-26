@@ -117,9 +117,9 @@ export class VcfAnalyzerService {
         }
 
         let commands = [
-            `${INTERSECT_BED_CMD} ${options.join(' ')} | grep -v "0/0" > ${this.vcfOriginal}.body`,
-            `less ${this.vcfOriginal} | awk '{if (index($0, "#") == 1) print $0}' > ${this.vcfOriginal}.header`,
-            `cat ${this.vcfOriginal}.header ${this.vcfOriginal}.body > ${this.vcfBed}`,
+            `${INTERSECT_BED_CMD} ${options.join(' ')} | grep -v "0/0" > ${this.vcfFile}.body`,
+            `less ${this.vcfFile} | awk '{if (index($0, "#") == 1) print $0}' > ${this.vcfFile}.header`,
+            `cat ${this.vcfFile}.header ${this.vcfFile}.body > ${this.vcfBed}`,
             zipFileCommand
         ]
 
