@@ -69,7 +69,7 @@ export class VcfAnalyzerService {
         
         }
 
-        this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_FILE : VCF_ORIGINAL_COMPRESSED_FILE}`
+        this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_COMPRESSED_FILE : VCF_ORIGINAL_FILE}`
         
         let command = `cp ${uploadPath} ${this.vcfOriginal} && less ${this.vcfOriginal} > ${this.vcfFile}`
 
