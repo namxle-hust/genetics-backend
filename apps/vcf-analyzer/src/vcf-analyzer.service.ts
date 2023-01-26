@@ -69,6 +69,11 @@ export class VcfAnalyzerService {
         
         }
 
+        if (!fs.existsSync(uploadPath)) {
+            let error = this.commonService.customError('Synchronizing');
+            throw error;
+        }
+
         this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_COMPRESSED_FILE : VCF_ORIGINAL_FILE}`
         
         let command = `cp ${uploadPath} ${this.vcfOriginal} && less ${this.vcfOriginal} > ${this.vcfFile}`

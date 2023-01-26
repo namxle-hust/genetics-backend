@@ -30,9 +30,13 @@ export class VcfAnalyzerController {
             await this.communicationService.updateSampleStatusStatus(AnalysisStatus.IMPORT_QUEUING, data.id)
 
         } catch (error) {
-            this.logger.error(error)
-            await this.communicationService.updateSampleStatusStatus(AnalysisStatus.ERROR, data.id)
-            this.rmqService.ack(context)
+            if (error.stack != 'vcf') {
+                this.logger.error(error)
+                await this.communicationService.updateSampleStatusStatus(AnalysisStatus.ERROR, data.id)
+                this.rmqService.ack(context)
+            } else {
+                this.rmqService.nack(context)
+            }
         }
     }
 }

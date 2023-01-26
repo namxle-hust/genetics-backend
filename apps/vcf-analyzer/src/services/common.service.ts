@@ -30,6 +30,13 @@ export class CommonService {
         return `${s3Dir}/${analysesFolder}/${analysis.id}`
     }
 
+    customError(message: string): Error {
+        let error = new Error(message);
+        error.stack = 'vcf'
+
+        return error;
+    }
+
     escapeFileName(name) {
         let options = [
             [/"/g, '\\"'],
