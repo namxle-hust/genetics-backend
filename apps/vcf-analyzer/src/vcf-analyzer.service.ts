@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
 import { AnnovarService } from './services';
-import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_INPUT_NO_ZIP, VCF_INPUT_ZIP, VCF_MODIFIED_FILE, VCF_ORIGINAL_NO_ZIP_FILE, VCF_ORIGINAL_ZIP_FILE, VCF_SORT_CMD, VCF_TABIX_CMD } from '@app/common';
+import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD } from '@app/common';
 import { SampleType } from '@app/prisma';
 import * as fs from 'fs'
 
@@ -11,8 +11,6 @@ import * as fs from 'fs'
 export class VcfAnalyzerService {
 
     private defaultBedFile: string;
-
-    private inputVcf: string 
 
     private analysisFolder: string
 
@@ -39,13 +37,11 @@ export class VcfAnalyzerService {
 
     async analyze(analysis: AnalysisModel) {
         this.analysisFolder = this.commonService.getAnalysisFolder(analysis);
-
         this.analysis = analysis;
 
-        this.inputVcf = `${this.analysisFolder}/`
         this.vcfBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
-        this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
         this.vcfFile = `${this.analysisFolder}/${VCF_FILE}`
+        this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
 
         await this.preprocess();
 
@@ -58,56 +54,48 @@ export class VcfAnalyzerService {
     }
 
     async preprocess() {
-        let command = ''
+        let uploadPath;
+
         if (this.analysis.sample.type == SampleType.FASTQ) {
             this.isGZ = true;
-
-            this.vcfOriginal = `${this.analysisFolder}/${VCF_ORIGINAL_ZIP_FILE}`
-            this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_ZIP}`
-
-            command = `cp ${this.analysisFolder}/${FASTQ_OUTPUT_VCF} ${this.analysisFolder}/${VCF_INPUT_ZIP}`
+            uploadPath = `${this.analysisFolder}/${FASTQ_OUTPUT_VCF}`            
 
         } else {
             // Get only first element because vcf only allow upload 1 file
-            let uploadPath = `${this.uploadFolder}/${this.analysis.sample.files[0].uploadedName}`
-
+            uploadPath = `${this.uploadFolder}/${this.analysis.sample.files[0].uploadedName}`
+            
             // Check if it is vcf.gz file
-            if (uploadPath.indexOf('vcf.gz') != -1) {
-                this.isGZ = true;
-                this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_ZIP}`
-                this.vcfOriginal = `${this.analysisFolder}/${VCF_ORIGINAL_ZIP_FILE}`
-            } else {
-                this.isGZ = false;
-                this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_NO_ZIP}`
-                this.vcfOriginal = `${this.analysisFolder}/${VCF_ORIGINAL_NO_ZIP_FILE}`
-            }
-
-            command = `cp ${uploadPath} ${this.inputVcf}`  
+            this.isGZ = uploadPath.indexOf('vcf.gz') != -1 ? true : false
+        
         }
+
+        this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_FILE : VCF_ORIGINAL_COMPRESSED_FILE}`
+        
+        let command = `cp ${uploadPath} ${this.vcfOriginal} && less ${this.vcfOriginal} > ${this.vcfFile}`
 
         await this.commonService.runCommand(command);
     }
 
     async applyBedFile() {
         
-        let count = await this.annovarService.getRowCount(this.inputVcf);
+        let count = await this.annovarService.getRowCount(this.vcfFile);
 
         let options = [
             `-b ${this.defaultBedFile}`,
-            `-a ${this.inputVcf}`
+            `-a ${this.vcfFile}`
         ]
 
-        let zipFileCommand = ''
+        let zipFileCommand = 'ls'
 
         if (this.isGZ) {
-            zipFileCommand = `bgzip -f ${this.vcfFile}`
+            zipFileCommand = `bgzip -f -c ${this.vcfFile} > ${this.vcfBed}.gz`
         }
 
         let commands = [
             `${INTERSECT_BED_CMD} ${options.join(' ')}`,
-            `grep -v "0/0" > ${this.inputVcf}.body`,
-            `less ${this.inputVcf} | awk '{if (index($0, "#") == 1) print $0}' > ${this.inputVcf}.header`,
-            `cat ${this.inputVcf}.header ${this.inputVcf}.body > ${this.vcfFile}`,
+            `grep -v "0/0" > ${this.vcfFile}.body`,
+            `less ${this.vcfFile} | awk '{if (index($0, "#") == 1) print $0}' > ${this.vcfFile}.header`,
+            `cat ${this.vcfFile}.header ${this.vcfFile}.body > ${this.vcfBed}`,
             zipFileCommand
         ]
 
@@ -129,20 +117,11 @@ export class VcfAnalyzerService {
     }
 
     async prepareZipFile() {
-        let copyOriginalFileCmd = ''
-
-        if (fs.existsSync(this.vcfOriginal)) {
-            copyOriginalFileCmd = 'ls';
-        } else {
-            copyOriginalFileCmd = `cp ${this.inputVcf} ${this.vcfOriginal}`;
-        }
-
-        let sortCmd = `${VCF_SORT_CMD} -c ${this.vcfOriginal} > ${this.vcfFile}`
+        let sortCmd = `${VCF_SORT_CMD} -c ${this.vcfBed}.gz > ${this.vcfFile}`
         let bgzipCmd = `${VCF_BGZIP_CMD} -f ${this.vcfFile}`
         let tabixCmd = `${VCF_TABIX_CMD} -f ${this.vcfFile}.gz`
 
         let commands = [
-            copyOriginalFileCmd,
             sortCmd,
             bgzipCmd,
             tabixCmd
@@ -158,15 +137,7 @@ export class VcfAnalyzerService {
     }
 
     async prepareNormalFile() {
-        let copyOriginalFileCmd = ''
-
-        if (fs.existsSync(this.vcfOriginal)) {
-            copyOriginalFileCmd = 'ls';
-        } else {
-            copyOriginalFileCmd = `cp ${this.inputVcf} ${this.vcfOriginal}`;
-        }
-
-        let sortCmd = `${VCF_SORT_CMD} -c ${this.vcfOriginal} > ${this.vcfFile}`
+        let sortCmd = `${VCF_SORT_CMD} -c ${this.vcfBed} > ${this.vcfFile}`
 
         await this.commonService.runCommand(sortCmd);
 
