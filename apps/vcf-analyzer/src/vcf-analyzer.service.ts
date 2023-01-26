@@ -61,11 +61,11 @@ export class VcfAnalyzerService {
         let command = ''
         if (this.analysis.sample.type == SampleType.FASTQ) {
             this.isGZ = true;
-            
+
             this.vcfOriginal = `${this.analysisFolder}/${VCF_ORIGINAL_ZIP_FILE}`
             this.inputVcf = `${this.analysisFolder}/${VCF_INPUT_ZIP}`
 
-            command = `mv ${this.analysisFolder}/${FASTQ_OUTPUT_VCF} ${this.analysisFolder}/${VCF_INPUT_ZIP}`
+            command = `cp ${this.analysisFolder}/${FASTQ_OUTPUT_VCF} ${this.analysisFolder}/${VCF_INPUT_ZIP}`
 
         } else {
             // Get only first element because vcf only allow upload 1 file
