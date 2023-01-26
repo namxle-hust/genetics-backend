@@ -105,7 +105,7 @@ export class VcfAnalyzerService {
 
         let command = commands.join(' && ');
 
-        this.commonService.runCommand(command);
+        await this.commonService.runCommand(command);
 
     }
 
