@@ -32,7 +32,7 @@ export class VcfAnalyzerService {
     ) {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
         this.uploadFolder = this.configService.get<string>('')
-       
+
     }
 
     async analyze(analysis: AnalysisModel) {
@@ -52,7 +52,7 @@ export class VcfAnalyzerService {
         await this.prepareFile();
 
 
-        
+
     }
 
     async preprocess() {
@@ -60,15 +60,15 @@ export class VcfAnalyzerService {
 
         if (this.analysis.sample.type == SampleType.FASTQ) {
             this.isGZ = true;
-            uploadPath = `${this.analysisFolder}/${FASTQ_OUTPUT_VCF}`            
+            uploadPath = `${this.analysisFolder}/${FASTQ_OUTPUT_VCF}`
 
         } else {
             // Get only first element because vcf only allow upload 1 file
             uploadPath = `${this.uploadFolder}/${this.analysis.sample.files[0].uploadedName}`
-            
+
             // Check if it is vcf.gz file
             this.isGZ = uploadPath.indexOf('vcf.gz') != -1 ? true : false
-        
+
         }
 
         if (!fs.existsSync(uploadPath)) {
@@ -77,7 +77,7 @@ export class VcfAnalyzerService {
         }
 
         this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_COMPRESSED_FILE : VCF_ORIGINAL_FILE}`
-        
+
         let command = `cp ${uploadPath} ${this.vcfOriginal}`
 
         await this.commonService.runCommand(command);
@@ -102,12 +102,12 @@ export class VcfAnalyzerService {
     }
 
     async applyBedFile() {
-        
+
         let count = await this.annovarService.getRowCount(this.vcfOriginal);
 
         let options = [
             `-b ${this.defaultBedFile}`,
-            `-a ${this.isGZ ? this.vcfFile : `${this.vcfFile}.gz`}`
+            `-a ${this.isGZ ? `${this.vcfFile}.gz` : this.vcfFile}`
         ]
 
         let zipFileCommand = 'ls'
