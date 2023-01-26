@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
-import { AnnovarService } from './services';
+import { AnnovarService, VcfService } from './services';
 import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD } from '@app/common';
 import { SampleType } from '@app/prisma';
 import * as fs from 'fs'
@@ -16,10 +16,12 @@ export class VcfAnalyzerService {
 
     private uploadFolder: string
 
+
     private vcfModified: string
-    private vcfBed: string;
     private vcfOriginal: string
+    private vcfBed: string
     private vcfFile: string
+    private vepOutput: string
 
     private analysis: AnalysisModel
 
@@ -28,7 +30,8 @@ export class VcfAnalyzerService {
     constructor(
         private readonly annovarService: AnnovarService,
         private readonly commonService: CommonService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly vcfService: VcfService
     ) {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
         this.uploadFolder = this.configService.get<string>('')
@@ -42,6 +45,8 @@ export class VcfAnalyzerService {
         this.vcfBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
         this.vcfFile = `${this.analysisFolder}/${VCF_FILE}`
         this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
+        this.vepOutput = this.annovarService.getVepOutput(analysis)
+       
 
         await this.preprocess();
 
@@ -51,8 +56,8 @@ export class VcfAnalyzerService {
 
         await this.prepareFile();
 
-
-
+        await this.annovarService.runVEP(this.vcfFile ,this.vepOutput)
+        
     }
 
     async preprocess() {
@@ -123,7 +128,7 @@ export class VcfAnalyzerService {
             zipFileCommand
         ]
 
-        let command = commands.join(' && ');
+        let command = commands.filter(cmd => cmd).join(' && ');
 
         await this.commonService.runCommand(command);
 
