@@ -93,12 +93,11 @@ export class VcfAnalyzerService {
         let zipFileCommand = 'ls'
 
         if (this.isGZ) {
-            zipFileCommand = `bgzip -f -c ${this.vcfFile} > ${this.vcfBed}.gz`
+            zipFileCommand = `${VCF_BGZIP_CMD} -f ${this.vcfBed}`
         }
 
         let commands = [
-            `${INTERSECT_BED_CMD} ${options.join(' ')}`,
-            `grep -v "0/0" > ${this.vcfFile}.body`,
+            `${INTERSECT_BED_CMD} ${options.join(' ')} | grep -v "0/0" > ${this.vcfFile}.body`,
             `less ${this.vcfFile} | awk '{if (index($0, "#") == 1) print $0}' > ${this.vcfFile}.header`,
             `cat ${this.vcfFile}.header ${this.vcfFile}.body > ${this.vcfBed}`,
             zipFileCommand

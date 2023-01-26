@@ -35,6 +35,7 @@ export class VcfAnalyzerController {
                 await this.communicationService.updateSampleStatusStatus(AnalysisStatus.ERROR, data.id)
                 this.rmqService.ack(context)
             } else {
+                console.log('Requeue')
                 this.rmqService.nack(context)
             }
         }
