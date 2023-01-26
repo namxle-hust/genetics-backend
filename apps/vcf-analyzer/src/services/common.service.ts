@@ -13,12 +13,14 @@ export class CommonService {
 
     async runCommand(command: string): Promise<any> {
         this.logger.log(command)
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             child.exec(command, (error, stdout, stderr) => {
                 if (error) {
+                    this.logger.log(stderr);
                     return reject(error)
+                } else {
+                    return resolve(stdout);
                 }
-                return resolve(stdout);
             });
         })
     }
