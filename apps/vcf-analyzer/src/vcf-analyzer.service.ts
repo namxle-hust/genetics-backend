@@ -22,6 +22,7 @@ export class VcfAnalyzerService {
     private vcfBed: string
     private vcfFile: string
     private vepOutput: string
+    private vepInput: string
 
     private analysis: AnalysisModel
 
@@ -150,6 +151,8 @@ export class VcfAnalyzerService {
         let bgzipCmd = `${VCF_BGZIP_CMD} -f ${this.vcfFile}`
         let tabixCmd = `${VCF_TABIX_CMD} -f ${this.vcfFile}.gz`
 
+        this.vepInput = `${this.vcfFile}.gz`
+
         let commands = [
             sortCmd,
             bgzipCmd,
@@ -167,6 +170,8 @@ export class VcfAnalyzerService {
 
     async prepareNormalFile() {
         let sortCmd = `${VCF_SORT_CMD} -c ${this.vcfBed} > ${this.vcfFile}`
+
+        this.vepInput = this.vcfFile
 
         await this.commonService.runCommand(sortCmd);
 
