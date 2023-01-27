@@ -170,6 +170,8 @@ export class AnnovarService {
             '-custom', `${this.vepDir}/Plugins/gnomAD/gnomad.genomes.v3.1.sites.chrM.vcf.gz,gnomMT,vcf,exact,0,AC,AF_hom,AF_het,AN,pop_AF_hom,pop_AF_het`
         ]
 
+        this.logger.log(args);
+
         return new Promise((resolve, reject) => {
             let worker = child.spawn(command, args)
 
