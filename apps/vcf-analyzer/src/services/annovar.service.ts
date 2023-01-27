@@ -176,11 +176,11 @@ export class AnnovarService {
             let worker = child.spawn(command, args)
 
             worker.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`)
+                this.logger.log(`stdout: ${data}`)
             })
 
             worker.stderr.on('data', (data) => {
-                console.log(`stderr: ${data}`)
+                this.logger.log(`data: ${data}`)
 
                 if (data.includes('EXCEPTION') || data.includes('ERROR')) {
                     workerStatus = 'error'
@@ -188,14 +188,14 @@ export class AnnovarService {
             });
 
             worker.on('error', (data) => {
-                console.log(`worker error: ${data}`)
+                this.logger.error(`worker error: ${data}`)
                 workerStatus = 'error'
                 return reject();
             })
 
             worker.on('close', (code) => {
                 if (workerStatus == 'success') {
-                    console.log(`Vep completed. Duration: ${(Date.now() - start) / 1000} seconds.`)
+                    this.logger.log(`Vep completed. Duration: ${(Date.now() - start) / 1000} seconds.`)
                     if (fs.existsSync(output)) {
                         return resolve(output);
                     } else {
