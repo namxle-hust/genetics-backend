@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
 import { AnnovarService, VcfService } from './services';
-import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD } from '@app/common';
-import { SampleType } from '@app/prisma';
+import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED } from '@app/common';
+import { SampleType, VcfType } from '@app/prisma';
 import * as fs from 'fs'
 
 @Injectable()
@@ -65,8 +65,14 @@ export class VcfAnalyzerService {
         let uploadPath;
 
         if (this.analysis.sample.type == SampleType.FASTQ) {
-            this.isGZ = true;
-            uploadPath = `${this.analysisFolder}/${FASTQ_OUTPUT_VCF}`
+            if (this.analysis.vcfType == VcfType.WES) {
+                this.isGZ = false
+                uploadPath = `${this.analysisFolder}/${FASTQ_OUTPUT_VCF}`
+            } else {
+                this.isGZ = true
+                uploadPath = `${this.analysisFolder}/${FASTQ_OUTPUT_VCF_COMPRESSED}`
+            }
+
 
         } else {
             // Get only first element because vcf only allow upload 1 file

@@ -34,7 +34,7 @@ export class AnalyzeService {
 
         await this.vcfService.removeLowQuality(tmpOutput, filterOutput)
 
-        await this.vcfService.archiveOutput(filterOutput, analysis)
+        await this.vcfService.renameOutputWES(filterOutput, analysis)
 
         return true;
 

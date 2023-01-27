@@ -4,7 +4,8 @@ import * as es from 'event-stream'
 import { CommonService } from "./common.service";
 import { AnalysisModel } from "../models";
 import { ConfigService } from "@nestjs/config";
-import { FASTQ_OUTPUT_VCF } from "@app/common";
+import { FASTQ_OUTPUT_VCF, FASTQ_OUTPUT_VCF_COMPRESSED } from "@app/common";
+import { VcfType } from "@app/prisma";
 
 @Injectable()
 export class VcfService {
@@ -14,6 +15,7 @@ export class VcfService {
     private s3Bucket: string
     private s3AnalysesFolder: string
     private vcfOutput = FASTQ_OUTPUT_VCF
+    private vcfOutputCompressed = FASTQ_OUTPUT_VCF_COMPRESSED
 
 
     constructor(private commonService: CommonService, private configService: ConfigService) {
@@ -24,47 +26,35 @@ export class VcfService {
     async uploadVcfFiles(analysis: AnalysisModel) {
         let analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis);
         
-        let tbiFile = `${this.commonService.getTbiFile(`${this.vcfOutput}`)}`
+        let output = analysis.vcfType == VcfType.WES ? this.vcfOutput : this.vcfOutputCompressed
 
-        let vcfFilePath = `${analysisFolder}/${this.vcfOutput}`
-        let tbiFilePath = `${this.commonService.getTbiFile(`${analysisFolder}/${this.vcfOutput}`)}`
+        let vcfFilePath = `${analysisFolder}/${output}`
 
-        let uploadVcfCmd = this.commonService.getUploadCmd(vcfFilePath, `${this.s3AnalysesFolder}/${analysis.id}/${this.vcfOutput}`)
-        let uploadTbiCmd = this.commonService.getUploadCmd(tbiFilePath, `${this.s3AnalysesFolder}/${analysis.id}/${tbiFile}`)
-
+        let uploadVcfCmd = this.commonService.getUploadCmd(vcfFilePath, `${this.s3AnalysesFolder}/${analysis.id}/${output}`)
+        
         let commands = [
-            uploadVcfCmd,
-            uploadTbiCmd
+            uploadVcfCmd
         ]
 
         let command = commands.join(' && ')
 
-        this.commonService.runCommand(command);
+        await this.commonService.runCommand(command);
     }
 
-    async archiveOutput(source: string, analysis: AnalysisModel) {
+    async renameOutputWES(source: string, analysis: AnalysisModel) {
         let analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis);
         let destination = `${analysisFolder}/${this.vcfOutput}`
 
-        // Sort vcf
-        let bgzipCommand = `vcf-sort ${source} | bgzip -c > ${destination}`
-        let tabixCommand = `tabix -f ${destination}`
+        let renameCommand = `cp ${source} ${destination}`;
 
-        let commands = [
-            bgzipCommand,
-            tabixCommand
-        ]
-
-        let command = commands.join(" && ");
-
-        await this.commonService.runCommand(command);
+        await this.commonService.runCommand(renameCommand);
     }
 
     async renameOutput(source: string, analysis: AnalysisModel) {
         let analysisFolder = this.commonService.getAnalysisDestinationFolder(analysis);
-        let destination = `${analysisFolder}/${this.vcfOutput}`
+        let destination = `${analysisFolder}/${this.vcfOutputCompressed}`
 
-        let renameCommand = `mv ${source} ${destination}`;
+        let renameCommand = `cp ${source} ${destination}`;
         let tabixCommand = `tabix -f ${destination}`;
 
         let commands = [
