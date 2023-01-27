@@ -142,6 +142,8 @@ export class AnnovarService {
     async runVEP(input: string, output: string) {
         let workerStatus = 'success';
 
+        this.logger.log('Run VEP')
+
         let start = Date.now();
 
         let command = this.vepCommand
