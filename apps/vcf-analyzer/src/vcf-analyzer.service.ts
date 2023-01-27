@@ -57,7 +57,7 @@ export class VcfAnalyzerService {
 
         await this.prepareFile();
 
-        await this.annovarService.runVEP(this.vcfFile ,this.vepOutput)
+        await this.annovarService.runVEP(this.vepInput ,this.vepOutput)
         
     }
 
