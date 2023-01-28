@@ -210,9 +210,4 @@ export class AnnovarService {
             });
         })
     }
-
-
-    async runAnnotation() {
-
-    }
 }

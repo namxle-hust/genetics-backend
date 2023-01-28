@@ -31,4 +31,4 @@ import { CommonService } from './services/common.service';
         CommonService
     ],
 })
-export class FastqAnalyzingModule { }
+export class FastqAnalyzingModule {}
