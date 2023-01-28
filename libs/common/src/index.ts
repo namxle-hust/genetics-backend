@@ -5,4 +5,6 @@ export * from './constants/service'
 export * from './constants/event'
 export * from './constants/common.constant'
 
+export * from './constants/vcf.constant'
+
 export * from './shared/type'

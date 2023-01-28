@@ -14,7 +14,8 @@ import { SamplesHandlerService } from './samples-handler.service';
             isGlobal: true,
             validationSchema: Joi.object({
                 RABBIT_MQ_URI: Joi.string().required(),
-                RABBIT_MQ_FASTQ_ANALYZING_QUEUE: Joi.string().required()
+                RABBIT_MQ_FASTQ_ANALYZING_QUEUE: Joi.string().required(),
+                RABBIT_MQ_VCF_ANALYZING_QUEUE: Joi.string().required()
             })
         }),
         RmqModule.register({

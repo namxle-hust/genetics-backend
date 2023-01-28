@@ -2,6 +2,8 @@ import { RmqModule, SAMPLE_STATUS_PROCESSOR } from '@app/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi'
+import { AnnovarService, CommunicationService, VcfService } from './services';
+import { CommonService } from './services/common.service';
 import { VcfAnalyzerController } from './vcf-analyzer.controller';
 import { VcfAnalyzerService } from './vcf-analyzer.service';
 
@@ -21,6 +23,12 @@ import { VcfAnalyzerService } from './vcf-analyzer.service';
         })
     ],
     controllers: [VcfAnalyzerController],
-    providers: [VcfAnalyzerService],
+    providers: [
+        VcfAnalyzerService,
+        CommunicationService,
+        CommonService,
+        AnnovarService,
+        VcfService
+    ],
 })
 export class VcfAnalyzerModule { }

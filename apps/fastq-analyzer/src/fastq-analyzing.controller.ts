@@ -3,7 +3,8 @@ import { Analysis, AnalysisStatus } from '@app/prisma';
 import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { AnalysisModel } from './models';
-import { CommunicationService, FastqAnalyzingService } from './services';
+import { AnalyzeService, CommunicationService, FastqAnalyzingService } from './services';
+import { VcfService } from './services/vcf.service';
 
 @Controller('fastq')
 export class FastqAnalyzingController {
@@ -12,7 +13,8 @@ export class FastqAnalyzingController {
     constructor(
         private readonly fastqAnalyzingService: FastqAnalyzingService,
         private readonly rmqService: RmqService,
-        private communicationService: CommunicationService
+        private communicationService: CommunicationService,
+        private vcfService: VcfService
     ) { }
 
     @EventPattern(FASTQ_ANALYZE_EVENT)
@@ -28,8 +30,10 @@ export class FastqAnalyzingController {
     }
 
     @Post('test')
-    async test(@Body() data: AnalysisModel) {
-        await this.fastqAnalyzingService.analyzeFastq(data);
+    async test(@Body() data: any) {
+        let vcfFile = data.vcfFile;
+        let output = data.output;
+        await this.vcfService.removeLowQuality(vcfFile, output);
         return true
     }
 }

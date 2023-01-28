@@ -1,4 +1,4 @@
-FROM node:16.17.1-alpine As development
+FROM node:16.17.1-alpine as development
 
 WORKDIR /usr/src/app
 
@@ -8,21 +8,27 @@ RUN yarn install --production=false
 
 COPY . .
 
-RUN yarn build
+RUN yarn build:vcf
 
-FROM node:16.17.1-alpine as production
+FROM namxle/vep:latest as production
+
+USER ubuntu
+
+WORKDIR /home/ubuntu/genetics
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
-WORKDIR /usr/src/app
-
 COPY package.json yarn.lock ./
 
-RUN yarn install --prod
+RUN source $NVM_DIR/nvm.sh && \
+    nvm use default && \
+    yarn install --production=false
 
-COPY . .
+COPY --chown=ubuntu:ubuntu  . .
 
-COPY --from=development /usr/src/app/dist ./dist
+RUN source $NVM_DIR/nvm.sh && \
+    nvm use default && \
+    yarn build:vcf
 
-CMD ["node", "dist/apps/vcf-analyzer/main"]
+# CMD ["node", "/home/ubuntu/genetics/dist/apps/vcf-analyzer/main"]
