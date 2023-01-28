@@ -87,7 +87,6 @@ export class VcfService {
                         VcfStream.resume()
                     } else {
                         if (line) {
-                            this.logger.debug(line);
                             fs.appendFileSync(output, line + '\n')
                             VcfStream.resume()
                         } else {
