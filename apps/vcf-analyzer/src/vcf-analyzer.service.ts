@@ -51,19 +51,19 @@ export class VcfAnalyzerService {
         return false;
     }
 
-    async checkAnalysisStatus(analysis: AnalysisModel): Promise<boolean> {
-        let analysisFolder = this.commonService.getAnalysisFolder(analysis);
+    // async checkAnalysisStatus(analysis: AnalysisModel): Promise<boolean> {
+    //     let analysisFolder = this.commonService.getAnalysisFolder(analysis);
 
-        let path = `${analysisFolder}/${ANALYZING_FILE}`
+    //     let path = `${analysisFolder}/${ANALYZING_FILE}`
 
-        if (fs.existsSync(path)) {
-            return true;
-        }
+    //     if (fs.existsSync(path)) {
+    //         return true;
+    //     }
 
-        await this.commonService.runCommand(`touch ${path}`);
+    //     await this.commonService.runCommand(`touch ${path}`);
 
-        return false;
-    }
+    //     return false;
+    // }
 
     async updateInstanceStatus() {
         let instanceStatusFile = this.configService.get<string>('INSTANCE_STATUS_FILE');
@@ -74,15 +74,15 @@ export class VcfAnalyzerService {
 
     }
 
-    async updateAnalysisStatus(analysis: AnalysisModel) {
-        let analysisFolder = this.commonService.getAnalysisFolder(analysis);
+    // async updateAnalysisStatus(analysis: AnalysisModel) {
+    //     let analysisFolder = this.commonService.getAnalysisFolder(analysis);
 
-        let path = `${analysisFolder}/${ANALYZING_FILE}`
+    //     let path = `${analysisFolder}/${ANALYZING_FILE}`
 
-        if (fs.existsSync(path)) {
-            await this.commonService.runCommand(`rm ${path}`);
-        }
-    }
+    //     if (fs.existsSync(path)) {
+    //         await this.commonService.runCommand(`rm ${path}`);
+    //     }
+    // }
 
     async analyze(analysis: AnalysisModel) {
         this.analysisFolder = this.commonService.getAnalysisFolder(analysis);

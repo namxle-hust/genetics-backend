@@ -44,26 +44,17 @@ export class VcfAnalyzerController {
                 process.exit(1);
             }
 
-            let isAnalysisRunning = await this.vcfAnalyzerService.checkAnalysisStatus(data);
-            
-            if (isAnalysisRunning) {
-                this.logger.log('Analysis is analyzing!')
-                return this.rmqService.ack(context)
-            }
-
             await this.communicationService.updateSampleStatusStatus(AnalysisStatus.VCF_ANALYZING ,data.id)
 
             await this.vcfAnalyzerService.analyze(data)
 
             this.rmqService.ack(context)
 
-            await this.vcfAnalyzerService.updateAnalysisStatus(data);
             await this.communicationService.updateSampleStatusStatus(AnalysisStatus.IMPORT_QUEUING, data.id)
 
             await this.vcfAnalyzerService.updateInstanceStatus()
 
         } catch (error) {
-            await this.vcfAnalyzerService.updateAnalysisStatus(data);
             
             if (!error.stack || error.stack != 'vcf') {
                 this.logger.error(error)
