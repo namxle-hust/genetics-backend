@@ -1,12 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { RmqContext, RmqOptions, Transport } from "@nestjs/microservices";
 
 @Injectable({})
-export class RmqService {
+export class RmqService implements OnApplicationBootstrap {
+
+    private readonly logger = new Logger(RmqService.name)
 
     constructor(private readonly configService: ConfigService) {
 
+    }
+
+    onApplicationBootstrap() {
+        this.logger.debug('Bootstraping')
     }
 
     getOptions(queue: string, noAck = false): RmqOptions {
