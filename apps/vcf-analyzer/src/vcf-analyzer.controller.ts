@@ -41,7 +41,7 @@ export class VcfAnalyzerController {
 
             if (isInstanceRunning) {
                 this.logger.log('Instance is running!')
-                return this.rmqService.nack(context);
+                process.exit(1);
             }
 
             let isAnalysisRunning = await this.vcfAnalyzerService.checkAnalysisStatus(data);
