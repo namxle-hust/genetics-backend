@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import * as fs from 'fs';
 import * as es from 'event-stream'
 import { CommonService } from "./common.service";
@@ -9,6 +9,8 @@ import { VcfType } from "@app/prisma";
 
 @Injectable()
 export class VcfService {
+
+    private readonly logger = new Logger(VcfService.name)
 
     private s3Bucket: string
     private s3AnalysesFolder: string
@@ -85,6 +87,7 @@ export class VcfService {
                         VcfStream.resume()
                     } else {
                         if (line) {
+                            this.logger.debug(line);
                             fs.appendFileSync(output, line + '\n')
                             VcfStream.resume()
                         } else {
@@ -93,11 +96,11 @@ export class VcfService {
                     }
                 }))
                 .on('error', (error) => {
-                    console.log('Error Filter vcf', error)
+                    this.logger.error('Error Filter vcf', error)
                     return resolve(false);
                 })
                 .on('end', () => {
-                    console.log('End Filter vcf')
+                    this.logger.log('End Filter vcf')
                     return resolve(true);
                 })
         })
