@@ -41,6 +41,7 @@ export class VcfAnalyzerController {
 
             if (isInstanceRunning) {
                 this.logger.log('Instance is running!')
+                this.vcfAnalyzerService.updateInstanceStatus()
                 process.exit(1);
             }
 
