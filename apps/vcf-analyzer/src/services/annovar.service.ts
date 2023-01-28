@@ -34,6 +34,8 @@ export class AnnovarService {
         return `${this.tmpFolder}/analysis_${analysis.id}_${VEP_OUTPUT}`
     }
 
+    
+
     async getRowCount(vcfFilePath: string) {
         let command = `less ${vcfFilePath} | awk -F"\t" '{ if (index($0, "#") != 1) { split($5,a,","); col8 = $8; for (i in a){ $5=a[i]; $8=col8";VARINDEX="i; print }  }}' | wc -l`
 
@@ -43,6 +45,7 @@ export class AnnovarService {
     }
 
     async validateVcf(vcfPath: string) {
+        this.logger.log('Validate :', vcfPath)
         let vcf = {
             stream: null,
             lineIndex: null,
@@ -208,4 +211,8 @@ export class AnnovarService {
         })
     }
 
+
+    async runAnnotation() {
+
+    }
 }
