@@ -8,6 +8,7 @@ export const VCF_ORIGINAL_COMPRESSED_FILE = 'analysis.original.vcf.gz'
 
 export const VCF_FILE = 'analysis.vcf'
 
+export const ANALYZING_FILE = 'analysis.analyzing'
 
 // VEP files
 export const VEP_OUTPUT = 'vep.canonical'

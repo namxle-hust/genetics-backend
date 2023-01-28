@@ -1,4 +1,4 @@
-import { AF_VCF_FILE, ANNO_CLINVAR_FILE, ANNO_FILE, ANNO_VEP_FILE, ORIGIN_VEP_FILE, VARIANT_ONTOLOGY, VCF_HGMD, VCF_HGMD_CLINVAR, VCF_TRANSCRIPT_FILE } from "@app/common";
+import { AF_VCF_FILE, ANALYZING_FILE, ANNO_CLINVAR_FILE, ANNO_FILE, ANNO_VEP_FILE, ORIGIN_VEP_FILE, VARIANT_ONTOLOGY, VCF_HGMD, VCF_HGMD_CLINVAR, VCF_TRANSCRIPT_FILE } from "@app/common";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as fs from 'fs'
@@ -69,6 +69,8 @@ export class VcfService {
         this._hgmdPath = this.configService.get<string>('HGMD_PATH')
 
     }
+
+  
 
     async run(vcfFile: string, analysis: AnalysisModel, vepOutput: string) {
         this.analysisId = analysis.id;

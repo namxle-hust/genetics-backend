@@ -36,15 +36,34 @@ export class VcfAnalyzerController {
     @EventPattern(VCF_ANALYZE_EVENT)
     async getVcfAnalysis(@Payload() data: AnalysisModel, @Ctx() context: RmqContext) {
         try {
+
+            let isInstanceRunning = await this.vcfAnalyzerService.checkInstanceStatus();
+
+            if (isInstanceRunning) {
+                return this.rmqService.nack(context);
+            }
+
+            let isAnalysisRunning = await this.vcfAnalyzerService.checkAnalysisStatus(data);
+            
+            if (isAnalysisRunning) {
+                this.logger.log('Analysis is analyzing!')
+                return this.rmqService.ack(context)
+            }
+
             await this.communicationService.updateSampleStatusStatus(AnalysisStatus.VCF_ANALYZING ,data.id)
 
             await this.vcfAnalyzerService.analyze(data)
 
             this.rmqService.ack(context)
 
+            await this.vcfAnalyzerService.updateAnalysisStatus(data);
             await this.communicationService.updateSampleStatusStatus(AnalysisStatus.IMPORT_QUEUING, data.id)
 
+            await this.vcfAnalyzerService.updateInstanceStatus()
+
         } catch (error) {
+            await this.vcfAnalyzerService.updateAnalysisStatus(data);
+            
             if (!error.stack || error.stack != 'vcf') {
                 this.logger.error(error)
                 await this.communicationService.updateSampleStatusStatus(AnalysisStatus.ERROR, data.id)
@@ -53,6 +72,8 @@ export class VcfAnalyzerController {
                 console.log('Requeue')
                 this.rmqService.nack(context)
             }
+           
+            await this.vcfAnalyzerService.updateInstanceStatus()
         }
     }
 }

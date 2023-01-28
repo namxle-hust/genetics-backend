@@ -3,16 +3,12 @@ import { ConfigService } from "@nestjs/config";
 import { RmqContext, RmqOptions, Transport } from "@nestjs/microservices";
 
 @Injectable({})
-export class RmqService implements OnApplicationBootstrap {
+export class RmqService {
 
     private readonly logger = new Logger(RmqService.name)
 
     constructor(private readonly configService: ConfigService) {
 
-    }
-
-    onApplicationBootstrap() {
-        this.logger.debug('Bootstraping')
     }
 
     getOptions(queue: string, noAck = false): RmqOptions {

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
 import { AnnovarService, VcfService } from './services';
-import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED } from '@app/common';
+import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED, ANALYZING_FILE } from '@app/common';
 import { SampleType, VcfType } from '@app/prisma';
 import * as fs from 'fs'
 
@@ -37,6 +37,51 @@ export class VcfAnalyzerService {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
         this.uploadFolder = this.configService.get<string>('')
 
+    }
+
+    async checkInstanceStatus() {
+        let instanceStatusFile = this.configService.get<string>('INSTANCE_STATUS_FILE');
+
+        if (fs.existsSync(instanceStatusFile)) {
+            return true
+        }
+
+        await this.commonService.runCommand(`touch ${instanceStatusFile}`);
+
+        return false;
+    }
+
+    async checkAnalysisStatus(analysis: AnalysisModel): Promise<boolean> {
+        let analysisFolder = this.commonService.getAnalysisFolder(analysis);
+
+        let path = `${analysisFolder}/${ANALYZING_FILE}`
+
+        if (fs.existsSync(path)) {
+            return true;
+        }
+
+        await this.commonService.runCommand(`touch ${path}`);
+
+        return false;
+    }
+
+    async updateInstanceStatus() {
+        let instanceStatusFile = this.configService.get<string>('INSTANCE_STATUS_FILE');
+
+        if (fs.existsSync(instanceStatusFile)) {
+            await this.commonService.runCommand(`rm ${instanceStatusFile}`);
+        }
+
+    }
+
+    async updateAnalysisStatus(analysis: AnalysisModel) {
+        let analysisFolder = this.commonService.getAnalysisFolder(analysis);
+
+        let path = `${analysisFolder}/${ANALYZING_FILE}`
+
+        if (fs.existsSync(path)) {
+            await this.commonService.runCommand(`rm ${path}`);
+        }
     }
 
     async analyze(analysis: AnalysisModel) {
