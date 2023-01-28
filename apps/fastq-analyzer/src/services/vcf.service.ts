@@ -10,8 +10,6 @@ import { VcfType } from "@app/prisma";
 @Injectable()
 export class VcfService {
 
-    VcfStream: any;
-
     private s3Bucket: string
     private s3AnalysesFolder: string
     private vcfOutput = FASTQ_OUTPUT_VCF
@@ -68,28 +66,29 @@ export class VcfService {
     }
 
     async removeLowQuality(vcfFile: string, output: string): Promise<boolean> {
+        let VcfStream;
         return new Promise((resolve, reject) => {
-            this.VcfStream = fs.createReadStream(vcfFile)
+            VcfStream = fs.createReadStream(vcfFile)
                 .pipe(es.split())
                 .pipe(es.mapSync((line) => {
-                    this.VcfStream.pause()
+                    VcfStream.pause()
 
-                    if (!this.VcfStream.passedHeading) {
+                    if (!VcfStream.passedHeading) {
 
                         if (line.search('#CHROM') == 0) {
-                            this.VcfStream.passedHeading = true
-                            this.VcfStream.headings = line.split('\t')
+                            VcfStream.passedHeading = true
+                            VcfStream.headings = line.split('\t')
                         }
 
                         fs.appendFileSync(output, line + '\n')
 
-                        this.VcfStream.resume()
+                        VcfStream.resume()
                     } else {
                         if (line) {
                             fs.appendFileSync(output, line + '\n')
-                            this.VcfStream.resume()
+                            VcfStream.resume()
                         } else {
-                            return this.VcfStream.resume()
+                            return VcfStream.resume()
                         }
                     }
                 }))
