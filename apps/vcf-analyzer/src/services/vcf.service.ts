@@ -1,4 +1,4 @@
-import { AF_VCF_FILE, ANALYZING_FILE, ANNO_CLINVAR_FILE, ANNO_FILE, ANNO_VEP_FILE, CANONICAL_FILE, ORIGIN_VEP_FILE, VARIANT_ONTOLOGY, VCF_HGMD, VCF_HGMD_CLINVAR, VCF_TRANSCRIPT_FILE } from "@app/common";
+import { AF_VCF_FILE, ANALYZING_FILE, ANNO_CLINVAR_FILE, ANNO_FILE, RESULT_ANNO_FILE, ANNO_VEP_FILE, RESULT_CANONICAL_FILE, ORIGIN_VEP_FILE, VARIANT_ONTOLOGY, VCF_HGMD, VCF_HGMD_CLINVAR, VCF_TRANSCRIPT_FILE } from "@app/common";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as fs from 'fs'
@@ -130,8 +130,8 @@ export class VcfService {
 
     async uploadFiles() {
         let commands = [
-            `cp ${this.annoVepFile} ${this.analysisFolder}/${ANNO_FILE}`,
-            `cp ${this.canonicalFile} ${this.analysisFolder}/${CANONICAL_FILE}`
+            `cp ${this.annoVepFile} ${this.analysisFolder}/${RESULT_ANNO_FILE}`,
+            `cp ${this.canonicalFile} ${this.analysisFolder}/${RESULT_CANONICAL_FILE}`
         ]
 
         await this.commonService.runCommand(commands.join(' && '));
