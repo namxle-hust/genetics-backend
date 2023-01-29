@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
@@ -9,6 +9,9 @@ import * as fs from 'fs'
 
 @Injectable()
 export class VcfAnalyzerService {
+
+    private readonly logger = new Logger(VcfAnalyzerService.name)
+
 
     private defaultBedFile: string;
 
@@ -103,7 +106,12 @@ export class VcfAnalyzerService {
         await this.prepareFile();
 
         await this.annovarService.runVEP(this.vepInput ,this.vepOutput)
-        
+
+        // Run Vcf Analyze
+        await this.vcfService.run(this.vcfFile, analysis, this.vepOutput)
+
+        this.logger.log('Done Analysis')
+
     }
 
     async preprocess() {

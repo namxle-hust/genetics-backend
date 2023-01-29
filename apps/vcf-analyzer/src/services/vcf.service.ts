@@ -73,6 +73,12 @@ export class VcfService {
 
     }
 
+    async removeFiles() {
+        let command = `rm ${this.tmpFolderFormat}/*`
+
+        await this.commonService.runCommand(command);
+    }
+
   
 
     async run(vcfFile: string, analysis: AnalysisModel, vepOutput: string) {
@@ -113,8 +119,19 @@ export class VcfService {
         await this.readVcf()
 
         await this.classifyVariant()
+
+        // Upload files to s3
+        await this.uploadFiles();
+
+        await this.removeFiles()
         
         return true;
+    }
+
+    async uploadFiles() {
+        let command = `cp ${this.annoVepFile} ${this.analysisFolder} && cp ${this.canonicalFile} ${this.analysisFolder}`
+
+        await this.commonService.runCommand(command);
     }
 
 
