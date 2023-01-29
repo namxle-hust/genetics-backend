@@ -1,5 +1,5 @@
 import { AF_VCF_FILE, ANALYZING_FILE, ANNO_CLINVAR_FILE, ANNO_FILE, ANNO_VEP_FILE, ORIGIN_VEP_FILE, VARIANT_ONTOLOGY, VCF_HGMD, VCF_HGMD_CLINVAR, VCF_TRANSCRIPT_FILE } from "@app/common";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as fs from 'fs'
 import * as child from 'child_process'
@@ -11,6 +11,9 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class VcfService {
+
+    private readonly logger = new Logger(VcfService.name)
+
     private analysisId;
     private analysis: AnalysisModel;
     private analysisFolder: string;
@@ -161,19 +164,19 @@ export class VcfService {
                     }
                 }))
                 .on('error', (error) => {
-                    console.log('Add transcript error: ', error)
+                    this.logger.error('Add transcript error: ', error)
                     vepStream.hasError = true
                     vepStream.destroy()
                     return reject(false);
                 })
                 .on('end', () => {
-                    console.log('Add transcript done')
+                    this.logger.log('Add transcript done')
 
                     let transcriptCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$3]=$2; next}{ if (length(a[$15]) == 0) { print $0"\t0" } else { print $0"\t"a[$15] }}' ${this._transcriptDir} ${this.originVepFile} > ${this.vcfTranscriptFile} && awk -F"\t" 'FNR==NR{a[$2"_"$1]="exist"; next}{ if ( $1 == "#Uploaded_variation") { print $0"\tHGMD_transcript"} else if (a[$16] != "exist") { print $0"\t0" } else { print $0"\t"a[$16] }}' ${this._hgmdTranscript} ${this.vcfTranscriptFile} > ${this.vcfTranscriptFile}_tmp && cat ${this.vcfTranscriptFile}_tmp > ${this.vcfTranscriptFile}`;
 
                     child.exec(transcriptCommand, (error, stdout, stderr) => {
                         if (error) {
-                            console.log('Get transcript length error', error)
+                            this.logger.error('Get transcript length error', error)
                             return reject(false)
                         }
                         return resolve(true)
@@ -208,14 +211,11 @@ export class VcfService {
                         let lineString = line;
                         if (line.search('#CHROM') == 0) {
                             // This is the heading line, let's save it for later use
-                            console.log(line)
                             this.lineIndex = 0
                             this.headings = line.split('\t')
-                            console.log(this.headings)
+                            this.logger.log(this.headings)
                             //lineData.splice(-1,1)
                             lineString = lineData.join('\t')
-                            console.log('LineString')
-                            console.log(lineString)
                         }
 
                         fs.appendFileSync(this.AfVcfFile, lineString + '\n')
@@ -226,12 +226,12 @@ export class VcfService {
                 }))
                 .on('error', (error) => {
                     this.vcfStream.hasError = true
-                    console.log('Read vcf error', error)
+                    this.logger.error('Read vcf error', error)
                     // return self.vcfEvents.emit('completed', false)
                     this.vcfStream.destroy()
                 })
                 .on('close', () => {
-                    console.log('Close readVCF')
+                    this.logger.log('Close readVCF')
                     if (!this.annoStream.ended) {
                         this.annoStream.ended = true
                         this.annoStream.destroy()
@@ -278,11 +278,12 @@ export class VcfService {
 
                         child.exec(command, (error, stdout, stderr) => {
                             if (error) {
-                                console.log('Move anno error', error)
+                                this.logger.error('Move anno error', error)
                                 // return self.vcfEvents.emit('completed', false)
                                 return reject(false);
                             }
 
+                            this.logger.log('Move Anno Success')
                             return resolve(true)
                         })
                     }
@@ -375,7 +376,7 @@ export class VcfService {
                 }))
                 .on('error', (error) => {
                     this.classifyStream.hasError = true
-                    console.log('classifyVariant error', error)
+                    this.logger.error('classifyVariant error', error)
                     // return this.vcfEvents.emit('completed', false)
                     this.classifyStream.destroy()
                 })
@@ -384,6 +385,7 @@ export class VcfService {
                         // this.vcfEvents.emit('completed', false)
                         return reject(false)
                     } else {
+                        this.logger.log('Classify Variant completed')
                         return resolve(true);
                         // return this.vcfEvents.emit('completed', true)
                     }
@@ -641,7 +643,7 @@ export class VcfService {
                 }
             }))
             .on('error', (error) => {
-                console.log('Read anno error', error)
+                this.logger.log('Read anno error', error)
                 this.vcfStream.hasError = true
                 // return this.vcfEvents.emit('completed', false)
                 this.vcfStream.ended = true
@@ -742,12 +744,11 @@ export class VcfService {
             vcfExtraData.gene = Gene_Array[0];
             let selectedGene = 1;
             if (geneLine == '') {
-                console.log('geneLine False')
-                console.log('VCF')
-                console.log(JSON.stringify(vcfExtraData))
-                console.log('gene: ' + Gene_Array[0])
-                console.log('Anno Array: ')
-                console.log(JSON.stringify(annoArray))
+                this.logger.error('geneLine False')
+                this.logger.error(JSON.stringify(vcfExtraData))
+                this.logger.error('gene: ' + Gene_Array[0])
+                this.logger.error('Anno Array: ')
+                this.logger.error(JSON.stringify(annoArray))
             }
 
             if (geneLine != '') {
@@ -769,12 +770,11 @@ export class VcfService {
                     vcfExtraData.gene = Gene_Array[i];
 
                     if (geneLine == '') {
-                        console.log('geneLine False')
-                        console.log('VCF')
-                        console.log(JSON.stringify(vcfExtraData))
-                        console.log('gene: ' + Gene_Array[i])
-                        console.log('Anno Array: ')
-                        console.log(JSON.stringify(annoArray))
+                       this.logger.error('geneLine False')
+                       this.logger.error(JSON.stringify(vcfExtraData))
+                       this.logger.error('gene: ' + Gene_Array[i])
+                       this.logger.error('Anno Array: ')
+                       this.logger.error(JSON.stringify(annoArray))
                     }
 
                     if (geneLine != '') {
