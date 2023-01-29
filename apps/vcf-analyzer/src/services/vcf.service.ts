@@ -76,6 +76,8 @@ export class VcfService {
   
 
     async run(vcfFile: string, analysis: AnalysisModel, vepOutput: string) {
+        this.logger.log('Run VCF')
+
         this.analysisId = analysis.id;
         this.analysisFolder = this.commonService.getAnalysisFolder(analysis);
         this.analysis = analysis;
