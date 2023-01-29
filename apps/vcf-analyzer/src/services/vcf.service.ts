@@ -229,21 +229,23 @@ export class VcfService {
 
                         this.resumeAnnoStream()
                     } else {
-                        let lineData = line.split('\t')
-                        let lineString = line;
-                        if (line.search('#CHROM') == 0) {
-                            // This is the heading line, let's save it for later use
-                            this.lineIndex = 0
-                            this.headings = line.split('\t')
-                            this.logger.log(this.headings)
-                            //lineData.splice(-1,1)
-                            lineString = lineData.join('\t')
-                        }
+                        if (line) {
+                            let lineData = line.split('\t')
+                            let lineString = line;
+                            if (line.search('#CHROM') == 0) {
+                                // This is the heading line, let's save it for later use
+                                this.lineIndex = 0
+                                this.headings = line.split('\t')
+                                this.logger.log(this.headings)
+                                //lineData.splice(-1,1)
+                                lineString = lineData.join('\t')
+                            }
 
-                        fs.appendFileSync(this.AfVcfFile, lineString + '\n')
+                            fs.appendFileSync(this.AfVcfFile, lineString + '\n')
 
-                        this.vcfStream.extraData = []
-                        this.vcfStream.resume()
+                            this.vcfStream.extraData = []
+                            this.vcfStream.resume()
+                        } 
                     }
                 }))
                 .on('error', (error) => {
