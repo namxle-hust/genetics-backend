@@ -45,7 +45,7 @@ export class VariantService extends Service {
         const $project = { $project: VariantProjection };
         const $match = this.buildMatchAndCondition(criteria.where)
         const $count = { $group: { _id: null, count: { $sum: 1 } } }
-        
+
         let pipe = [];
         if ($match) {
             pipe.push($match)
@@ -56,8 +56,6 @@ export class VariantService extends Service {
             $project,
             $count,
         ]
-
-        this.logger.debug(pipe);
 
         return pipe
     }
@@ -140,6 +138,7 @@ export class VariantService extends Service {
             pipeFind.push($match)
         }
 
+
         pipeFind = [
             ...pipeFind,
             $project,
@@ -147,6 +146,8 @@ export class VariantService extends Service {
             $offset,
             $limit
         ]
+
+        this.logger.debug(pipeFind)
 
         return pipeFind
     }
