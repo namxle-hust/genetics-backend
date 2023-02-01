@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOME=/usr/apps
+HOME=/usr/src/apps
 
 echo $S3_ACCESS_KEY:$S3_SECRET_KEY > $HOME/.passwd-s3fs && \
 chmod 600 $HOME/.passwd-s3fs
