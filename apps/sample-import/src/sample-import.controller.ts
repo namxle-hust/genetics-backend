@@ -17,7 +17,7 @@ export class SampleImportController {
     @Cron(CronExpression.EVERY_10_SECONDS)
     async import() {
         try {
-
+            this.logger.log('Running Cron')
             await this.sampleImportService.importAnalysis()
 
         } catch (error) {
