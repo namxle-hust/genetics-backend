@@ -8,4 +8,4 @@ chmod 600 $HOME/.passwd-s3fs
 
 s3fs varigenes-storage /home/s3  -o passwd_file=${HOME}/.passwd-s3fs -o allow_other -o umask=000
 
-node /home/ubuntu/genetics/dist/apps/sample-import/main.js 
+node $HOME/dist/apps/sample-import/main.js 
