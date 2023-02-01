@@ -42,12 +42,10 @@ export class VariantService extends Service {
     }
 
     buildCountPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
-        const clinsigPiority = this.buildClinsigPriority();
-        const $project = { $project: { ...VariantProjection, clinsigPiority } };
+        const $project = { $project: VariantProjection };
         const $match = this.buildMatchAndCondition(criteria.where)
         const $count = { $group: { _id: null, count: { $sum: 1 } } }
-        const $sort = this.buildSort()
-
+        
         let pipe = [];
         if ($match) {
             pipe.push($match)
@@ -57,8 +55,9 @@ export class VariantService extends Service {
             ...pipe,
             $project,
             $count,
-            $sort
         ]
+
+        this.logger.debug(pipe);
 
         return pipe
     }
@@ -128,10 +127,12 @@ export class VariantService extends Service {
     }
 
     buildPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
-        const $project = { $project: VariantProjection };
+        const clinsigPiority = this.buildClinsigPriority();
+        const $project = { $project: { ...VariantProjection, clinsigPiority } };
         const $match = this.buildMatchAndCondition(criteria.where)
         const $offset = this.buildOffset(criteria);
         const $limit = this.buildLimit(criteria);
+        const $sort = this.buildSort()
 
         let pipeFind = [];
 
@@ -142,6 +143,7 @@ export class VariantService extends Service {
         pipeFind = [
             ...pipeFind,
             $project,
+            $sort,
             $offset,
             $limit
         ]
