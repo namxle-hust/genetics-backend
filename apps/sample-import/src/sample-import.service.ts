@@ -61,6 +61,8 @@ export class SampleImportService {
                 await this.mongoImport(analysis);
                 
                 this.logger.log('Done import');
+
+                this.importRepository.updateAnalysisStatus(analysis.id, AnalysisStatus.ANALYZED)
             }
         } catch (error) {
             if (error instanceof NotFoundError) {
