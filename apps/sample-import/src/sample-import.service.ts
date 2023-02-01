@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Analysis, AnalysisStatus, NotFoundError } from '@app/prisma';
 import { InjectDb } from '@app/common/mongodb/mongo.decorators';
 import { Db } from 'mongodb'
-import { RESULT_ANNO_FILE, VCF_FILE } from '@app/common';
+import { RESULT_ANNO_FILE, VCF_APPLIED_BED } from '@app/common';
 import { ImportRepository } from './import.repository';
 import { ConfigService } from '@nestjs/config';
 import { ANALYSIS_COLLECTION_PREFIX } from '@app/common/mongodb';
@@ -65,7 +65,7 @@ export class SampleImportService {
 
                 let data: IAnalysisUpdate = {
                     status: AnalysisStatus.ANALYZED,
-                    vcfFilePath: `${VCF_FILE}.gz`
+                    vcfFilePath: `${VCF_APPLIED_BED}.gz`
                 }
 
                 this.importRepository.updateAnalysisStatus(analysis.id, data)
