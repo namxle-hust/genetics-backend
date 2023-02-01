@@ -42,9 +42,11 @@ export class VariantService extends Service {
     }
 
     buildCountPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
-        const $project = { $project: VariantProjection };
+        const clinsigPiority = this.buildClinsigPriority();
+        const $project = { $project: { ...VariantProjection, clinsigPiority } };
         const $match = this.buildMatchAndCondition(criteria.where)
         const $count = { $group: { _id: null, count: { $sum: 1 } } }
+        const $sort = this.buildSort()
 
         let pipe = [];
         if ($match) {
@@ -54,10 +56,75 @@ export class VariantService extends Service {
         pipe = [
             ...pipe,
             $project,
-            $count
+            $count,
+            $sort
         ]
 
         return pipe
+    }
+
+    buildSort() {
+        return {
+            "$sort": { CLINSIG_PRIORITY: 1 }
+        }
+    }
+
+    buildClinsigPriority() {
+        return {
+            "$ifNull": [
+                "$CLINSIG_PRIORITY",
+                {
+                    "$cond": {
+                        "if": {
+                            "$eq": ["$CLINSIG_FINAL", "drug response"]
+                        },
+                        "then": 0,
+                        "else": {
+                            "$cond": {
+                                "if": {
+                                    "$eq": ["$CLINSIG_FINAL", "pathogenic"]
+                                },
+                                "then": 1,
+                                "else": {
+                                    "$cond": {
+                                        "if": {
+                                            "$eq": ["$CLINSIG_FINAL", "likely pathogenic"]
+                                        },
+                                        "then": 2,
+                                        "else": {
+                                            "$cond": {
+                                                "if": {
+                                                    "$eq": ["$CLINSIG_FINAL", "uncertain significance"]
+                                                },
+                                                "then": 3,
+                                                "else": {
+                                                    "$cond": {
+                                                        "if": {
+                                                            "$eq": ["$CLINSIG_FINAL", "likely benign"]
+                                                        },
+                                                        "then": 4,
+                                                        "else": {
+                                                            "$cond": {
+                                                                "if": {
+                                                                    "$eq": ["$CLINSIG_FINAL", "benign"]
+                                                                },
+                                                                "then": 5,
+                                                                "else": 6
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+
     }
 
     buildPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
