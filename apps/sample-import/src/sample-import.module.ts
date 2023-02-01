@@ -10,6 +10,7 @@ import { SampleImportService } from './sample-import.service';
 import { ImportRepository } from './import.repository';
 import { AnalysisImportRepository } from './analysis-import.repository';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CommonService } from './common.service';
 
 @Module({
     imports: [
@@ -44,6 +45,6 @@ import { ScheduleModule } from '@nestjs/schedule';
         ScheduleModule.forRoot()
     ],
     controllers: [SampleImportController],
-    providers: [SampleImportService, ImportRepository, AnalysisImportRepository],
+    providers: [SampleImportService, ImportRepository, AnalysisImportRepository, CommonService],
 })
 export class SampleImportModule { }

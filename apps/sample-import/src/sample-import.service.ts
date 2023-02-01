@@ -1,8 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AnalysisStatus, NotFoundError } from '@app/prisma';
+import { Analysis, AnalysisStatus, NotFoundError } from '@app/prisma';
 import { InjectDb } from '@app/common/mongodb/mongo.decorators';
 import { Db } from 'mongodb'
+import { RESULT_ANNO_FILE } from '@app/common';
 import { ImportRepository } from './import.repository';
+import { ConfigService } from '@nestjs/config';
+import { ANALYSIS_COLLECTION_PREFIX } from '@app/common/mongodb';
+import { CommonService } from './common.service';
 
 @Injectable()
 export class SampleImportService {
@@ -11,7 +15,9 @@ export class SampleImportService {
 
     constructor(
         @InjectDb() private readonly db: Db,
-        private readonly importRepository: ImportRepository
+        private readonly importRepository: ImportRepository,
+        private configService: ConfigService,
+        private commonService: CommonService
     ) {
 
     }
@@ -52,8 +58,9 @@ export class SampleImportService {
 
                 this.importRepository.updateAnalysisStatus(analysis.id, AnalysisStatus.IMPORTING)
 
-
+                await this.mongoImport(analysis);
                 
+                this.logger.log('Done import');
             }
         } catch (error) {
             if (error instanceof NotFoundError) {
@@ -64,7 +71,25 @@ export class SampleImportService {
         
     }
 
-    async mongoImport() {
-        
+    async mongoImport(analysis: Analysis) {
+        const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analysis.id}`
+
+        const annoFile = `${this.configService.get<string>('S3_DIR')}/${this.configService.get<string>('S3_ANALYSES_FOLDER')}/${analysis.id}/${RESULT_ANNO_FILE}`
+
+
+        let options = [
+            `--uri ${this.configService.get<string>('MONGODB_URI')}`,
+            `--collection ${collectionName}`,
+            `--type tsv`,
+            `--headerline`,
+            `--file ${annoFile}`,
+            `--drop`
+        ]
+
+        let command = `${this.configService.get<string>('MONGO_IMPORT_CMD')} ${options.join(' ')}`
+
+        await this.commonService.runCommand(command);
+
+        return true;
     }
 }
