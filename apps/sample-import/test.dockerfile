@@ -9,11 +9,9 @@ RUN apt-get update -y && \
     apt-get install -y build-essential libfuse-dev libcurl4-openssl-dev libxml2-dev pkg-config libssl-dev mime-support automake libtool wget tar git unzip curl
 RUN apt-get install lsb-release -y  && apt-get install zip -y && apt-get install nano -y
 
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-3.6.asc | apt-key add -
-RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list
+RUN wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu1804-x86_64-100.6.1.deb
+RUN apt install -y ./mongodb-database-tools-ubuntu1804-x86_64-100.6.1.deb
 
-RUN apt-get update -y
-RUN apt-get install -y mongodb-org-tools
 # RUN apt-get install -y poppler-utils
 
 ENV NVM_DIR /usr/local/nvm

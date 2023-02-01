@@ -80,10 +80,12 @@ export class SampleImportService {
         let options = [
             `--uri ${this.configService.get<string>('MONGODB_URI')}`,
             `--collection ${collectionName}`,
+            `--db ${this.configService.get<string>('MONGODB_DATABASE')}`,
             `--type tsv`,
             `--headerline`,
             `--file ${annoFile}`,
-            `--drop`
+            `--drop`,
+            `--authenticationDatabase=admin`
         ]
 
         let command = `${this.configService.get<string>('MONGO_IMPORT_CMD')} ${options.join(' ')}`
