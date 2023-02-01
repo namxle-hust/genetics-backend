@@ -192,6 +192,15 @@ export class VcfAnalyzerService {
 
         await this.commonService.runCommand(command);
 
+        // Compressed bed & get tabix
+        commands = [
+            `bgzip -f ${this.vcfBed}`,
+            `tabix -f ${this.vcfBed}.gz`
+        ]
+
+        command = commands.join(' && ');
+
+        await this.commonService.runCommand(command);
     }
 
 
