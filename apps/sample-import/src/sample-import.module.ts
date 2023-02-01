@@ -3,7 +3,6 @@ import { MongoModule } from '@app/common/mongodb/mongo.module';
 import { PrismaModule } from '@app/prisma';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi'
 import { DBModule, MongoConfigService } from '@app/common/mongodb';
 import { SampleImportController } from './sample-import.controller';

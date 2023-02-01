@@ -14,7 +14,7 @@ export class SampleImportController {
         return this.sampleImportService.getHello();
     }
 
-    @Cron(CronExpression.EVERY_30_SECONDS)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async import() {
         try {
 

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AnalysisStatus, NotFoundError, PrismaService } from '@app/prisma';
+import { AnalysisStatus, NotFoundError } from '@app/prisma';
 import { InjectDb } from '@app/common/mongodb/mongo.decorators';
 import { Db } from 'mongodb'
 import { ImportRepository } from './import.repository';
@@ -44,6 +44,8 @@ export class SampleImportService {
     async importAnalysis() {
         try {
             const analysisImporting = await this.importRepository.getAnalysisByStatus(AnalysisStatus.IMPORTING)
+
+            this.logger.log(analysisImporting)
 
             if (!analysisImporting) {
                 const analysis = await this.importRepository.findFirstOrThrow(AnalysisStatus.IMPORT_QUEUING);
