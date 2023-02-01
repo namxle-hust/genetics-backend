@@ -31,9 +31,9 @@ import { CommonService } from './common.service';
             isGlobal: true,
             useFactory: async (configService: ConfigService) => {
                 return {
-                    prismaOptions: {
-                        log: ['query']
-                    },
+                    // prismaOptions: {
+                    //     log: ['query']
+                    // },
                 };
             },
             inject: [ConfigService],
