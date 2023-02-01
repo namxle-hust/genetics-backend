@@ -9,6 +9,7 @@ import { SampleImportController } from './sample-import.controller';
 import { SampleImportService } from './sample-import.service';
 import { ImportRepository } from './import.repository';
 import { AnalysisImportRepository } from './analysis-import.repository';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
@@ -40,6 +41,7 @@ import { AnalysisImportRepository } from './analysis-import.repository';
             imports: [DBModule],
             useExisting: MongoConfigService
         }),
+        ScheduleModule.forRoot()
     ],
     controllers: [SampleImportController],
     providers: [SampleImportService, ImportRepository, AnalysisImportRepository],
