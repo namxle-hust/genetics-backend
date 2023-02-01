@@ -147,7 +147,7 @@ export class VariantService extends Service {
             $limit
         ]
 
-        this.logger.debug(pipeFind)
+        // this.logger.debug(pipeFind)
 
         return pipeFind
     }
