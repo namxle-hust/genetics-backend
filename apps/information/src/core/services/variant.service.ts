@@ -125,8 +125,8 @@ export class VariantService extends Service {
     }
 
     buildPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
-        const $CLINSIG_PRIORITY = this.buildClinsigPriority();
-        const $project = { $project: { ...VariantProjection, $CLINSIG_PRIORITY } };
+        const CLINSIG_PRIORITY = this.buildClinsigPriority();
+        const $project = { $project: { ...VariantProjection, CLINSIG_PRIORITY } };
         const $match = this.buildMatchAndCondition(criteria.where)
         const $offset = this.buildOffset(criteria);
         const $limit = this.buildLimit(criteria);
