@@ -8,6 +8,8 @@ import * as Joi from 'joi'
 import { DBModule, MongoConfigService } from '@app/common/mongodb';
 import { SampleImportController } from './sample-import.controller';
 import { SampleImportService } from './sample-import.service';
+import { ImportRepository } from './import.repository';
+import { AnalysisImportRepository } from './analysis-import.repository';
 
 @Module({
     imports: [
@@ -41,6 +43,6 @@ import { SampleImportService } from './sample-import.service';
         }),
     ],
     controllers: [SampleImportController],
-    providers: [SampleImportService],
+    providers: [SampleImportService, ImportRepository, AnalysisImportRepository],
 })
 export class SampleImportModule { }

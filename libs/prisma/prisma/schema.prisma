@@ -34,6 +34,7 @@ enum AnalysisStatus {
     VCF_RABBITMQ_QUEUING
     VCF_ANALYZING
     IMPORT_QUEUING
+    IMPORTING
     ANALYZED
     ERROR
 }

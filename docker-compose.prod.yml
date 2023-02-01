@@ -1,24 +1,26 @@
 version: '2'
 
 services:
-  # sample-import:
-  #   container_name: genetics_sample_import
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/sample-import/DockerFile
-  #     target: development
-  #   command: npm run start:dev sample-import
-  #   env_file:
-  #     - ./apps/sample-import/.env
-  #   depends_on:
-  #     - mongodb
-  #     - prisma-migration
-  #   volumes:
-  #     - /usr/src/app/node_modules
-  #   ports:
-  #     - '3000:3000'
-  #   networks:
-  #     - genetics
+  sample-import:
+    tty: true
+    privileged: true
+    container_name: genetics_sample_import
+    build:
+      context: .
+      dockerfile: ./apps/sample-import/DockerFile
+      target: production
+    command: /bin/bash
+    env_file:
+      - ./apps/sample-import/.env
+    depends_on:
+      - mongodb
+      - prisma-migration
+    volumes:
+      - /usr/src/app/node_modules
+    ports:
+      - '3000:3000'
+    networks:
+      - genetics
 
   samples-handler:
     container_name: genetics_samples-handler
