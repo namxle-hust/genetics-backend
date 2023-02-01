@@ -30,3 +30,15 @@ ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN npm install -g yarn
 
+# Install s3-fs
+
+RUN rm -rf /usr/src/s3fs-fuse
+RUN git clone https://github.com/s3fs-fuse/s3fs-fuse/ /usr/src/s3fs-fuse
+WORKDIR /usr/src/s3fs-fuse
+### Only use V1.90
+RUN git checkout cd466eb
+RUN ./autogen.sh && ./configure && make && make install
+
+RUN echo "user_allow_other" >> /etc/fuse.conf
+
+RUN mkdir /home/s3

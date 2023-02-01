@@ -45,12 +45,15 @@ export class SampleImportService {
         try {
             const analysisImporting = await this.importRepository.getAnalysisByStatus(AnalysisStatus.IMPORTING)
 
-            this.logger.log(analysisImporting)
-
             if (!analysisImporting) {
                 const analysis = await this.importRepository.findFirstOrThrow(AnalysisStatus.IMPORT_QUEUING);
 
                 this.logger.log(analysis);
+
+                this.importRepository.updateAnalysisStatus(analysis.id, AnalysisStatus.IMPORTING)
+
+
+                
             }
         } catch (error) {
             if (error instanceof NotFoundError) {
@@ -58,6 +61,10 @@ export class SampleImportService {
             }
             this.logger.error(error);
         }   
+        
+    }
+
+    async mongoImport() {
         
     }
 }

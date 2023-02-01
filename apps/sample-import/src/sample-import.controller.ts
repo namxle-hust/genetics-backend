@@ -14,10 +14,9 @@ export class SampleImportController {
         return this.sampleImportService.getHello();
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_30_SECONDS)
     async import() {
         try {
-            this.logger.log('Running Cron')
             await this.sampleImportService.importAnalysis()
 
         } catch (error) {

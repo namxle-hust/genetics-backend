@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: ./apps/sample-import/DockerFile
       target: production
-    command: /bin/bash
+    entrypoint: ./deployment/run/run-import.sh
     env_file:
       - ./apps/sample-import/.env
     depends_on:
