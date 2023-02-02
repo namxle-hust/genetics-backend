@@ -2,9 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../src/generated/client"
-    binaryTargets = ["native","darwin","debian-openssl-1.1.x"]
+    provider      = "prisma-client-js"
+    output        = "../src/generated/client"
+    binaryTargets = ["native", "darwin", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -68,9 +68,9 @@ model Workspace {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    name    String
-    userId  Int
-    user    User?    @relation(fields: [userId], references: [id])
+    name     String
+    userId   Int
+    user     User?      @relation(fields: [userId], references: [id])
     analyses Analysis[]
 
     @@unique([userId, name])
@@ -90,7 +90,7 @@ model Sample {
 
     type SampleType @default(VCF)
 
-    files   File[]
+    files    File[]
     analyses Analysis[]
 
     @@map("samples")
@@ -104,8 +104,8 @@ model File {
     name         String
     uploadedName String
     size         Int
-    sampleId      Int
-    sample        Sample  @relation(fields: [sampleId], references: [id])
+    sampleId     Int
+    sample       Sample @relation(fields: [sampleId], references: [id])
 
     @@map("uploaded_files")
 }
@@ -124,7 +124,7 @@ model Analysis {
     sample   Sample @relation(fields: [sampleId], references: [id])
 
     status    AnalysisStatus @default(VCF_QUEUING)
-    isDeleted Boolean      @default(false)
+    isDeleted Boolean        @default(false)
 
     vcfFilePath String?
 
@@ -138,4 +138,26 @@ model Analysis {
     gender Gender?
 
     @@map("analyses")
+}
+
+model PGX {
+    id Int @id @default(autoincrement())
+
+    rsid String
+
+    gene String
+
+    evidence String
+
+    clinical_annotation_types String
+
+    related_chemicals String
+
+    drug_response_category String
+
+    related_diseases String
+
+    annotation_text String
+
+    @@map("PGx")
 }
