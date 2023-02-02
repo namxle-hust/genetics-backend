@@ -92,6 +92,7 @@ services:
       - genetics
 
   postgres-db:
+    privileged: true
     image: postgres:13
     ports:
       - 5434:5432
@@ -161,7 +162,7 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: /home/user/genetics/postgres_data
+      device: /home/user/genetics/postgres-data
   mongodb_data:
     driver: local
   annovar_volume:
