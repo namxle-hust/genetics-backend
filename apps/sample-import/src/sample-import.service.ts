@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Analysis, AnalysisStatus, NotFoundError } from '@app/prisma';
 import { InjectDb } from '@app/common/mongodb/mongo.decorators';
 import { Db } from 'mongodb'
-import { RESULT_ANNO_FILE, VCF_APPLIED_BED } from '@app/common';
+import { RESULT_ANNO_FILE, RESULT_ANNO_PGX_FILE, VCF_APPLIED_BED } from '@app/common';
 import { ImportRepository } from './import.repository';
 import { ConfigService } from '@nestjs/config';
 import { ANALYSIS_COLLECTION_PREFIX } from '@app/common/mongodb';
@@ -12,6 +12,12 @@ import { IAnalysisUpdate } from './analysis.model';
 @Injectable()
 export class SampleImportService {
 
+    private s3Dir: string
+    private s3AnalysesFolder: string
+    private s3PublicFolder: string
+
+    private pharmaGkbFileName: string
+
     private readonly logger = new Logger(SampleImportService.name)
 
     constructor(
@@ -20,33 +26,28 @@ export class SampleImportService {
         private configService: ConfigService,
         private commonService: CommonService
     ) {
-
+        this.s3Dir = this.configService.get<string>('S3_DIR');
+        this.s3AnalysesFolder = this.configService.get<string>('S3_ANALYSES_FOLDER')
+        this.s3PublicFolder = this.configService.get<string>('S3_PUBLIC_FOLDER')
+        this.pharmaGkbFileName = this.configService.get<string>('PHARMAGKB_FILE_PATH')
     }
 
     getHello(): string {
         return 'Hello World!';
     }
 
-    // async test2(): Promise<string> {
-    //     console.log(123);
-    //     const count = await this.db.collection("samples").find();
-    //     await new Promise((resolve, reject) => {
-    //         setTimeout(() => {
-    //             return resolve(true);
-    //         }, 10000)
-    //     })
-    //     return 'users count:' + count;
-    // }
+    async addPgx(analysis: Analysis) {
+        const pgxSource = `${this.s3Dir}/${this.s3PublicFolder}/${this.pharmaGkbFileName}`
 
-    // async test(): Promise<any> {
-    //     const user = await this.prisma.user.create({
-    //         data: {
-    //             email: 'namledz707@gmail.com',
-    //             hash: "abc"
-    //         }
-    //     })
-    //     return user;
-    // }
+        const annoFile = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${RESULT_ANNO_FILE}`;
+
+        const annoPgxFile = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${RESULT_ANNO_PGX_FILE}`;
+
+        let command = `awk -F"\t" 'FNR==NR{a[$1]=1; next}{ if ($1 == "sampleId") { print $0"\tPGx"; } else { PGx = "."; if (a[$9] == 1) { PGx = 1; } print $0"\t"PGx; } }' ${pgxSource} ${annoFile} > ${annoPgxFile}`
+
+        await this.commonService.runCommand(command);
+    }
+
 
     async importAnalysis() {
         try {
@@ -59,6 +60,10 @@ export class SampleImportService {
 
                 this.importRepository.updateAnalysisStatus(analysis.id, { status: AnalysisStatus.IMPORTING })
 
+                // Adding pgx
+                await this.addPgx(analysis);
+
+                // Import to mongodb
                 await this.mongoImport(analysis);
                 
                 this.logger.log('Done import');
@@ -82,7 +87,7 @@ export class SampleImportService {
     async mongoImport(analysis: Analysis) {
         const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analysis.id}`
 
-        const annoFile = `${this.configService.get<string>('S3_DIR')}/${this.configService.get<string>('S3_ANALYSES_FOLDER')}/${analysis.id}/${RESULT_ANNO_FILE}`
+        const annoFile = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${RESULT_ANNO_PGX_FILE}`
 
 
         let options = [
