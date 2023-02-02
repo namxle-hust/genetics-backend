@@ -96,7 +96,7 @@ services:
     ports:
       - 5434:5432
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - postgres_data_volume:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123
@@ -156,6 +156,12 @@ services:
       - genetics
 
 volumes:
+  postgres_data_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/user/genetics/postgres_data
   mongodb_data:
     driver: local
   annovar_volume:
@@ -177,6 +183,6 @@ volumes:
       type: none
       device: /home/user/vep/vep_data
   genetics_vep_info_volume:
-    
+
 networks:
   genetics:
