@@ -17,7 +17,16 @@ export class WorkspaceService {
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<IWorkspaceFindInput, WorkspaceFilterDTO>(dto, { userId: userId });
+        let findInput: IWorkspaceFindInput = { 
+            userId: userId,
+        }
+
+        // If there is a search term
+        if (dto.searchTerm) {
+            findInput.name = dto.searchTerm;
+        }
+
+        let tableFindDto = new TableFindInput<IWorkspaceFindInput, WorkspaceFilterDTO>(dto, findInput);
         
         const total = await this.workspaceRepository.count(tableFindDto);
 
