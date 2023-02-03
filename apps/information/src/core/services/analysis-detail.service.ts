@@ -6,8 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { TableDTO, VariantFilterDTO } from "../dto";
 import { TableOutputEntity, VariantEntity, VariantQCUrlEntity } from "../entities";
 import { IVariantFilter, TableFindInput, VariantModel } from "../models";
-import { AnalysisRepository } from "../repository";
-import { VariantRepository } from "../repository/variant.repository";
+import { AnalysisRepository, VariantRepository } from "../repository";
 import { CommonService } from "./common.service";
 import { S3Service } from "./s3.service";
 import { VariantService } from "./variant.service";
@@ -35,10 +34,10 @@ export class AnalysisDetailService extends Service {
 
         const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analsisId}`
 
-        const data = await this.variantRepository.find(collectionName, pipe);
+        const data = await this.variantRepository.aggregate(collectionName, pipe);
         const items: VariantEntity[] = data.map((variant) => new VariantEntity(new VariantModel(variant)))
 
-        const count = await this.variantRepository.find(collectionName, countPipe);
+        const count = await this.variantRepository.aggregate(collectionName, countPipe);
 
         const total: number = count.length > 0 ? count[0].count : 0
 
@@ -51,6 +50,11 @@ export class AnalysisDetailService extends Service {
         return results;
     }
 
+    async getVariantDetail(analysisId: number, _id: string) {
+        const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analysisId}`
+        const condtions = this.variantService.buildVariantDetailConditions(_id);
+        const data = await this.variantRepository.find(collectionName, condtions); 
+    }
 
     async getQcUrl(analysisId: number): Promise<string> {
         const ananlysis = await this.analysisRepository.findById(analysisId);

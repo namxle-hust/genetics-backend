@@ -4,14 +4,18 @@ import { GetUser } from '../core/decorators';
 import { AnalysisCreateDTO, AnalysisDeleteManyDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO, VariantFilterDTO } from '../core/dto';
 import { AnalysisEntity, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from '../core/entities';
 import { JwtGuard } from '../core/guards';
-import { AnalysisService, AnalysisDetailService } from '../core/services';
+import { AnalysisService, AnalysisDetailService, VariantService } from '../core/services';
 
 
 @Controller('analysis')
 @UseGuards(JwtGuard)
 @ApiTags('analysis')
 export class AnalysisController {
-    constructor(private analysisService: AnalysisService, private analysisDetailService: AnalysisDetailService) {
+    constructor(
+        private analysisService: AnalysisService, 
+        private analysisDetailService: AnalysisDetailService,
+        private variantService: VariantService
+    ) {
         
     }
 
@@ -28,6 +32,13 @@ export class AnalysisController {
     async getVarients(@Param('id', ParseIntPipe) id, @Body() dto: TableDTO<VariantFilterDTO>) {
         const data = await this.analysisDetailService.getVariant(id, dto);
         return new TableOutputEntity<VariantEntity>(data)
+    }
+
+    @Get(':analysisId/variant-detail/:variantId')
+    @ApiCreatedResponse({ type: VariantEntity })
+    async getVariantDetail(@Param('analysisId', ParseIntPipe) analysisId, @Param('variantId') variantId) {
+        const data = await this.analysisDetailService.getVariantDetail(analysisId, variantId)
+        return new VariantEntity(data[0])
     }
 
     @Get(':id/qc-url')

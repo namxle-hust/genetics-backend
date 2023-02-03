@@ -1,15 +1,27 @@
 import { Service } from "@app/common/shared/service";
 import { Injectable, Logger } from "@nestjs/common";
+import mongoose from "mongoose";
 import { VariantProjection } from "../constants";
-import { VariantFilterDTO } from "../dto";
 import { IVariantFilter, TableFindInput, VariantFilterConditionModel } from "../models";
-import { VariantRepository } from "../repository/variant.repository";
 
 @Injectable()
 export class VariantService extends Service {
 
     constructor() {
         super()
+    }
+
+    buildPgxCondition() {
+        return {
+            "PGx": 1
+        }
+    }
+
+    buildVariantDetailConditions(_id: string) {
+        let objectId = new mongoose.Types.ObjectId(_id);
+        return {
+            "_id": objectId
+        };
     }
 
     buildOffset(criteria: TableFindInput<IVariantFilter, IVariantFilter>) {
