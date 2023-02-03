@@ -99,7 +99,7 @@ export class AnalyzeService {
 
         const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${SampleName}`
 
-        this.commonService.runCommand(sentieonCommand);
+        await this.commonService.runCommand(sentieonCommand);
 
         return `${this.analysisFolder}/${VcfHcOutput}`
     }
@@ -114,7 +114,6 @@ export class AnalyzeService {
 
         await this.vcfService.renameOutput(output, analysis);
 
-        return true;   
     }
     
 }
