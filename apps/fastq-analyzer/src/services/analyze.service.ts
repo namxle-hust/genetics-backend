@@ -97,9 +97,18 @@ export class AnalyzeService {
 
         const VcfHcOutput = 'vqsr_SNP_INDEL.hc.recaled.vcf.gz'
 
+        const changeDirCommand = `cd ${this.analysisFolder}`
+
         const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${SampleName}`
 
-        await this.commonService.runCommand(sentieonCommand);
+        const commands = [
+            changeDirCommand,
+            sentieonCommand
+        ]
+
+        const command = commands.join(' && ')
+
+        await this.commonService.runCommand(command);
 
         return `${this.analysisFolder}/${VcfHcOutput}`
     }
