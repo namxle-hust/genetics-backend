@@ -5,8 +5,6 @@ import { Trim } from "../decorators";
 import { IWorkspaceFilter } from "../models";
 
 export class WorkspaceFilterDTO implements IWorkspaceFilter {
-    name?: string;
-    userId: number;
     
 }
 

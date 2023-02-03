@@ -23,7 +23,9 @@ export class WorkspaceService {
 
         // If there is a search term
         if (dto.searchTerm) {
-            findInput.name = dto.searchTerm;
+            findInput.name = { 
+                contains: dto.searchTerm
+            };
         }
 
         let tableFindDto = new TableFindInput<IWorkspaceFindInput, WorkspaceFilterDTO>(dto, findInput);
