@@ -12,7 +12,7 @@ export class CommonService {
     async runCommand(command: string): Promise<string> {
         this.logger.log(command)
         return await new Promise((resolve, reject) => {
-            child.exec(command, (error, stdout, stderr) => {
+            child.exec(command, { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
                 if (error) {
                     this.logger.log(stderr);
                     return reject(error)
