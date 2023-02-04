@@ -7,7 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "docker:info": "docker compose -f docker-compose.prod.yml up -d --build -V information-service",
+    "docker-build:info": "docker compose -f docker-compose.prod.yml up -d --build -V information-service",
+    "docker-build:vcf": "docker compose -f docker-compose.prod.yml up -d --build -V vcf-analyzer-service",
     "build": "nest build",
     "build:information": "nest build information",
     "build:fastq": "nest build fastq-analyzer",
