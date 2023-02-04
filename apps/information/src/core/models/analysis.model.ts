@@ -50,7 +50,10 @@ export class AnalysisFindInput implements IAnalysisFindInput {
             this.sampleId = dto.filter.sampleId
         }
 
-        this.workspace.userId = userId
+        this.workspace = { 
+            userId: userId
+        }
+        
         this.isDeleted = false;
     }
 }

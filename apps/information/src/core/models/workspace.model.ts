@@ -15,7 +15,9 @@ export class WorkspaceFindInput implements IWorkspaceFindInput {
 
     constructor(dto: TableDTO<IWorkspaceFilter>, userId: number) {
         if (dto.searchTerm) {
-            this.name.contains = dto.searchTerm
+            this.name = {
+                contains: dto.searchTerm
+            }
         }
         this.userId = userId
     }

@@ -24,7 +24,9 @@ export class SampleFindInput implements ISampleFindInput {
 
     constructor(dto: TableDTO<ISampleFilter>, userId: number) {
         if (dto.searchTerm) {
-            this.name.contains = dto.searchTerm
+            this.name = {
+                contains: dto.searchTerm
+            }
         }
         if (dto.filter.type) {
             this.type = dto.filter.type

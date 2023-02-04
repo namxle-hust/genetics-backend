@@ -29,7 +29,7 @@ export class AnalysisController {
 
     @Post('variants/:id/find')
     @ApiCreatedResponse({ type: TableOutputEntity })
-    async getVarients(@Param('id', ParseIntPipe) id, @Body() dto: TableDTO<VariantFilterDTO>) {
+    async getVariants(@Param('id', ParseIntPipe) id, @Body() dto: TableDTO<VariantFilterDTO>) {
         const data = await this.analysisDetailService.getVariant(id, dto);
         return new TableOutputEntity<VariantEntity>(data)
     }
