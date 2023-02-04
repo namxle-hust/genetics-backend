@@ -6,7 +6,7 @@ async function bootstrap() {
     const app = await NestFactory.create(FastqAnalyzingModule);
 
     const rmqService = app.get<RmqService>(RmqService)
-    app.connectMicroservice(rmqService.getOptions(FASTQ_ANALYZING))
+    app.connectMicroservice(rmqService.getOptions(FASTQ_ANALYZING, true))
 
     await app.startAllMicroservices()
 
