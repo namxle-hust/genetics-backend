@@ -237,8 +237,8 @@ export class VcfService {
                         this.resumeAnnoStream()
                     } else {
                         if (line) {
-                            this.logger.debug(line);
                             let lineData = line.split('\t')
+                            this.logger.debug(line);
                             let lineString = line;
                             if (line.search('#CHROM') == 0) {
                                 // This is the heading line, let's save it for later use
