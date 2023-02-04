@@ -35,7 +35,9 @@ export class AnalysisFindInput implements IAnalysisFindInput {
 
     constructor(dto: TableDTO<IAnalysisFilter>, userId: number) {
         if (dto.searchTerm) {
-            this.name.contains = dto.searchTerm
+            this.name = {
+                contains: dto.searchTerm
+            }
         }
 
         if (dto.filter.vcfType) {
@@ -50,10 +52,10 @@ export class AnalysisFindInput implements IAnalysisFindInput {
             this.sampleId = dto.filter.sampleId
         }
 
-        this.workspace = { 
+        this.workspace = {
             userId: userId
         }
-        
+
         this.isDeleted = false;
     }
 }
