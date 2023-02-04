@@ -22,7 +22,7 @@ export class VcfAnalyzerService {
 
 
     private vcfModified: string
-    private vcfFormatTmp: string
+    private vcfOriginalTmp: string
     private vcfOriginal: string
     private vcfBed: string
     private vcfFile: string
@@ -97,7 +97,7 @@ export class VcfAnalyzerService {
         this.vcfBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
         this.vcfFile = `${this.analysisFolder}/${VCF_FILE}`
         this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
-        this.vcfFormatTmp = `${this.analysisFolder}/${VCF_FORMAT_TMP_FILE}`
+        this.vcfOriginalTmp = `${this.analysisFolder}/${VCF_FORMAT_TMP_FILE}`
         this.vepOutput = this.annovarService.getVepOutput(analysis)
        
 
@@ -162,16 +162,16 @@ export class VcfAnalyzerService {
 
     async fomatVcfFile() {
         let zipFileCommand = 'ls'
-        let preformatCommand = `less ${this.vcfOriginal} > ${this.vcfFormatTmp}`
+        let preformatCommand = `less ${this.vcfOriginal} > ${this.vcfOriginalTmp}`
         
         if (this.isGZ) {
             zipFileCommand = `bgzip -f ${this.vcfFile}`
-            preformatCommand = `bgzip -cd ${this.vcfOriginal} > ${this.vcfFormatTmp}`
+            preformatCommand = `bgzip -cd ${this.vcfOriginal} > ${this.vcfOriginalTmp}`
         }
 
         let commands = [
             preformatCommand,
-            `awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' ${this.vcfFormatTmp} > ${this.vcfFile}`,
+            `awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' ${this.vcfOriginalTmp} > ${this.vcfFile}`,
             zipFileCommand
         ]
 
@@ -183,7 +183,7 @@ export class VcfAnalyzerService {
 
     async applyBedFile() {
 
-        let count = await this.annovarService.getRowCount(this.vcfOriginal);
+        let count = await this.annovarService.getRowCount(this.vcfOriginalTmp);
 
         let options = [
             `-b ${this.defaultBedFile}`,
