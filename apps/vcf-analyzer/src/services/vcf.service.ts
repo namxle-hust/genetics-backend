@@ -82,48 +82,54 @@ export class VcfService {
   
 
     async run(vcfFile: string, analysis: AnalysisModel, vepOutput: string) {
-        this.logger.log('Run VCF')
+        try {
+            this.logger.log('Run VCF')
 
-        this.analysisId = analysis.id;
-        this.analysisFolder = this.commonService.getAnalysisFolder(analysis);
-        this.analysis = analysis;
+            this.analysisId = analysis.id;
+            this.analysisFolder = this.commonService.getAnalysisFolder(analysis);
+            this.analysis = analysis;
 
-        this.tmpFolderFormat = this.commonService.getTmpFolderFormat(analysis)
+            this.tmpFolderFormat = this.commonService.getTmpFolderFormat(analysis)
 
-        this.vcfFile = vcfFile
-        this.vcfHGMDFile = `${this.tmpFolderFormat}_${VCF_HGMD}`
-        this.vcfHgmdClinvarFile = `${this.tmpFolderFormat}_${VCF_HGMD_CLINVAR}`
+            this.vcfFile = vcfFile
+            this.vcfHGMDFile = `${this.tmpFolderFormat}_${VCF_HGMD}`
+            this.vcfHgmdClinvarFile = `${this.tmpFolderFormat}_${VCF_HGMD_CLINVAR}`
 
-        this.canonicalFile = `${vepOutput}`
+            this.canonicalFile = `${vepOutput}`
 
-        this.vcfTranscriptFile = `${this.tmpFolderFormat}_${VCF_TRANSCRIPT_FILE}`
+            this.vcfTranscriptFile = `${this.tmpFolderFormat}_${VCF_TRANSCRIPT_FILE}`
 
-        this.originAnnoFile = this.vcfTranscriptFile
+            this.originAnnoFile = this.vcfTranscriptFile
 
-        this.originVepFile = `${this.tmpFolderFormat}_${ORIGIN_VEP_FILE}`
+            this.originVepFile = `${this.tmpFolderFormat}_${ORIGIN_VEP_FILE}`
 
-        this.annoFile = `${this.tmpFolderFormat}_${ANNO_FILE}`
+            this.annoFile = `${this.tmpFolderFormat}_${ANNO_FILE}`
 
-        this.annoClinvarFile = `${this.tmpFolderFormat}_${ANNO_CLINVAR_FILE}`
+            this.annoClinvarFile = `${this.tmpFolderFormat}_${ANNO_CLINVAR_FILE}`
 
-        this.annoVepFile = `${this.tmpFolderFormat}_${ANNO_VEP_FILE}`
+            this.annoVepFile = `${this.tmpFolderFormat}_${ANNO_VEP_FILE}`
 
-        this.AfVcfFile = `${this.tmpFolderFormat}_${AF_VCF_FILE}`
+            this.AfVcfFile = `${this.tmpFolderFormat}_${AF_VCF_FILE}`
 
-        this.annoStream = null
-        this.vcfStream = null
-        this.classifyStream = null
+            this.annoStream = null
+            this.vcfStream = null
+            this.classifyStream = null
 
-        await this.addTranscriptLength(vepOutput)
+            await this.addTranscriptLength(vepOutput)
 
-        await this.readVcf()
+            await this.readVcf()
 
-        await this.classifyVariant()
+            await this.classifyVariant()
 
-        // Upload files to s3
-        await this.uploadFiles();
+            // Upload files to s3
+            await this.uploadFiles();
 
-        await this.removeFiles()
+            await this.removeFiles()
+        } catch (error) {
+            await this.removeFiles()
+            throw error
+        }
+        
         
         return true;
     }
