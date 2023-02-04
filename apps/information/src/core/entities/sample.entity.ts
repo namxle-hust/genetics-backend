@@ -34,8 +34,21 @@ export class SampleEntity implements Sample {
     @Exclude()
     isDelete: boolean;
 
+    @ApiProperty()
+    firstName: string;
+    
+    @ApiProperty()
+    lastName: string;
+
+    @ApiProperty()
+    dob: string;
+
+    @ApiProperty()
+    ethnicity: string;
+
+
     constructor(partial: Partial<SampleEntity>) {
         Object.assign(this, partial);
     }
-    
+   
 }

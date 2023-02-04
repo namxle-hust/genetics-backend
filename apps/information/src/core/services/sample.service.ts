@@ -65,7 +65,12 @@ export class SampleService {
         let data: ISampleCreateInput = {
             userId: userId,
             name: dto.name,
-            type: dto.type
+            type: dto.type,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            dob: dto.dob,
+            ethnicity: dto.ethnicity,
+            gender: dto.gender
         }
 
         const sample = await this.sampleRepository.create(data);

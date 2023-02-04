@@ -93,6 +93,11 @@ model Sample {
     files    File[]
     analyses Analysis[]
 
+    firstName String?
+    lastName  String?
+    dob       String?
+    ethnicity String?
+
     @@map("samples")
 }
 

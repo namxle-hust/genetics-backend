@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, ValidateIf, ValidateNested } from "class-validator"
 import { Trim } from "../decorators";
-import { SampleType } from "@app/prisma";
+import { Gender, SampleType } from "@app/prisma";
 import { Type } from "class-transformer";
 import { FileCreateWithSampleDTO } from "./file.dto";
 import { ISampleFilter } from "../models";
@@ -27,6 +27,35 @@ export class SampleCreateDTO {
     @ValidateNested({ each: true })
     @Type(() => FileCreateWithSampleDTO)
     files: FileCreateWithSampleDTO[]
+
+    @IsString()
+    @IsNotEmpty()
+    @Trim()
+    @ApiProperty()
+    firstName: string
+
+    @IsString()
+    @IsNotEmpty()
+    @Trim()
+    @ApiProperty()
+    lastName: string
+
+    @IsString()
+    @IsNotEmpty()
+    @Trim()
+    @ApiProperty()
+    dob: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @Trim()
+    @ApiProperty()
+    ethnicity: string;
+
+    @IsNotEmpty()
+    @IsEnum(Gender)
+    @ApiProperty()
+    gender: Gender
 
 }
 

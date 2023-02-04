@@ -1,4 +1,4 @@
-import { SampleType } from "@app/prisma"
+import { Gender, SampleType } from "@app/prisma"
 import { SampleFilterDTO, TableDTO } from "../dto"
 
 export interface ISampleFilter {
@@ -39,7 +39,12 @@ export class SampleFindInput implements ISampleFindInput {
 export interface ISampleCreateInput {
     name: string
     userId: number
-    type: SampleType
+    type: SampleType,
+    firstName: string
+    lastName: string
+    dob: string;
+    ethnicity: string;
+    gender: Gender
 }
 
 export interface ISampleUpdateInput {
