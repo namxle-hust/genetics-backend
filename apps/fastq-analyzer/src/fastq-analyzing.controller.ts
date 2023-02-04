@@ -30,8 +30,11 @@ export class FastqAnalyzingController {
             this.rmqService.ack(context)
 
             await this.fastqAnalyzingService.analyzeFastq(data);
+
+            this.globalService.isAnalyzing = false;
             
         } catch (error) {
+            this.globalService.isAnalyzing = false;
             this.logger.error(error)
             await this.communicationService.updateSampleStatusStatus(AnalysisStatus.ERROR, data.id)
         }
