@@ -213,7 +213,7 @@ export class VcfService {
 
         return new Promise((resolve, reject) => {
             this.vcfStream = fs.createReadStream(this.vcfFile)
-                .pipe(es.split())
+                .pipe(es ? es.split() : undefined)
                 .pipe(es.mapSync((line) => {
                     this.vcfStream.pause()
 
