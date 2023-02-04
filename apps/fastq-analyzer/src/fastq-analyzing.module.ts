@@ -6,6 +6,7 @@ import { FastqAnalyzingController } from './fastq-analyzing.controller';
 import { FastqAnalyzingService, CommunicationService, AnalyzeService } from './services';
 import { VcfService } from './services/vcf.service'
 import { CommonService } from './services/common.service';
+import { GlobalService } from './services/global.service';
 
 @Module({
     imports: [
@@ -28,7 +29,8 @@ import { CommonService } from './services/common.service';
         CommunicationService,
         AnalyzeService,
         VcfService,
-        CommonService
+        CommonService,
+        GlobalService
     ],
 })
 export class FastqAnalyzingModule {}
