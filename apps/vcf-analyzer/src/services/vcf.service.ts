@@ -251,7 +251,9 @@ export class VcfService {
                             fs.appendFileSync(this.AfVcfFile, lineString + '\n')
 
                             this.vcfStream.extraData = []
+
                             this.logger.debug(line);
+
                             this.vcfStream.resume()
                             
                         } 
@@ -453,7 +455,9 @@ export class VcfService {
             }
 
             // Column ALT may contain multiples value seperated by a comma
-            result.ALT = data[altIndex].split(',')
+            if (altIndex != -1) {
+                result.ALT = data[altIndex].split(',')
+            }
 
             let chromIndex = this.headings.indexOf('#CHROM')
             let inputPosIndex = this.headings.indexOf('POS')
