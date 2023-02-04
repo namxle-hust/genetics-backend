@@ -97,6 +97,7 @@ model Sample {
     lastName  String?
     dob       String?
     ethnicity String?
+    gender    Gender?
 
     @@map("samples")
 }
