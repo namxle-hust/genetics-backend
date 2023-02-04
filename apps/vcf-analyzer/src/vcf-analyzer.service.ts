@@ -147,9 +147,15 @@ export class VcfAnalyzerService {
 
         this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_COMPRESSED_FILE : VCF_ORIGINAL_FILE}`
 
-        let command = `cp ${uploadPath} ${this.vcfOriginal}`
+        let copyCommand = `cp ${uploadPath} ${this.vcfOriginal}`
+        let createDirCommand = `mkdir -p ${this.analysisFolder}`
 
-        await this.commonService.runCommand(command);
+        let commands = [
+            createDirCommand,
+            copyCommand
+        ]
+
+        await this.commonService.runCommand(commands.join(' && '));
     }
 
     async fomatVcfFile() {
