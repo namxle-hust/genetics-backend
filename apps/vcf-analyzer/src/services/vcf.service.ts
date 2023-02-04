@@ -215,6 +215,7 @@ export class VcfService {
             this.vcfStream = fs.createReadStream(this.vcfFile)
                 .pipe(es ? es.split() : undefined)
                 .pipe(es.mapSync((line) => {
+                    this.logger.debug(line);
                     this.vcfStream.pause()
 
                     let eventName, extraData
