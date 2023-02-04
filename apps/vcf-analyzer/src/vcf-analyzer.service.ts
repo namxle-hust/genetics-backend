@@ -17,7 +17,8 @@ export class VcfAnalyzerService {
 
     private analysisFolder: string
 
-    private uploadFolder: string
+    private s3UploadFolder: string
+    private s3Dir: string
 
 
     private vcfModified: string
@@ -38,7 +39,8 @@ export class VcfAnalyzerService {
         private readonly vcfService: VcfService
     ) {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
-        this.uploadFolder = this.configService.get<string>('')
+        this.s3UploadFolder = this.configService.get<string>('S3_UPLOAD_FOLDER')
+        this.s3Dir = this.configService.get<string>('S3_DIR')
 
     }
 
@@ -129,15 +131,17 @@ export class VcfAnalyzerService {
 
         } else {
             // Get only first element because vcf only allow upload 1 file
-            uploadPath = `${this.uploadFolder}/${this.analysis.sample.files[0].uploadedName}`
+            uploadPath = `${this.s3Dir}/${this.s3UploadFolder}/${this.analysis.sample.files[0].uploadedName}`
 
+            
             // Check if it is vcf.gz file
             this.isGZ = uploadPath.indexOf('vcf.gz') != -1 ? true : false
-
+            
         }
-
+        
         if (!fs.existsSync(uploadPath)) {
             let error = this.commonService.customError('Synchronizing');
+            this.logger.log(uploadPath)
             throw error;
         }
 
