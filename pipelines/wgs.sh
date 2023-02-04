@@ -221,46 +221,6 @@ if [ "$run_vqsr" = "yes" ]; then
 	$release_dir/bin/sentieon plot vqsr -o vqsr_SNP_INDEL.VQSR.pdf vqsr_SNP_INDEL.hc.plot_file.txt
 fi
 
-if test -f "metrics-report.pdf"; then
-	convert -density 300 -trim metrics-report.pdf -quality 100 metrics-chart.jpg && mv metrics-chart-1.jpg metrics-chart-1a.jpg && mv metrics-chart-2.jpg metrics-chart-1.jpg && mv metrics-chart-1a.jpg metrics-chart-2.jpg && mogrify -crop 0x2000+0+0 metrics-chart-0.jpg && mogrify -crop 0x2000+0+0 metrics-chart-1.jpg && mogrify -crop 0x2000+0+0 metrics-chart-2.jpg && mogrify -crop 0x2000+0+0 metrics-chart-3.jpg
-fi
-
-#CNV Files
-
-mkdir CNV
-cd CNV
-
-dotnet /apps/Canvas/Canvas-1.40.0.1613+master_x64/Canvas.dll  SmallPedigree-WGS  -b ../realigned.bam  --sample-b-allele-vcf  ../vqsr_SNP_INDEL.hc.recaled.vcf.gz -r $ref/hs37d5/hs37d5.fa  -g $ref/hs37d5/ -f $ref/canvas/filter13.bed -o ./ 
-
-#QC FILES
-
-cd ../ && mkdir QC && cd QC
-
-export SENTIEON_LICENSE=/apps/sentieon/lic/Breakthrough_Genomics_eval.lic
-/apps/sentieon/201808.08/bin/sentieon driver -r $ref/hs37d5/hs37d5.fa -i ../deduped.bam  --algo WgsMetricsAlgo deduped_wgs_metrics.txt
-samtools flagstat ../bwa.bam -@40 > flagstat
-nohup /apps/bedtools/tmp/2/bin/coverageBed -abam ../realigned.bam  -b /apps/sentieon/run_v3/bed/Homo_sapiens.GRCh37.75.genes.UTR.Agilent_v6.intersect_GIAB_highconf.veritas_snps.p_lp_risk_Y_MT_20200222.bed -d > every-nt
-perl /apps/sentieon/run_v3/OnTargetReadDepth.pl  every-nt every-nt  > every-nt.depth
-
-
-less deduped_wgs_metrics.txt | awk -F"\t" '{if(NR==3){print $0}}' > data_deduped.tsv
-
-less flagstat | awk -F" " '{if(NR == 1){printf "%s", $1"\t"} if(NR == 5){printf "%s", $1"\t"; printf(substr($5,index($5,"(") + 1,index($5,"%") - 2))}}' > data_flagstat.tsv
-
-awk -F"\t" 'FNR==NR{raw_reads=$1; reads_mapped=$2; rm_percent=$3 ; next;}{duplicate_rate=(1-$7)*reads_mapped; printf("%s %.1f %s", raw_reads"\t"reads_mapped"\t"rm_percent"\t"$2"\t"$3"\t"$7"\t", duplicate_rate, "\t"$13"\t"$15"\t"$17"\t"$19"\t"$20"\t"$21"\n")}' data_flagstat.tsv data_deduped.tsv | awk -F"\t" '{print "Raw reads\tReads Mapped\tReads Mapped Percent\tMEAN_COVERAGE\tSD_COVERAGE\tPCT_EXC_DUPE\tDuplicates Rate\tPCT_1X\tPCT_10X\tPCT_20X\tPCT_30X\tPCT_40X\tPCT_50X"; print $0}' > wgs_metrics.txt
-
-echo -e  "chrom\tstart\tend\tmax\tmin\tavg\tlength\tindex" > scatter-data-header.tsv && less  every-nt.depth |shuf -n 10000 | awk -F"\t" '{split($2, a, "_"); print a[1]"\t"a[2]"\t"a[3]"\t"$3"\t"$4"\t"$5"\t"$6}' | vcf-sort -c | awk -F"\t" '{print $0"\t"NR}' > scatter-data-no-header.tsv && cat scatter-data-header.tsv scatter-data-no-header.tsv > scatter-data.tsv && rm scatter-data-header.tsv scatter-data-no-header.tsv
-
-cd ../
-
-/apps/sentieon/run_v2/bed_files/PGL/PGL.sh $workdir/realigned.bam $workdir/vqsr_SNP_INDEL.hc.recaled.vcf.gz $sample
-
-# RUN split reads command
-
-/apps/sentieon/run_v3/extract_split_reads_v2.sh $workdir/realigned.bam $workdir $sample
-
-# RUN split reads command for CNV
-
-cd $workdir
-
-/apps/sentieon/run_v3/annotate_cnv_by_split_reads CNV/CNV.vcf.gz split_reads.bam /apps/sentieon/run_v3/conf.sr
+# if test -f "metrics-report.pdf"; then
+# 	convert -density 300 -trim metrics-report.pdf -quality 100 metrics-chart.jpg && mv metrics-chart-1.jpg metrics-chart-1a.jpg && mv metrics-chart-2.jpg metrics-chart-1.jpg && mv metrics-chart-1a.jpg metrics-chart-2.jpg && mogrify -crop 0x2000+0+0 metrics-chart-0.jpg && mogrify -crop 0x2000+0+0 metrics-chart-1.jpg && mogrify -crop 0x2000+0+0 metrics-chart-2.jpg && mogrify -crop 0x2000+0+0 metrics-chart-3.jpg
+# fi
