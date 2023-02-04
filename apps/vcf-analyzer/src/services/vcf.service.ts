@@ -215,7 +215,6 @@ export class VcfService {
             this.vcfStream = fs.createReadStream(this.vcfFile)
                 .pipe(es ? es.split() : undefined)
                 .pipe(es.mapSync((line) => {
-                    this.logger.debug(line);
                     this.vcfStream.pause()
 
                     let eventName, extraData
@@ -231,6 +230,7 @@ export class VcfService {
                         this.resumeAnnoStream()
                     } else {
                         if (line) {
+                            this.logger.debug(line);
                             let lineData = line.split('\t')
                             let lineString = line;
                             if (line.search('#CHROM') == 0) {
@@ -252,7 +252,7 @@ export class VcfService {
                 .on('error', (error) => {
                     this.vcfStream.hasError = true
                     this.logger.error('Read vcf error')
-                    this.logger.debug(error);
+                    this.logger.error(error);
                     // return self.vcfEvents.emit('completed', false)
                     this.vcfStream.destroy()
                 })
