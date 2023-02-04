@@ -1,9 +1,9 @@
 import { ANALYSIS_COLLECTION_PREFIX } from "@app/common/mongodb";
 import { Service } from "@app/common/shared/service";
-import { Analysis } from "@app/prisma";
+import { Analysis, Sample } from "@app/prisma";
 import { Injectable } from "@nestjs/common";
 import { IPgxData, IPgxReportData, IReportData } from "../models/report.model";
-import { PgxRepository, VariantRepository } from "../repository";
+import { AnalysisRepository, PgxRepository, VariantRepository } from "../repository";
 import { VariantService } from "./variant.service";
 
 @Injectable()
@@ -11,7 +11,8 @@ export class ReportService extends Service{
     constructor(
         private variantService: VariantService,
         private variantRepository: VariantRepository,
-        private pgxRepository: PgxRepository
+        private pgxRepository: PgxRepository,
+        private analysisRepository: AnalysisRepository
     ) {
         super()
     }
@@ -19,6 +20,8 @@ export class ReportService extends Service{
     async getReportData(analysisId: number): Promise<IReportData> {
 
         let pgxData: IPgxData[] = await this.getPgxData(analysisId);
+
+        const sample: Sample = await this.analysisRepository.findSampleByAnalysis(analysisId);
 
         let categories = []
         let data: IPgxReportData[] = []
@@ -108,7 +111,8 @@ export class ReportService extends Service{
 
         return {
             pgxData: resultList,
-            categories: categories
+            categories: categories,
+            sample: sample
         };
     }
 

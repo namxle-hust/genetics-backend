@@ -24,6 +24,22 @@ export class AnalysisRepository {
         }
     }
 
+    async findSampleByAnalysis(id: number): Promise<Sample> {
+        const analysis = await this.prisma.analysis.findUnique({
+            where: { id: id },
+            include: {
+                sample: true,
+                workspace: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+        })
+
+        return analysis.sample;
+    }
+
     async findById(id: number): Promise<Analysis> {
         const analysis = await this.prisma.analysis.findUnique({
             where: { id: id },

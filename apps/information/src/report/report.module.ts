@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PgxRepository, VariantRepository } from '../core/repository';
+import { AnalysisRepository, PgxRepository, SampleRepository, VariantRepository } from '../core/repository';
 import { ReportService, VariantService } from '../core/services';
 import { ReportController } from './report.controller';
 
@@ -9,7 +9,9 @@ import { ReportController } from './report.controller';
         VariantService,
         ReportService,
         VariantRepository,
-        PgxRepository
+        PgxRepository,
+        SampleRepository,
+        AnalysisRepository
     ]
 })
 export class ReportModule { }

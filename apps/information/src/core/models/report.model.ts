@@ -1,3 +1,5 @@
+import { Sample } from "@app/prisma"
+
 export interface IPgxData {
     chrom: string
     pos: string
@@ -32,4 +34,5 @@ export interface IPgxReportData {
 export interface IReportData {
     categories: string[]
     pgxData: IPgxReportData[]
+    sample: Sample
 }
