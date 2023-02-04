@@ -250,7 +250,8 @@ export class VcfService {
                 }))
                 .on('error', (error) => {
                     this.vcfStream.hasError = true
-                    this.logger.error('Read vcf error', error)
+                    this.logger.error('Read vcf error')
+                    this.logger.debug(error);
                     // return self.vcfEvents.emit('completed', false)
                     this.vcfStream.destroy()
                 })
