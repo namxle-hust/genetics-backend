@@ -10,6 +10,8 @@ export const VCF_FILE = 'analysis.vcf'
 
 export const ANALYZING_FILE = 'analysis.analyzing'
 
+export const VCF_FORMAT_TMP_FILE = 'analysis.tmp.format.vcf'
+
 // VEP files
 export const VEP_OUTPUT = 'vep.canonical'
 export const VCF_HGMD = 'vep.hgmd.vcf'

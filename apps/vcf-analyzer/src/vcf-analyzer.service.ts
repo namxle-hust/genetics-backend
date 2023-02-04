@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
 import { AnnovarService, VcfService } from './services';
-import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED, ANALYZING_FILE } from '@app/common';
+import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED, ANALYZING_FILE, VCF_FORMAT_TMP_FILE } from '@app/common';
 import { SampleType, VcfType } from '@app/prisma';
 import * as fs from 'fs'
 
@@ -22,6 +22,7 @@ export class VcfAnalyzerService {
 
 
     private vcfModified: string
+    private vcfFormatTmp: string
     private vcfOriginal: string
     private vcfBed: string
     private vcfFile: string
@@ -96,6 +97,7 @@ export class VcfAnalyzerService {
         this.vcfBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
         this.vcfFile = `${this.analysisFolder}/${VCF_FILE}`
         this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
+        this.vcfFormatTmp = `${this.analysisFolder}/${VCF_FORMAT_TMP_FILE}`
         this.vepOutput = this.annovarService.getVepOutput(analysis)
        
 
@@ -160,13 +162,16 @@ export class VcfAnalyzerService {
 
     async fomatVcfFile() {
         let zipFileCommand = 'ls'
-
+        let preformatCommand = `less ${this.vcfOriginal} > ${this.vcfFormatTmp}`
+        
         if (this.isGZ) {
             zipFileCommand = `bgzip -f ${this.vcfFile}`
+            preformatCommand = `bgzip -cd ${this.vcfOriginal} > ${this.vcfFormatTmp}`
         }
 
         let commands = [
-            `less ${this.vcfOriginal} | awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' > ${this.vcfFile}`,
+            preformatCommand,
+            `awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' ${this.vcfFormatTmp} > ${this.vcfFile}`,
             zipFileCommand
         ]
 
