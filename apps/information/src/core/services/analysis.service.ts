@@ -1,7 +1,7 @@
 import { NotFoundError, AnalysisStatus, Analysis } from '@app/prisma';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AnalysisCreateDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO } from '../dto';
-import { IAnalysisCreateInput, IAnalysisFindInput, IAnalysisUpdateInput, TableFindInput } from '../models';
+import { AnalysisFindInput, IAnalysisCreateInput, IAnalysisFindInput, IAnalysisUpdateInput, TableFindInput } from '../models';
 import { TableOutputEntity, AnalysisEntity } from '../entities';
 import { AnalysisRepository, SampleRepository } from '../repository';
 @Injectable({})
@@ -14,7 +14,9 @@ export class AnalysisService {
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<IAnalysisFindInput, AnalysisFilterDTO>(dto, { isDeleted: false });
+        let findInput: IAnalysisFindInput = new AnalysisFindInput(dto, userId);
+
+        let tableFindDto = new TableFindInput<IAnalysisFindInput, AnalysisFilterDTO>(dto, findInput);
 
         const total = await this.analysisRepository.count(tableFindDto);
 

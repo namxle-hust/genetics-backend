@@ -7,7 +7,9 @@ import { FileCreateWithSampleDTO } from "./file.dto";
 import { ISampleFilter } from "../models";
 
 export class SampleFilterDTO implements ISampleFilter {
-    
+    @ApiProperty()
+    @IsEnum(SampleType)
+    type?: SampleType;
 }
 
 export class SampleCreateDTO {

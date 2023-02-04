@@ -1,7 +1,7 @@
 import { Workspace } from '@app/prisma';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { TableDTO, WorkspaceFilterDTO } from '../dto';
-import { TableFindInput } from '../models';
+import { TableFindInput, WorkspaceFindInput } from '../models';
 import { WorkspaceCreateDTO, WorkspaceUpdateDTO } from '../dto';
 import { TableOutputEntity, WorkspaceEntity } from '../entities';
 import { IWorkspaceCreateInput, IWorkspaceFindInput, IWorkspaceUpdateInput } from '../models';
@@ -17,16 +17,7 @@ export class WorkspaceService {
             total: 0
         }
 
-        let findInput: IWorkspaceFindInput = { 
-            userId: userId,
-        }
-
-        // If there is a search term
-        if (dto.searchTerm) {
-            findInput.name = { 
-                contains: dto.searchTerm
-            };
-        }
+        let findInput: IWorkspaceFindInput = new WorkspaceFindInput(dto, userId)
 
         let tableFindDto = new TableFindInput<IWorkspaceFindInput, WorkspaceFilterDTO>(dto, findInput);
         
