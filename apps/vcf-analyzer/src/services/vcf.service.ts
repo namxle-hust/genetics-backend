@@ -238,6 +238,7 @@ export class VcfService {
 
                             this.resumeAnnoStream()
                         }
+                        this.vcfStream.resume()
                     } else {
                         if (line) {
                             let lineData = line.split('\t')
@@ -256,9 +257,9 @@ export class VcfService {
                             this.vcfStream.extraData = []
 
                             // this.logger.debug(line);
+                            this.vcfStream.resume()
                         }
 
-                        this.vcfStream.resume()
                     }
                 }))
                 .on('error', (error) => {
