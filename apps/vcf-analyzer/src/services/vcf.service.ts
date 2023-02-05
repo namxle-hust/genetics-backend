@@ -40,9 +40,9 @@ export class VcfService {
     private annoArray = [];
     private prevLine: string
 
-    private annoStream
-    private vcfStream
-    private classifyStream
+    private annoStream: any
+    private vcfStream: any
+    private classifyStream: any
 
     private genomicCount = 0
     private exonicCount = 0
@@ -62,7 +62,6 @@ export class VcfService {
         private commonService: CommonService,
         private configService: ConfigService,
         private calculateService: CalculateService,
-        private eventEmitter: EventEmitter2
     ) {
         this._transcriptDir = this.configService.get<string>('TRANSCRIPT_DIR')
         this._hgmdTranscript = this.configService.get<string>('HGMD_TRANSCRIPT')
@@ -124,7 +123,7 @@ export class VcfService {
             // Upload files to s3
             await this.uploadFiles();
 
-            await this.removeFiles()
+            // await this.removeFiles()
         } catch (error) {
             // await this.removeFiles()
             throw error
