@@ -57,7 +57,7 @@ export class AnalyzeService {
 
         const files = analysis.sample.files;
 
-        const SampleName = analysis.name.replace(' ', '_');
+        const SampleName = analysis.name.replace(/ /gm, '_');
 
         const R1Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
         const R2Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
@@ -93,7 +93,7 @@ export class AnalyzeService {
         const R1Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
         const R2Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
 
-        const SampleName = analysis.name.replace(' ', '_');
+        const SampleName = analysis.name.replace(/ /gm, '_');
 
         const VcfHcOutput = 'vqsr_SNP_INDEL.hc.recaled.vcf.gz'
 
