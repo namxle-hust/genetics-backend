@@ -74,7 +74,7 @@ export class VcfService {
     }
 
     async removeFiles() {
-        let command = `rm ${this.tmpFolderFormat}*`
+        var command = `rm ${this.tmpFolderFormat}*`
 
         await this.commonService.runCommand(command);
     }
@@ -135,7 +135,7 @@ export class VcfService {
     }
 
     async uploadFiles() {
-        let commands = [
+        var commands = [
             `cp ${this.annoVepFile} ${this.analysisFolder}/${RESULT_ANNO_FILE}`,
             `cp ${this.canonicalFile} ${this.analysisFolder}/${RESULT_CANONICAL_FILE}`
         ]
@@ -145,7 +145,7 @@ export class VcfService {
 
 
     async addTranscriptLength(originAnnoFile) {
-        let vepStream;
+        var vepStream;
 
         return new Promise((resolve, reject) => {
             vepStream = fs.createReadStream(originAnnoFile)
@@ -163,7 +163,7 @@ export class VcfService {
                             vepStream.headings.push('#transcript_gene')
                             vepStream.headings.push('transcriptHGMD_gene')
 
-                            let annoHeadings = vepStream.headings
+                            var annoHeadings = vepStream.headings
 
                             fs.appendFileSync(this.originVepFile, annoHeadings.join('\t') + '\n')
                         }
@@ -171,13 +171,13 @@ export class VcfService {
                         vepStream.resume()
                     } else {
                         if (line) {
-                            let lineData = line.split('\t')
+                            var lineData = line.split('\t')
 
                             var transcript = lineData[vepStream.headings.indexOf('Feature')].split('.')[0]
 
-                            let varExtra = lineData[vepStream.headings.indexOf('Extra')]
+                            var varExtra = lineData[vepStream.headings.indexOf('Extra')]
 
-                            let geneSymbol = this.calculateService.formatData(this.getGeneSymbol(varExtra))
+                            var geneSymbol = this.calculateService.formatData(this.getGeneSymbol(varExtra))
 
                             lineData.push(transcript + '_' + geneSymbol)
                             lineData.push(lineData[vepStream.headings.indexOf('Feature')] + '_' + geneSymbol)
@@ -200,7 +200,7 @@ export class VcfService {
                 .on('end', () => {
                     this.logger.log('Add transcript done')
 
-                    let transcriptCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$3]=$2; next}{ if (length(a[$15]) == 0) { print $0"\t0" } else { print $0"\t"a[$15] }}' ${this._transcriptDir} ${this.originVepFile} > ${this.vcfTranscriptFile} && awk -F"\t" 'FNR==NR{a[$2"_"$1]="exist"; next}{ if ( $1 == "#Uploaded_variation") { print $0"\tHGMD_transcript"} else if (a[$16] != "exist") { print $0"\t0" } else { print $0"\t"a[$16] }}' ${this._hgmdTranscript} ${this.vcfTranscriptFile} > ${this.vcfTranscriptFile}_tmp && cat ${this.vcfTranscriptFile}_tmp > ${this.vcfTranscriptFile}`;
+                    var transcriptCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$3]=$2; next}{ if (length(a[$15]) == 0) { print $0"\t0" } else { print $0"\t"a[$15] }}' ${this._transcriptDir} ${this.originVepFile} > ${this.vcfTranscriptFile} && awk -F"\t" 'FNR==NR{a[$2"_"$1]="exist"; next}{ if ( $1 == "#Uploaded_variation") { print $0"\tHGMD_transcript"} else if (a[$16] != "exist") { print $0"\t0" } else { print $0"\t"a[$16] }}' ${this._hgmdTranscript} ${this.vcfTranscriptFile} > ${this.vcfTranscriptFile}_tmp && cat ${this.vcfTranscriptFile}_tmp > ${this.vcfTranscriptFile}`;
 
                     child.exec(transcriptCommand, (error, stdout, stderr) => {
                         if (error) {
@@ -223,7 +223,7 @@ export class VcfService {
                 .pipe(es.mapSync((line) => {
                     this.vcfStream.pause()
 
-                    let eventName, extraData
+                    var eventName, extraData
 
                     if (this.lineIndex != null) {
                         this.logger.debug(line);
@@ -237,10 +237,10 @@ export class VcfService {
                         this.resumeAnnoStream()
                     } else {
                         if (line) {
-                            let lineData = line.split('\t')
-                            let lineString = line;
+                            var lineData = line.split('\t')
+                            var lineString = line;
                             if (line.search('#CHROM') == 0) {
-                                // This is the heading line, let's save it for later use
+                                // This is the heading line, var's save it for later use
                                 this.lineIndex = 0
                                 this.headings = line.split('\t')
                                 this.logger.log(this.headings)
@@ -263,7 +263,7 @@ export class VcfService {
                     this.vcfStream.hasError = true
                     this.logger.error('Read vcf error')
                     this.logger.error(error);
-                    // return self.vcfEvents.emit('completed', false)
+                    // return self.vcfEvents.emit('compvared', false)
                     this.vcfStream.destroy()
                 })
                 .on('close', () => {
@@ -277,45 +277,45 @@ export class VcfService {
                         return reject(false);
                     } else {
                         // IF AF only 1.00 or 0.500
-                        let tabixComand = '';
+                        var tabixComand = '';
 
                         if (this.checkAF == false) {
-                            let compressedFile = this.AfVcfFile + '.gz';
-                            let tabixFile = this.AfVcfFile + '.gz.tbi';
-                            let compressedFileDist = this.vcfFile + '.gz';
-                            let tabixFileDist = this.vcfFile + '.gz.tbi';
+                            var compressedFile = this.AfVcfFile + '.gz';
+                            var tabixFile = this.AfVcfFile + '.gz.tbi';
+                            var compressedFileDist = this.vcfFile + '.gz';
+                            var tabixFileDist = this.vcfFile + '.gz.tbi';
 
                             tabixComand = `bgzip -f ${this.AfVcfFile} && tabix -f ${compressedFile} && rm -rf ${compressedFileDist} ${tabixFileDist} && mv -f ${compressedFile} ${compressedFileDist} && mv -f ${tabixFile} ${tabixFileDist} && `
                         }
 
-                        let clearRefAlt = `awk -F"\t" 'BEGIN{OFS="\t"}{ref = $7;alt = $8; chrom = $5; pos = $6; gene = $16; if(index($0, "sampleId") == 1) { print $0;} else if (length(ref) == 1 || length(alt) == 1) { $83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else if (substr(ref,length(ref),1) != substr(alt,length(alt),1)) {$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else {while (length(ref) != 1 && length(alt) != 1 && substr(ref,length(ref),1) == substr(alt,length(alt),1)) {ref = substr(ref, 1, length(ref)-1);alt = substr(alt, 1, length(alt)-1);}$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;}}' ${this.annoFile} >  ${this.annoFile}_temp && mv -f ${this.annoFile}_temp ${this.annoFile} && `
+                        var clearRefAlt = `awk -F"\t" 'BEGIN{OFS="\t"}{ref = $7;alt = $8; chrom = $5; pos = $6; gene = $16; if(index($0, "sampleId") == 1) { print $0;} else if (length(ref) == 1 || length(alt) == 1) { $83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else if (substr(ref,length(ref),1) != substr(alt,length(alt),1)) {$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else {while (length(ref) != 1 && length(alt) != 1 && substr(ref,length(ref),1) == substr(alt,length(alt),1)) {ref = substr(ref, 1, length(ref)-1);alt = substr(alt, 1, length(alt)-1);}$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;}}' ${this.annoFile} >  ${this.annoFile}_temp && mv -f ${this.annoFile}_temp ${this.annoFile} && `
 
                         // Add ClinVar
-                        let clinVarCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$7]=$5"\t"$6"\t"$8"\t"$9"\t"$10"\t"$11; b[$1"_"$2"_"$3"_"$4"_"$7]=$12; next}{ curation = (length(b[$83]) == 0) ? "." : b[$83]; if(index($0, "sampleId") == 1) {print $0"\tCLNACC\tCLNSIG_BTG\treview_status\tlast_evaluated\tgold_stars\tconsensus_score\tcuration"} else if (length(a[$83]) == 0) { print $0"\t.\t.\t.\t.\t.\t.\t"curation } else { print $0"\t"a[$83]"\t"curation }}' ${this._clinvarDir} ${this.annoFile}  > ${this.vcfHGMDFile} `
+                        var clinVarCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$7]=$5"\t"$6"\t"$8"\t"$9"\t"$10"\t"$11; b[$1"_"$2"_"$3"_"$4"_"$7]=$12; next}{ curation = (length(b[$83]) == 0) ? "." : b[$83]; if(index($0, "sampleId") == 1) {print $0"\tCLNACC\tCLNSIG_BTG\treview_status\tlast_evaluated\tgold_stars\tconsensus_score\tcuration"} else if (length(a[$83]) == 0) { print $0"\t.\t.\t.\t.\t.\t.\t"curation } else { print $0"\t"a[$83]"\t"curation }}' ${this._clinvarDir} ${this.annoFile}  > ${this.vcfHGMDFile} `
 
                         // Add Nan ClinVar
-                        let BTGConcensusCommand = `&& awk -F"\t" 'FNR==NR{a[$1]=$2; next}{ if(index($0, "sampleId") == 1) {print $0"\tBTG_Concensus"} else if (length(a[$5"-"$6"-"$7"-"$8"-"$16]) == 0) { print $0"\t." } else { print $0"\t"a[$5"-"$6"-"$7"-"$8"-"$16] }}' ${this._clinvarBTG} ${this.vcfHGMDFile}  > ${this.vcfHGMDFile}_temp && mv -f ${this.vcfHGMDFile}_temp ${this.vcfHGMDFile} `
+                        var BTGConcensusCommand = `&& awk -F"\t" 'FNR==NR{a[$1]=$2; next}{ if(index($0, "sampleId") == 1) {print $0"\tBTG_Concensus"} else if (length(a[$5"-"$6"-"$7"-"$8"-"$16]) == 0) { print $0"\t." } else { print $0"\t"a[$5"-"$6"-"$7"-"$8"-"$16] }}' ${this._clinvarBTG} ${this.vcfHGMDFile}  > ${this.vcfHGMDFile}_temp && mv -f ${this.vcfHGMDFile}_temp ${this.vcfHGMDFile} `
 
                         // Add Nan Clinvar 03 2020
                         clinVarCommand += BTGConcensusCommand;
                         // clinVarCommand += AddClinvarCommand;
 
                         // Add cosmic
-                        let addCosmicID = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$2]=$1; next}{if(length(a[$14]) == 0){ print $0; } else { if (a[$14] == $16) { print $0; } else { $14 = "."; print $0;}  } }' ${this._cosmic} ${this.vcfHGMDFile} > ${this.annoFile} `
+                        var addCosmicID = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$2]=$1; next}{if(length(a[$14]) == 0){ print $0; } else { if (a[$14] == $16) { print $0; } else { $14 = "."; print $0;}  } }' ${this._cosmic} ${this.vcfHGMDFile} > ${this.annoFile} `
 
                         // Add HGMD
-                        let hgmdCommand = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$5]=$6; next}{ if(index($0, "sampleId") == 1) {print $0"\tHGMD"} else if (length(a[$83]) == 0) { print $0"\t."; } else { print $0"\tDM"; }}' ${this._hgmdPath} ${this.annoFile} > ${this.vcfHgmdClinvarFile}`
+                        var hgmdCommand = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$5]=$6; next}{ if(index($0, "sampleId") == 1) {print $0"\tHGMD"} else if (length(a[$83]) == 0) { print $0"\t."; } else { print $0"\tDM"; }}' ${this._hgmdPath} ${this.annoFile} > ${this.vcfHgmdClinvarFile}`
 
                         // Move anno file from tmp dir to S3 dir
                         // Remote origin anno file
                       
-                        let command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand} && rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
+                        var command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand} && rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
                   
 
                         child.exec(command, (error, stdout, stderr) => {
                             if (error) {
                                 this.logger.error('Move anno error', error)
-                                // return self.vcfEvents.emit('completed', false)
+                                // return self.vcfEvents.emit('compvared', false)
                                 return reject(false);
                             }
 
@@ -335,32 +335,32 @@ export class VcfService {
                 .pipe(es.mapSync((line) => {
                     this.classifyStream.pause()
 
-                    let lineData = line.split('\t')
+                    var lineData = line.split('\t')
                     if (this.lineIndex == null) {
                         this.classifyStream.headings = line.split('\t')
                         this.lineIndex = 0
                         fs.appendFileSync(this.annoVepFile, line + '\n')
                     } else if (lineData.length > 5) {
 
-                        //let CLINSIG = lineData[self.classifyStream.headings.indexOf('CLINSIG')]
-                        let VARIANT_ID = lineData[this.classifyStream.headings.indexOf('Clinvar_VARIANT_ID')]
-                        // let NEW_CLINSIG = lineData[self.classifyStream.headings.indexOf('NEW_CLINSIG')]
-                        let codingEffect = lineData[this.classifyStream.headings.indexOf('codingEffect')]
-                        let gene = lineData[this.classifyStream.headings.indexOf('gene')]
-                        let CLNSIG_ID = lineData[this.classifyStream.headings.indexOf('CLNACC')]
-                        let BTG_CLINSIG = lineData[this.classifyStream.headings.indexOf('CLNSIG_BTG')]
-                        let HGMD = lineData[this.classifyStream.headings.indexOf('HGMD')]
-                        let BTG_Concensus = lineData[this.classifyStream.headings.indexOf('BTG_Concensus')]
-                        let GoldStars = lineData[this.classifyStream.headings.indexOf('gold_stars')]
-                        let VAR_SCORE = lineData[this.classifyStream.headings.indexOf('VAR_SCORE')]
-                        let Curation = lineData[this.classifyStream.headings.indexOf('curation')]
+                        //var CLINSIG = lineData[self.classifyStream.headings.indexOf('CLINSIG')]
+                        var VARIANT_ID = lineData[this.classifyStream.headings.indexOf('Clinvar_VARIANT_ID')]
+                        // var NEW_CLINSIG = lineData[self.classifyStream.headings.indexOf('NEW_CLINSIG')]
+                        var codingEffect = lineData[this.classifyStream.headings.indexOf('codingEffect')]
+                        var gene = lineData[this.classifyStream.headings.indexOf('gene')]
+                        var CLNSIG_ID = lineData[this.classifyStream.headings.indexOf('CLNACC')]
+                        var BTG_CLINSIG = lineData[this.classifyStream.headings.indexOf('CLNSIG_BTG')]
+                        var HGMD = lineData[this.classifyStream.headings.indexOf('HGMD')]
+                        var BTG_Concensus = lineData[this.classifyStream.headings.indexOf('BTG_Concensus')]
+                        var GoldStars = lineData[this.classifyStream.headings.indexOf('gold_stars')]
+                        var VAR_SCORE = lineData[this.classifyStream.headings.indexOf('VAR_SCORE')]
+                        var Curation = lineData[this.classifyStream.headings.indexOf('curation')]
 
-                        let ClinvarText = BTG_CLINSIG.split(";_").join(", ")
-                        let ClinvarText2 = ClinvarText.split("_").join(" ")
-                        let ClinvarText3 = ClinvarText2.split("/").join(", ")
-                        let CLINSIG = ClinvarText3
+                        var ClinvarText = BTG_CLINSIG.split(";_").join(", ")
+                        var ClinvarText2 = ClinvarText.split("_").join(" ")
+                        var ClinvarText3 = ClinvarText2.split("/").join(", ")
+                        var CLINSIG = ClinvarText3
 
-                        let alleleFrequencyData = {
+                        var alleleFrequencyData = {
                             BTG_Concensus: BTG_Concensus,
                             GoldStars: GoldStars != '.' ? parseInt(GoldStars) : 0,
                             VAR_SCORE: GoldStars != '.' ? parseFloat(VAR_SCORE) : 0,
@@ -392,7 +392,7 @@ export class VcfService {
                             varLocation: lineData[this.classifyStream.headings.indexOf('varLocation')],
                         }
 
-                        let classificationData = this.calculateService.calculateClinsigFinal(CLINSIG, alleleFrequencyData, codingEffect, gene, CLNSIG_ID, HGMD)
+                        var classificationData = this.calculateService.calculateClinsigFinal(CLINSIG, alleleFrequencyData, codingEffect, gene, CLNSIG_ID, HGMD)
 
                         lineData[this.classifyStream.headings.indexOf('CLINSIG_PRIORITY')] = classificationData.CLINSIG_PRIORITY;
                         lineData[this.classifyStream.headings.indexOf('CLINSIG_FINAL')] = classificationData.CLINSIG_FINAL;
@@ -413,17 +413,17 @@ export class VcfService {
                 .on('error', (error) => {
                     this.classifyStream.hasError = true
                     this.logger.error('classifyVariant error', error)
-                    // return this.vcfEvents.emit('completed', false)
+                    // return this.vcfEvents.emit('compvared', false)
                     this.classifyStream.destroy()
                 })
                 .on('close', () => {
                     if (this.classifyStream.hasError) {
-                        // this.vcfEvents.emit('completed', false)
+                        // this.vcfEvents.emit('compvared', false)
                         return reject(false)
                     } else {
-                        this.logger.log('Classify Variant completed')
+                        this.logger.log('Classify Variant compvared')
                         return resolve(true);
-                        // return this.vcfEvents.emit('completed', true)
+                        // return this.vcfEvents.emit('compvared', true)
                     }
                 })
         })
@@ -432,16 +432,16 @@ export class VcfService {
 
     analyzeLine(vcfLine) {
         if (vcfLine) {
-            let modified = ''
-            let data = vcfLine.split('\t')
+            var modified = ''
+            var data = vcfLine.split('\t')
 
-            let altIndex = this.headings.indexOf('ALT')
-            let refIndex = this.headings.indexOf('REF')
-            let qualIndex = this.headings.indexOf('QUAL')
-            let filterIndex = this.headings.indexOf('FILTER')
-            let infoIndex = this.headings.indexOf('INFO')
+            var altIndex = this.headings.indexOf('ALT')
+            var refIndex = this.headings.indexOf('REF')
+            var qualIndex = this.headings.indexOf('QUAL')
+            var filterIndex = this.headings.indexOf('FILTER')
+            var infoIndex = this.headings.indexOf('INFO')
 
-            let result = this.calculateData(data)
+            var result = this.calculateData(data)
             result.analysisId = this.analysisId
             result.REF = data[refIndex]
             result.QUAL = data[qualIndex]
@@ -449,8 +449,8 @@ export class VcfService {
             result.INFO = data[infoIndex]
 
             if (result.INFO.indexOf(';CSQ=') != -1) {
-                let vepRL = result.INFO.split(';CSQ=')[1];
-                let geneTranscipt = vepRL.split('|')[6];
+                var vepRL = result.INFO.split(';CSQ=')[1];
+                var geneTranscipt = vepRL.split('|')[6];
                 result.MT = geneTranscipt
             }
 
@@ -459,8 +459,8 @@ export class VcfService {
                 result.ALT = data[altIndex].split(',')
             }
 
-            let chromIndex = this.headings.indexOf('#CHROM')
-            let inputPosIndex = this.headings.indexOf('POS')
+            var chromIndex = this.headings.indexOf('#CHROM')
+            var inputPosIndex = this.headings.indexOf('POS')
 
             result.chrom = data[chromIndex]
             result.inputPos = data[inputPosIndex]
@@ -493,7 +493,7 @@ export class VcfService {
                         this.annoStream.passedHeading = true
                         this.annoStream.headings = line.split('\t')
 
-                        let annoHeadings = [
+                        var annoHeadings = [
                             "sampleId",
                             "readDepth",
                             "alleleFrequency",
@@ -624,7 +624,7 @@ export class VcfService {
 
                     this.annoStream.resume()
                 } else {
-                    let lineData = line.split('\t')
+                    var lineData = line.split('\t')
 
                     if (line && this.annoStream.firstLine) {
                         this.annoStream.firstLine = false;
@@ -642,13 +642,13 @@ export class VcfService {
 
                         var lineLocation = lineData[this.annoStream.headings.indexOf('Location')]
 
-                        let varLocation = lineLocation.split('-')
+                        var varLocation = lineLocation.split('-')
 
-                        let vepInputPos = varLocation[0].split(':')[1];
+                        var vepInputPos = varLocation[0].split(':')[1];
 
-                        let intVepInputPos = parseInt(vepInputPos) - 1
+                        var intVepInputPos = parseInt(vepInputPos) - 1
 
-                        let varExtra = lineData[this.annoStream.headings.indexOf('Extra')]
+                        var varExtra = lineData[this.annoStream.headings.indexOf('Extra')]
 
                         if (this.vcfStream.extraData
                             && (this.vcfStream.extraData.inputPos == vepInputPos || this.vcfStream.extraData.inputPos == intVepInputPos)
@@ -683,12 +683,14 @@ export class VcfService {
             .on('error', (error) => {
                 this.logger.log('Read anno error', error)
                 this.vcfStream.hasError = true
-                // return this.vcfEvents.emit('completed', false)
+                // return this.vcfEvents.emit('compvared', false)
                 this.vcfStream.ended = true
                 return this.vcfStream.destroy()
             })
             .on('end', () => {
                 this.filterVariant(this.annoArray, this.vcfStream.extraData);
+
+                this.logger.log('Finish Read Anno')
 
                 if (!this.vcfStream.ended) {
                     this.vcfStream.ended = true
@@ -699,47 +701,47 @@ export class VcfService {
     }
 
     filterVariant(annoArray, vcfExtraData) {
-        let NM_Array = [];
-        let NR_Array = [];
-        let XM_Array = [];
-        let XR_Array = [];
-        let ENST_Array = [];
-        let Other_Array = [];
-        let Gene_Array = []
+        var NM_Array = [];
+        var NR_Array = [];
+        var XM_Array = [];
+        var XR_Array = [];
+        var ENST_Array = [];
+        var Other_Array = [];
+        var Gene_Array = []
 
-        let Gene_Name = '.';
+        var Gene_Name = '.';
 
-        let line = '';
-        let transcriptArray = [];
+        var line = '';
+        var transcriptArray = [];
 
-        let refseqGene = []
+        var refseqGene = []
 
         for (var i in annoArray) {
             line = annoArray[i];
-            let lineData = line.split('\t');
-            let transcript = lineData[this.annoStream.headings.indexOf('Feature')]
-            let extraColumn = lineData[this.annoStream.headings.indexOf('Extra')]
+            var lineData = line.split('\t');
+            var transcript = lineData[this.annoStream.headings.indexOf('Feature')]
+            var extraColumn = lineData[this.annoStream.headings.indexOf('Extra')]
 
-            let geneName = this.calculateService.formatData(this.getGeneSymbol(extraColumn));
+            var geneName = this.calculateService.formatData(this.getGeneSymbol(extraColumn));
 
-            let geneColumn = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Gene')])
+            var geneColumn = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Gene')])
 
-            let varHGVSc = this.getExtraData('HGVSc', extraColumn);
-            let varHGVSp = this.getExtraData('HGVSp', extraColumn);
+            var varHGVSc = this.getExtraData('HGVSc', extraColumn);
+            var varHGVSp = this.getExtraData('HGVSp', extraColumn);
 
 
-            let cNomen = '.';
-            let pNomen = '.';
+            var cNomen = '.';
+            var pNomen = '.';
 
             if (varHGVSc != null) {
-                let cNomenArray = varHGVSc.split(':');
+                var cNomenArray = varHGVSc.split(':');
                 if (cNomenArray[1] != undefined) {
                     cNomen = cNomenArray[1];
                 }
             }
 
             if (varHGVSp != null) {
-                let pNomenArray = varHGVSp.split(':');
+                var pNomenArray = varHGVSp.split(':');
                 if (pNomenArray[1] != undefined) {
                     pNomen = pNomenArray[1];
                     pNomen = pNomen.replace("%3D", "=");
@@ -769,7 +771,7 @@ export class VcfService {
             }
         }
 
-        let checkAllWithdrawn = true;
+        var checkAllWithdrawn = true;
         for (var i in Gene_Array) {
             if (Gene_Array[i].indexOf('withdrawn') == -1) {
                 checkAllWithdrawn = false;
@@ -780,7 +782,7 @@ export class VcfService {
 
             var geneLine = this.selectLongestTranscriptByGene(NM_Array, NR_Array, ENST_Array, Other_Array, Gene_Array[0]);
             vcfExtraData.gene = Gene_Array[0];
-            let selectedGene = 1;
+            var selectedGene = 1;
             if (geneLine == '') {
                 this.logger.error('geneLine False')
                 this.logger.error(JSON.stringify(vcfExtraData))
@@ -793,7 +795,7 @@ export class VcfService {
                 this.appendToAnnoFile(geneLine, vcfExtraData, transcriptArray.join('|'), selectedGene);
             }
         } else {
-            let selectedGene = 0;
+            var selectedGene = 0;
 
             if ((vcfExtraData.chrom == 'MT' || vcfExtraData.chrom == 'M' || vcfExtraData.chrom == 'chrM' || vcfExtraData.chrom == 'chrMT') && vcfExtraData.INFO.indexOf(';CSQ=') != -1) {
                 if (vcfExtraData.MT == '' || vcfExtraData.MT == null) {
@@ -839,7 +841,7 @@ export class VcfService {
     }
 
     getCodingEffect(data) {
-        let variantOntology = VARIANT_ONTOLOGY;
+        var variantOntology = VARIANT_ONTOLOGY;
 
         for (var i in variantOntology) {
             if (data == variantOntology[i][0]) {
@@ -851,7 +853,7 @@ export class VcfService {
     }
 
     getVarLocation(data) {
-        let variantOntology = VARIANT_ONTOLOGY;
+        var variantOntology = VARIANT_ONTOLOGY;
 
         for (var i in variantOntology) {
             if (data == variantOntology[i][0]) {
@@ -864,8 +866,8 @@ export class VcfService {
     }
 
     getCosmicIds(data) {
-        let dataArray = data ? data.split(',') : []
-        let cosmicIds = []
+        var dataArray = data ? data.split(',') : []
+        var cosmicIds = []
 
         for (var i in dataArray) {
             if (dataArray[i].indexOf('COSM') != -1) {
@@ -877,21 +879,21 @@ export class VcfService {
     }
 
     appendToAnnoFile(line, vcfExtraData, transcriptIds, selectedGene) {
-        let lineData = line.split('\t');
-        let extraData = lineData[this.annoStream.headings.indexOf('Extra')]
-        let transcript = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Feature')])
-        let codingEffect = this.getCodingEffect(lineData[this.annoStream.headings.indexOf('Consequence')])
-        let varLocation = this.getVarLocation(lineData[this.annoStream.headings.indexOf('Consequence')])
-        let Consequence = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Consequence')])
-        let CDS_position = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('CDS_position')])
+        var lineData = line.split('\t');
+        var extraData = lineData[this.annoStream.headings.indexOf('Extra')]
+        var transcript = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Feature')])
+        var codingEffect = this.getCodingEffect(lineData[this.annoStream.headings.indexOf('Consequence')])
+        var varLocation = this.getVarLocation(lineData[this.annoStream.headings.indexOf('Consequence')])
+        var Consequence = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Consequence')])
+        var CDS_position = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('CDS_position')])
 
-        let varHGVSc = this.getExtraData('HGVSc', extraData);
-        let varHGVSp = this.getExtraData('HGVSp', extraData);
-        let STRAND = this.getExtraData('STRAND', extraData);
+        var varHGVSc = this.getExtraData('HGVSc', extraData);
+        var varHGVSp = this.getExtraData('HGVSp', extraData);
+        var STRAND = this.getExtraData('STRAND', extraData);
 
-        let cosmicIds: string | Array<string> = this.getCosmicIds(lineData[this.annoStream.headings.indexOf('Existing_variation')]);
+        var cosmicIds: string | Array<string> = this.getCosmicIds(lineData[this.annoStream.headings.indexOf('Existing_variation')]);
 
-        let cosmic = '.'
+        var cosmic = '.'
 
         if (cosmicIds && cosmicIds.length > 0) {
             cosmic = cosmicIds[0];
@@ -899,12 +901,12 @@ export class VcfService {
             cosmicIds = cosmicIds.join('|')
         }
 
-        let CLINSIG = this.calculateService.formatData(this.getExtraData('CLIN_SIG', extraData))
+        var CLINSIG = this.calculateService.formatData(this.getExtraData('CLIN_SIG', extraData))
 
-        let cNomen = '.';
-        let pNomen = '.';
-        let gene = this.calculateService.formatData(this.getGeneSymbol(extraData));
-        let withdrawnGene = 0;
+        var cNomen = '.';
+        var pNomen = '.';
+        var gene = this.calculateService.formatData(this.getGeneSymbol(extraData));
+        var withdrawnGene = 0;
 
         if (gene.indexOf('~withdrawn') != -1) {
             gene = gene.split('~withdrawn')[0]
@@ -912,14 +914,14 @@ export class VcfService {
         }
 
         if (varHGVSc != null) {
-            let cNomenArray = varHGVSc.split(':');
+            var cNomenArray = varHGVSc.split(':');
             if (cNomenArray[1] != undefined) {
                 cNomen = cNomenArray[1];
             }
         }
 
         if (varHGVSp != null) {
-            let pNomenArray = varHGVSp.split(':');
+            var pNomenArray = varHGVSp.split(':');
             if (pNomenArray[1] != undefined) {
                 pNomen = pNomenArray[1];
                 pNomen = pNomen.replace("%3D", "=");
@@ -928,39 +930,39 @@ export class VcfService {
 
         var lineLocation = lineData[this.annoStream.headings.indexOf('Location')]
 
-        let vepVarLocation = lineLocation.split('-')
+        var vepVarLocation = lineLocation.split('-')
 
         vcfExtraData.chrom = vcfExtraData.chrom.split('chr').join('')
 
-        let vepPOS = vepVarLocation[0].split(':')[1];
-        let vepChrom = vepVarLocation[0].split(':')[0].split('chr').join('');
-        let vepALT = lineData[this.annoStream.headings.indexOf('Allele')]
-        let vepREF = this.getExtraData('GIVEN_REF', extraData)
-        let vcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + vcfExtraData.REF + '_' + vcfExtraData.ALT + '_' + gene;
+        var vepPOS = vepVarLocation[0].split(':')[1];
+        var vepChrom = vepVarLocation[0].split(':')[0].split('chr').join('');
+        var vepALT = lineData[this.annoStream.headings.indexOf('Allele')]
+        var vepREF = this.getExtraData('GIVEN_REF', extraData)
+        var vcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + vcfExtraData.REF + '_' + vcfExtraData.ALT + '_' + gene;
 
-        let deletionNucle = this.getDeletion(vcfExtraData.REF, vcfExtraData.ALT[0], STRAND)
-        // let shortVcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + shortedRefAlt.REF + '_' + shortedRefAlt.ALT + '_' + gene;
+        var devarionNucle = this.getDevarion(vcfExtraData.REF, vcfExtraData.ALT[0], STRAND)
+        // var shortVcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + shortedRefAlt.REF + '_' + shortedRefAlt.ALT + '_' + gene;
 
-        if (cNomen != '.' && deletionNucle != '' && cNomen.substr(cNomen.length - 3) == 'del') {
-            cNomen = cNomen + deletionNucle
+        if (cNomen != '.' && devarionNucle != '' && cNomen.substr(cNomen.length - 3) == 'del') {
+            cNomen = cNomen + devarionNucle
         }
 
-        let vepDataIndex = vepChrom + '_' + vepPOS + '_' + vepREF + '_' + vepALT + '_' + gene;
+        var vepDataIndex = vepChrom + '_' + vepPOS + '_' + vepREF + '_' + vepALT + '_' + gene;
 
-        let Variant_ID = this.calculateService.formatData(this.getExtraData('Clinvar_VARIANT_ID', extraData))
-        let AF_1000g = this.calculateService.formatData(this.getExtraData('AF', extraData))
-        let EAS_AF_1000g = this.calculateService.formatData(this.getExtraData('EAS_AF', extraData))
-        let AMR_AF_1000g = this.calculateService.formatData(this.getExtraData('AMR_AF', extraData))
-        let AFR_AF_1000g = this.calculateService.formatData(this.getExtraData('AFR_AF', extraData))
-        let EUR_AF_1000g = this.calculateService.formatData(this.getExtraData('EUR_AF', extraData))
-        let SAS_AF_1000g = this.calculateService.formatData(this.getExtraData('SAS_AF', extraData))
+        var Variant_ID = this.calculateService.formatData(this.getExtraData('Clinvar_VARIANT_ID', extraData))
+        var AF_1000g = this.calculateService.formatData(this.getExtraData('AF', extraData))
+        var EAS_AF_1000g = this.calculateService.formatData(this.getExtraData('EAS_AF', extraData))
+        var AMR_AF_1000g = this.calculateService.formatData(this.getExtraData('AMR_AF', extraData))
+        var AFR_AF_1000g = this.calculateService.formatData(this.getExtraData('AFR_AF', extraData))
+        var EUR_AF_1000g = this.calculateService.formatData(this.getExtraData('EUR_AF', extraData))
+        var SAS_AF_1000g = this.calculateService.formatData(this.getExtraData('SAS_AF', extraData))
 
-        let AA_AF = this.calculateService.formatData(this.getExtraData('AA_AF', extraData))
-        let EA_AF = this.calculateService.formatData(this.getExtraData('EA_AF', extraData))
+        var AA_AF = this.calculateService.formatData(this.getExtraData('AA_AF', extraData))
+        var EA_AF = this.calculateService.formatData(this.getExtraData('EA_AF', extraData))
 
         CLINSIG = this.formatCLINSIG(CLINSIG)
 
-        let alleleFrequencyData = {
+        var alleleFrequencyData = {
             AF: vcfExtraData.alleleFrequency,
             gnomAD_exome_ALL: this.calculateService.formatData(this.getExtraData('gnomADe_AF', extraData)),
             gnomAD_exome_AFR: this.calculateService.formatData(this.getExtraData('gnomADe_AF_afr', extraData)),
@@ -995,46 +997,46 @@ export class VcfService {
             SAS_AF_1000g: this.calculateService.formatData(this.getExtraData('SAS_AF', extraData)),
         }
 
-        let gnomAD_MAX_AF = this.getMAX_AF(alleleFrequencyData)
+        var gnomAD_MAX_AF = this.getMAX_AF(alleleFrequencyData)
 
-        let MAX_AF = gnomAD_MAX_AF.MAX_AF
-        let MAX_AF_POPS = gnomAD_MAX_AF.MAX_AF_POPS
+        var MAX_AF = gnomAD_MAX_AF.MAX_AF
+        var MAX_AF_POPS = gnomAD_MAX_AF.MAX_AF_POPS
 
-        let SIFT_score = this.calculateService.formatData(this.getExtraData('SIFT', extraData))
-        let PolyPhen_score = this.calculateService.formatData(this.getExtraData('PolyPhen', extraData))
+        var SIFT_score = this.calculateService.formatData(this.getExtraData('SIFT', extraData))
+        var PolyPhen_score = this.calculateService.formatData(this.getExtraData('PolyPhen', extraData))
 
-        let SIFT_number = '.'
+        var SIFT_number = '.'
 
         if (SIFT_score != '.') {
             SIFT_number = SIFT_score.split('(')[1].split(')')[0]
         }
 
-        let PolyPhen_number = '.'
+        var PolyPhen_number = '.'
 
         if (PolyPhen_score != '.') {
             PolyPhen_number = PolyPhen_score.split('(')[1].split(')')[0]
         }
 
-        let HGNC_SYMONYMS = this.calculateService.formatData(this.getExtraData('HGNC_SYNONYMS', extraData))
-        let HGNC_PRE_SYMBOL = this.calculateService.formatData(this.getExtraData('HGNC_PRE_SYMBOL', extraData))
+        var HGNC_SYMONYMS = this.calculateService.formatData(this.getExtraData('HGNC_SYNONYMS', extraData))
+        var HGNC_PRE_SYMBOL = this.calculateService.formatData(this.getExtraData('HGNC_PRE_SYMBOL', extraData))
 
-        let geneSplicer = this.getExtraData('GeneSplicer', extraData);
-        let IMPACT = this.getExtraData('IMPACT', extraData);
-        let VARIANT_CLASS = this.getExtraData('VARIANT_CLASS', extraData);
+        var geneSplicer = this.getExtraData('GeneSplicer', extraData);
+        var IMPACT = this.getExtraData('IMPACT', extraData);
+        var VARIANT_CLASS = this.getExtraData('VARIANT_CLASS', extraData);
 
-        let VAR_GENE = this.calculateService.formatData(this.getExtraData('variantScore_VAR_GENE', extraData))
-        let VAR_SCORE = this.calculateService.formatData(this.getExtraData('variantScore_VAR_SCORE', extraData))
-        let VAR_GENE_VAL = '.'
-        let VAR_SCORE_VAL = '.'
+        var VAR_GENE = this.calculateService.formatData(this.getExtraData('variantScore_VAR_GENE', extraData))
+        var VAR_SCORE = this.calculateService.formatData(this.getExtraData('variantScore_VAR_SCORE', extraData))
+        var VAR_GENE_VAL = '.'
+        var VAR_SCORE_VAL = '.'
 
-        let rsId = this.calculateService.formatData(this.getExtraData('dbSNP_RS', extraData))
+        var rsId = this.calculateService.formatData(this.getExtraData('dbSNP_RS', extraData))
         rsId = rsId != '.' ? ('rs' + rsId) : '.';
-        let rsIdVep = this.calculateService.formatData(this.getRsID(lineData[this.annoStream.headings.indexOf('#Uploaded_variation')], lineData[this.annoStream.headings.indexOf('Existing_variation')]));
+        var rsIdVep = this.calculateService.formatData(this.getRsID(lineData[this.annoStream.headings.indexOf('#Uploaded_variation')], lineData[this.annoStream.headings.indexOf('Existing_variation')]));
         rsId = rsId != '.' ? rsId : rsIdVep;
 
         if (VAR_GENE != '.') {
-            let VAR_GENE_AR = VAR_GENE.split(',');
-            let VAR_SCORE_AR = VAR_SCORE.split(',');
+            var VAR_GENE_AR = VAR_GENE.split(',');
+            var VAR_SCORE_AR = VAR_SCORE.split(',');
 
             for (var i in VAR_GENE_AR) {
                 if (VAR_GENE_AR[i] == gene) {
@@ -1044,9 +1046,9 @@ export class VcfService {
             }
         }
 
-        let TrimmedVariant = this.convert(vcfExtraData.chrom, vcfExtraData.inputPos, vcfExtraData.REF, vcfExtraData.ALT[0], gene)
+        var TrimmedVariant = this.convert(vcfExtraData.chrom, vcfExtraData.inputPos, vcfExtraData.REF, vcfExtraData.ALT[0], gene)
 
-        let data = [
+        var data = [
             vcfExtraData.sampleId,                                              //  sampleId
             vcfExtraData.readDepth,                                             //  readDepth
             vcfExtraData.alleleFrequency,                                       //  alleleFrequency
@@ -1189,7 +1191,7 @@ export class VcfService {
         return '.';
     }
 
-    getDeletion(Ref, Alt, STRAND) {
+    getDevarion(Ref, Alt, STRAND) {
         if (Ref.length <= Alt.length) {
             return ''
         }
@@ -1212,22 +1214,22 @@ export class VcfService {
         }
     }
 
-    getComplementary(deletion, strand) {
+    getComplementary(devarion, strand) {
         if (strand == -1 || strand == "-1") {
-            let deletionRevert = deletion.split("").reverse()
-            let compDel = ''
-            let compArr = {
+            var devarionRevert = devarion.split("").reverse()
+            var compDel = ''
+            var compArr = {
                 'A': 'T',
                 'T': 'A',
                 'G': 'C',
                 'C': 'G'
             }
-            for (var i in deletionRevert) {
-                compDel += compArr[deletionRevert[i]]
+            for (var i in devarionRevert) {
+                compDel += compArr[devarionRevert[i]]
             }
             return compDel
         } else {
-            return deletion;
+            return devarion;
         }
     }
 
@@ -1267,7 +1269,7 @@ export class VcfService {
 
 
     getMAX_AF(gnomAD) {
-        let gnomAD_WES_AF = {
+        var gnomAD_WES_AF = {
             AFR: gnomAD.gnomAD_exome_AFR,
             AMR: gnomAD.gnomAD_exome_AMR,
             ASJ: gnomAD.gnomAD_exome_ASJ,
@@ -1278,7 +1280,7 @@ export class VcfService {
             SAS: gnomAD.gnomAD_exome_SAS
         }
 
-        let gnomAD_WGS_AF = {
+        var gnomAD_WGS_AF = {
             AFR: gnomAD.gnomAD_genome_AFR,
             AMR: gnomAD.gnomAD_genome_AMR,
             ASJ: gnomAD.gnomAD_genome_ASJ,
@@ -1288,7 +1290,7 @@ export class VcfService {
             OTH: gnomAD.gnomAD_genome_OTH,
         }
 
-        let gnomAD_AF
+        var gnomAD_AF
 
         if (gnomAD_WES_AF.AMR != '.') {
             gnomAD_AF = gnomAD_WES_AF;
@@ -1296,7 +1298,7 @@ export class VcfService {
             gnomAD_AF = gnomAD_WGS_AF;
         }
 
-        let maxAF: string | number = 0;
+        var maxAF: string | number = 0;
 
         for (var i in gnomAD_AF) {
             if (gnomAD_AF[i] != '.' && isNaN(gnomAD_AF[i]) == false) {
@@ -1313,7 +1315,7 @@ export class VcfService {
             }
         }
 
-        let maxAF_POPS = []
+        var maxAF_POPS = []
 
         for (var i in gnomAD_AF) {
             if (maxAF == gnomAD_AF[i]) {
@@ -1399,10 +1401,10 @@ export class VcfService {
     selectLongestTranscript(transcriptArray, geneName) {
         var resultArray = []
         for (var i in transcriptArray) {
-            let line = transcriptArray[i];
-            let lineData = line.split('\t');
-            let extraData = lineData[this.annoStream.headings.indexOf('Extra')];
-            let symbol = this.calculateService.formatData(this.getGeneSymbol(extraData))
+            var line = transcriptArray[i];
+            var lineData = line.split('\t');
+            var extraData = lineData[this.annoStream.headings.indexOf('Extra')];
+            var symbol = this.calculateService.formatData(this.getGeneSymbol(extraData))
 
             if (symbol == geneName) {
                 resultArray.push(line)
@@ -1413,13 +1415,13 @@ export class VcfService {
             return false;
         }
 
-        let maxLine = resultArray[0];
-        let maxLength = maxLine.split('\t')[this.annoStream.headings.indexOf('transcript_length')]
+        var maxLine = resultArray[0];
+        var maxLength = maxLine.split('\t')[this.annoStream.headings.indexOf('transcript_length')]
         for (var i in resultArray) {
-            let line = resultArray[i];
-            let lineData = line.split('\t');
-            let length = lineData[this.annoStream.headings.indexOf('transcript_length')];
-            let HGMDTranscript = lineData[this.annoStream.headings.indexOf('HGMD_transcript')];
+            var line = resultArray[i];
+            var lineData = line.split('\t');
+            var length = lineData[this.annoStream.headings.indexOf('transcript_length')];
+            var HGMDTranscript = lineData[this.annoStream.headings.indexOf('HGMD_transcript')];
             if (HGMDTranscript == 'exist') {
                 return line
             }
@@ -1432,15 +1434,15 @@ export class VcfService {
     }
 
     calculateData(data) {
-        let chromIndex = this.headings.indexOf('#CHROM')
-        let formatIndex = this.headings.indexOf('FORMAT')
-        let infoIndex = this.headings.indexOf('INFO')
+        var chromIndex = this.headings.indexOf('#CHROM')
+        var formatIndex = this.headings.indexOf('FORMAT')
+        var infoIndex = this.headings.indexOf('INFO')
 
-        let variantIndex = this.getExtraData('VARINDEX', data[infoIndex]);
-        let vcfAF = this.getExtraData('AF', data[infoIndex]);
+        var variantIndex = this.getExtraData('VARINDEX', data[infoIndex]);
+        var vcfAF = this.getExtraData('AF', data[infoIndex]);
 
         // Ugly check if this is a variant row
-        let chrom = data[chromIndex]
+        var chrom = data[chromIndex]
         if (chrom.indexOf('##') == 0) {
             return {
                 readDepth: null,
@@ -1471,9 +1473,9 @@ export class VcfService {
                 coverage: null
             }
         } else {
-            let format = data[formatIndex]
-            let formatData = data[formatIndex + 1]
-            let result
+            var format = data[formatIndex]
+            var formatData = data[formatIndex + 1]
+            var result
 
             if (format == 'GT:AD:DP:GQ:PL'
                 || format == 'GT:AD:DP:GQ:PGT:PID:PL'
@@ -1551,20 +1553,20 @@ export class VcfService {
     }
 
     writeAfVcf(line, extraData) {
-        let infoIndex = this.headings.indexOf('INFO');
-        let data = line.split('\t');
-        let infoData = []
+        var infoIndex = this.headings.indexOf('INFO');
+        var data = line.split('\t');
+        var infoData = []
         if (infoIndex != -1) {
             infoData = data[infoIndex].split(';');
         }
 
-        let checkExist = false;
+        var checkExist = false;
 
         for (var i in infoData) {
             if (infoData[i].indexOf('AF=') == 0 && extraData.alleleFrequency != null) {
-                let currentAF = infoData[i].split('=');
+                var currentAF = infoData[i].split('=');
                 
-                let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
+                var AF = Math.round(extraData.alleleFrequency * 1000) / 1000
 
                 infoData[i] = `AF=${AF}`;
                 data[infoIndex] = infoData.join(';')
@@ -1576,7 +1578,7 @@ export class VcfService {
         }
 
         if (checkExist == false) {
-            let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
+            var AF = Math.round(extraData.alleleFrequency * 1000) / 1000
             infoData.push(`AF=${AF}`)
             data[infoIndex] = infoData.join(';')
             this.checkAF = false;
@@ -1588,13 +1590,13 @@ export class VcfService {
     }
 
     getGeneSymbol(extraData: string) {
-        let VEP_SYMBOL = null
-        let HGNC_SYMBOL = null
+        var VEP_SYMBOL = null
+        var HGNC_SYMBOL = null
 
-        let extraArray = extraData ? extraData.split(';') : []
+        var extraArray = extraData ? extraData.split(';') : []
 
         for (var i in extraArray) {
-            let keyValue = extraArray[i].split('=');
+            var keyValue = extraArray[i].split('=');
 
             if (keyValue[0] == 'SYMBOL') {
                 VEP_SYMBOL = keyValue[1];
@@ -1619,10 +1621,10 @@ export class VcfService {
             return null;
         }
 
-        let extraArray = extraData ? extraData.split(';') : []
+        var extraArray = extraData ? extraData.split(';') : []
 
         for (var i in extraArray) {
-            let keyValue = extraArray[i].split('=');
+            var keyValue = extraArray[i].split('=');
 
             if (keyValue[0] == key) {
                 return keyValue[1];
@@ -1635,8 +1637,8 @@ export class VcfService {
 
 
     calculateExac(name, extraData) {
-        let AC = this.calculateService.formatData(this.getExtraData('ExAC_AC' + name, extraData))
-        let AN = this.calculateService.formatData(this.getExtraData('ExAC_AN' + name, extraData))
+        var AC = this.calculateService.formatData(this.getExtraData('ExAC_AC' + name, extraData))
+        var AN = this.calculateService.formatData(this.getExtraData('ExAC_AN' + name, extraData))
 
         if (AC == null || AN == null || AN == 0 || AN == '.' || AC == '.') {
             return '.'
