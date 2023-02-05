@@ -236,7 +236,7 @@ export class VcfService {
 
                         this.resumeAnnoStream()
                     } else {
-                        if (line && line.trim()) {
+                        if (line) {
                             let lineData = line.split('\t')
                             let lineString = line;
                             if (line.search('#CHROM') == 0) {
@@ -455,7 +455,7 @@ export class VcfService {
             }
 
             // Column ALT may contain multiples value seperated by a comma
-            if (altIndex != -1) {
+            if (data[altIndex]) {
                 result.ALT = data[altIndex].split(',')
             }
 
@@ -864,7 +864,7 @@ export class VcfService {
     }
 
     getCosmicIds(data) {
-        let dataArray = data.split(',')
+        let dataArray = data ? data.split(',') : []
         let cosmicIds = []
 
         for (var i in dataArray) {
@@ -1557,7 +1557,7 @@ export class VcfService {
         if (infoIndex != -1) {
             infoData = data[infoIndex].split(';');
         }
-        
+
         let checkExist = false;
 
         for (var i in infoData) {
@@ -1591,7 +1591,7 @@ export class VcfService {
         let VEP_SYMBOL = null
         let HGNC_SYMBOL = null
 
-        let extraArray = extraData.split(';');
+        let extraArray = extraData ? extraData.split(';') : []
 
         for (var i in extraArray) {
             let keyValue = extraArray[i].split('=');
@@ -1619,7 +1619,7 @@ export class VcfService {
             return null;
         }
 
-        let extraArray = extraData.split(';');
+        let extraArray = extraData ? extraData.split(';') : []
 
         for (var i in extraArray) {
             let keyValue = extraArray[i].split('=');
