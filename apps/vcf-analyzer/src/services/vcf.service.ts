@@ -126,7 +126,7 @@ export class VcfService {
 
             await this.removeFiles()
         } catch (error) {
-            await this.removeFiles()
+            // await this.removeFiles()
             throw error
         }
         
