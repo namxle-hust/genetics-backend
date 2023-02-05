@@ -226,7 +226,7 @@ export class VcfService {
                     let eventName, extraData
 
                     if (this.lineIndex != null) {
-                        // this.logger.debug(line);
+                        this.logger.debug(line);
                         // This is a data line, analyze it, and read next annotation line
                         this.lineIndex++
 
@@ -252,7 +252,7 @@ export class VcfService {
 
                             this.vcfStream.extraData = []
 
-                            this.logger.debug(line);
+                            // this.logger.debug(line);
 
                             this.vcfStream.resume()
                             
