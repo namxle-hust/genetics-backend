@@ -237,8 +237,9 @@ export class VcfService {
                             this.writeAfVcf(line, this.vcfStream.extraData);
 
                             this.resumeAnnoStream()
+                        } else {
+                            this.vcfStream.resume()
                         }
-                        this.vcfStream.resume()
                     } else {
                         if (line) {
                             let lineData = line.split('\t')
