@@ -256,10 +256,9 @@ export class VcfService {
                             this.vcfStream.extraData = []
 
                             // this.logger.debug(line);
-
-                            this.vcfStream.resume()
-
                         }
+
+                        this.vcfStream.resume()
                     }
                 }))
                 .on('error', (error) => {
