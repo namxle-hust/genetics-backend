@@ -227,15 +227,17 @@ export class VcfService {
                     let eventName, extraData
 
                     if (this.lineIndex != null) {
-                        this.logger.debug(line);
-                        // This is a data line, analyze it, and read next annotation line
-                        this.lineIndex++
+                        if (line) {
+                            this.logger.debug(line);
+                            // This is a data line, analyze it, and read next annotation line
+                            this.lineIndex++
 
-                        this.vcfStream.extraData = this.analyzeLine(line)
+                            this.vcfStream.extraData = this.analyzeLine(line)
 
-                        this.writeAfVcf(line, this.vcfStream.extraData);
+                            this.writeAfVcf(line, this.vcfStream.extraData);
 
-                        this.resumeAnnoStream()
+                            this.resumeAnnoStream()
+                        }
                     } else {
                         if (line) {
                             let lineData = line.split('\t')
