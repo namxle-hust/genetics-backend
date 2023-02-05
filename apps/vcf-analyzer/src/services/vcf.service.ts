@@ -8,6 +8,7 @@ import { AnalysisModel } from "../models";
 import { CommonService } from "./common.service";
 import { CalculateService } from "./calculate.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+import { GetDataService } from "./get-data.service";
 
 @Injectable()
 export class VcfService {
@@ -36,7 +37,7 @@ export class VcfService {
 
     private annoFile;
     private headings;
-    
+
     private annoArray = [];
     private prevLine: string
 
@@ -62,6 +63,7 @@ export class VcfService {
         private commonService: CommonService,
         private configService: ConfigService,
         private calculateService: CalculateService,
+        private getDataService: GetDataService
     ) {
         this._transcriptDir = this.configService.get<string>('TRANSCRIPT_DIR')
         this._hgmdTranscript = this.configService.get<string>('HGMD_TRANSCRIPT')
@@ -78,7 +80,7 @@ export class VcfService {
         await this.commonService.runCommand(command);
     }
 
-  
+
 
     async run(vcfFile: string, analysis: AnalysisModel, vepOutput: string) {
         try {
@@ -128,8 +130,8 @@ export class VcfService {
             // await this.removeFiles()
             throw error
         }
-        
-        
+
+
         return true;
     }
 
@@ -176,7 +178,7 @@ export class VcfService {
 
                             let varExtra = lineData[vepStream.headings.indexOf('Extra')]
 
-                            let geneSymbol = this.calculateService.formatData(this.getGeneSymbol(varExtra))
+                            let geneSymbol = this.calculateService.formatData(this.getDataService.getGeneSymbol(varExtra))
 
                             lineData.push(transcript + '_' + geneSymbol)
                             lineData.push(lineData[vepStream.headings.indexOf('Feature')] + '_' + geneSymbol)
@@ -254,8 +256,8 @@ export class VcfService {
                             // this.logger.debug(line);
 
                             this.vcfStream.resume()
-                            
-                        } 
+
+                        }
                     }
                 }))
                 .on('error', (error) => {
@@ -307,14 +309,13 @@ export class VcfService {
 
                         // Move anno file from tmp dir to S3 dir
                         // Remote origin anno file
-                      
+
                         let command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand} && rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
-                  
+
 
                         child.exec(command, (error, stdout, stderr) => {
                             if (error) {
                                 this.logger.error('Move anno error', error)
-                                // return self.vcfEvents.emit('completed', false)
                                 return reject(false);
                             }
 
@@ -343,9 +344,8 @@ export class VcfService {
 
                         //let CLINSIG = lineData[self.classifyStream.headings.indexOf('CLINSIG')]
                         let VARIANT_ID = lineData[this.classifyStream.headings.indexOf('Clinvar_VARIANT_ID')]
-                        // let NEW_CLINSIG = lineData[self.classifyStream.headings.indexOf('NEW_CLINSIG')]
                         let codingEffect = lineData[this.classifyStream.headings.indexOf('codingEffect')]
-                        let gene = lineData[this.classifyStream.headings.indexOf('`gene`')]
+                        let gene = lineData[this.classifyStream.headings.indexOf('gene')]
                         let CLNSIG_ID = lineData[this.classifyStream.headings.indexOf('CLNACC')]
                         let BTG_CLINSIG = lineData[this.classifyStream.headings.indexOf('CLNSIG_BTG')]
                         let HGMD = lineData[this.classifyStream.headings.indexOf('HGMD')]
@@ -412,7 +412,6 @@ export class VcfService {
                 .on('error', (error) => {
                     this.classifyStream.hasError = true
                     this.logger.error('classifyVariant error', error)
-                    // return this.vcfEvents.emit('completed', false)
                     this.classifyStream.destroy()
                 })
                 .on('close', () => {
@@ -422,11 +421,10 @@ export class VcfService {
                     } else {
                         this.logger.log('Classify Variant completed')
                         return resolve(true);
-                        // return this.vcfEvents.emit('completed', true)
                     }
                 })
         })
-        
+
     }
 
     analyzeLine(vcfLine) {
@@ -454,9 +452,7 @@ export class VcfService {
             }
 
             // Column ALT may contain multiples value seperated by a comma
-            if (data[altIndex]) {
-                result.ALT = data[altIndex].split(',')
-            }
+            result.ALT = data[altIndex].split(',')
 
             let chromIndex = this.headings.indexOf('#CHROM')
             let inputPosIndex = this.headings.indexOf('POS')
@@ -719,7 +715,7 @@ export class VcfService {
             let transcript = lineData[this.annoStream.headings.indexOf('Feature')]
             let extraColumn = lineData[this.annoStream.headings.indexOf('Extra')]
 
-            let geneName = this.calculateService.formatData(this.getGeneSymbol(extraColumn));
+            let geneName = this.calculateService.formatData(this.getDataService.getGeneSymbol(extraColumn));
 
             let geneColumn = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Gene')])
 
@@ -807,11 +803,11 @@ export class VcfService {
                     vcfExtraData.gene = Gene_Array[i];
 
                     if (geneLine == '') {
-                       this.logger.error('geneLine False')
-                       this.logger.error(JSON.stringify(vcfExtraData))
-                       this.logger.error('gene: ' + Gene_Array[i])
-                       this.logger.error('Anno Array: ')
-                       this.logger.error(JSON.stringify(annoArray))
+                        this.logger.error('geneLine False')
+                        this.logger.error(JSON.stringify(vcfExtraData))
+                        this.logger.error('gene: ' + Gene_Array[i])
+                        this.logger.error('Anno Array: ')
+                        this.logger.error(JSON.stringify(annoArray))
                     }
 
                     if (geneLine != '') {
@@ -837,50 +833,13 @@ export class VcfService {
         }
     }
 
-    getCodingEffect(data) {
-        let variantOntology = VARIANT_ONTOLOGY;
-
-        for (var i in variantOntology) {
-            if (data == variantOntology[i][0]) {
-                return variantOntology[i][1];
-            }
-        }
-
-        return 'other';
-    }
-
-    getVarLocation(data) {
-        let variantOntology = VARIANT_ONTOLOGY;
-
-        for (var i in variantOntology) {
-            if (data == variantOntology[i][0]) {
-                return variantOntology[i][2];
-            }
-        }
-
-        return 'other';
-
-    }
-
-    getCosmicIds(data) {
-        let dataArray = data ? data.split(',') : []
-        let cosmicIds = []
-
-        for (var i in dataArray) {
-            if (dataArray[i].indexOf('COSM') != -1) {
-                cosmicIds.push(dataArray[i])
-            }
-        }
-
-        return cosmicIds
-    }
 
     appendToAnnoFile(line, vcfExtraData, transcriptIds, selectedGene) {
         let lineData = line.split('\t');
         let extraData = lineData[this.annoStream.headings.indexOf('Extra')]
         let transcript = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Feature')])
-        let codingEffect = this.getCodingEffect(lineData[this.annoStream.headings.indexOf('Consequence')])
-        let varLocation = this.getVarLocation(lineData[this.annoStream.headings.indexOf('Consequence')])
+        let codingEffect = this.getDataService.getCodingEffect(lineData[this.annoStream.headings.indexOf('Consequence')])
+        let varLocation = this.getDataService.getVarLocation(lineData[this.annoStream.headings.indexOf('Consequence')])
         let Consequence = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('Consequence')])
         let CDS_position = this.calculateService.formatData(lineData[this.annoStream.headings.indexOf('CDS_position')])
 
@@ -888,21 +847,22 @@ export class VcfService {
         let varHGVSp = this.calculateService.getExtraData('HGVSp', extraData);
         let STRAND = this.calculateService.getExtraData('STRAND', extraData);
 
-        let cosmicIds: string | Array<string> = this.getCosmicIds(lineData[this.annoStream.headings.indexOf('Existing_variation')]);
+        let tmpcosmicIds = this.getDataService.getCosmicIds(lineData[this.annoStream.headings.indexOf('Existing_variation')]);
 
+        let cosmicIds = '.'      
         let cosmic = '.'
 
-        if (cosmicIds && cosmicIds.length > 0) {
-            cosmic = cosmicIds[0];
+        if (tmpcosmicIds && tmpcosmicIds.length > 0) {
+            cosmic = tmpcosmicIds[0];
 
-            cosmicIds = cosmicIds.join('|')
+            cosmicIds = tmpcosmicIds.join('|')
         }
 
         let CLINSIG = this.calculateService.formatData(this.calculateService.getExtraData('CLIN_SIG', extraData))
 
         let cNomen = '.';
         let pNomen = '.';
-        let gene = this.calculateService.formatData(this.getGeneSymbol(extraData));
+        let gene = this.calculateService.formatData(this.getDataService.getGeneSymbol(extraData));
         let withdrawnGene = 0;
 
         if (gene.indexOf('~withdrawn') != -1) {
@@ -937,7 +897,7 @@ export class VcfService {
         let vepREF = this.calculateService.getExtraData('GIVEN_REF', extraData)
         let vcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + vcfExtraData.REF + '_' + vcfExtraData.ALT + '_' + gene;
 
-        let deletionNucle = this.getDeletion(vcfExtraData.REF, vcfExtraData.ALT[0], STRAND)
+        let deletionNucle = this.getDataService.getDeletion(vcfExtraData.REF, vcfExtraData.ALT[0], STRAND)
         // let shortVcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + shortedRefAlt.REF + '_' + shortedRefAlt.ALT + '_' + gene;
 
         if (cNomen != '.' && deletionNucle != '' && cNomen.substr(cNomen.length - 3) == 'del') {
@@ -957,7 +917,7 @@ export class VcfService {
         let AA_AF = this.calculateService.formatData(this.calculateService.getExtraData('AA_AF', extraData))
         let EA_AF = this.calculateService.formatData(this.calculateService.getExtraData('EA_AF', extraData))
 
-        CLINSIG = this.formatCLINSIG(CLINSIG)
+        CLINSIG = this.getDataService.formatCLINSIG(CLINSIG)
 
         let alleleFrequencyData = {
             AF: vcfExtraData.alleleFrequency,
@@ -994,7 +954,7 @@ export class VcfService {
             SAS_AF_1000g: this.calculateService.formatData(this.calculateService.getExtraData('SAS_AF', extraData)),
         }
 
-        let gnomAD_MAX_AF = this.getMAX_AF(alleleFrequencyData)
+        let gnomAD_MAX_AF = this.getDataService.getMAX_AF(alleleFrequencyData)
 
         let MAX_AF = gnomAD_MAX_AF.MAX_AF
         let MAX_AF_POPS = gnomAD_MAX_AF.MAX_AF_POPS
@@ -1014,6 +974,8 @@ export class VcfService {
             PolyPhen_number = PolyPhen_score.split('(')[1].split(')')[0]
         }
 
+        //let CLINSIG_DATA = this.calculateClinsigFinal(CLINSIG, alleleFrequencyData, codingEffect, gene)
+
         let HGNC_SYMONYMS = this.calculateService.formatData(this.calculateService.getExtraData('HGNC_SYNONYMS', extraData))
         let HGNC_PRE_SYMBOL = this.calculateService.formatData(this.calculateService.getExtraData('HGNC_PRE_SYMBOL', extraData))
 
@@ -1028,7 +990,7 @@ export class VcfService {
 
         let rsId = this.calculateService.formatData(this.calculateService.getExtraData('dbSNP_RS', extraData))
         rsId = rsId != '.' ? ('rs' + rsId) : '.';
-        let rsIdVep = this.calculateService.formatData(this.getRsID(lineData[this.annoStream.headings.indexOf('#Uploaded_variation')], lineData[this.annoStream.headings.indexOf('Existing_variation')]));
+        let rsIdVep = this.calculateService.formatData(this.getDataService.getRsID(lineData[this.annoStream.headings.indexOf('#Uploaded_variation')], lineData[this.annoStream.headings.indexOf('Existing_variation')]));
         rsId = rsId != '.' ? rsId : rsIdVep;
 
         if (VAR_GENE != '.') {
@@ -1043,7 +1005,7 @@ export class VcfService {
             }
         }
 
-        let TrimmedVariant = this.convert(vcfExtraData.chrom, vcfExtraData.inputPos, vcfExtraData.REF, vcfExtraData.ALT[0], gene)
+        let TrimmedVariant = this.calculateService.convert(vcfExtraData.chrom, vcfExtraData.inputPos, vcfExtraData.REF, vcfExtraData.ALT[0], gene)
 
         let data = [
             vcfExtraData.sampleId,                                              //  sampleId
@@ -1072,14 +1034,14 @@ export class VcfService {
             alleleFrequencyData.ExAC_NFE,                                       //  ExAC_NFE
             alleleFrequencyData.ExAC_OTH,                                       //  ExAC_OTH
             alleleFrequencyData.ExAC_SAS,                                       //  ExAC_SAS
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_ALL, alleleFrequencyData.gnomAD_genome_ALL),    //  gnomAD_exome_ALL
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_AFR, alleleFrequencyData.gnomAD_genome_AFR),    //  gnomAD_exome_AFR
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_AMR, alleleFrequencyData.gnomAD_genome_AMR),    //  gnomAD_exome_AMR
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_ASJ, alleleFrequencyData.gnomAD_genome_ASJ),    //  gnomAD_exome_ASJ
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_EAS, alleleFrequencyData.gnomAD_genome_EAS),    //  gnomAD_exome_EAS
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_FIN, alleleFrequencyData.gnomAD_genome_FIN),    //  gnomAD_exome_FIN
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_NFE, alleleFrequencyData.gnomAD_genome_NFE),    //  gnomAD_exome_NFE
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_OTH, alleleFrequencyData.gnomAD_genome_OTH),    //  gnomAD_exome_OTH
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_ALL, alleleFrequencyData.gnomAD_genome_ALL),    //  gnomAD_exome_ALL
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_AFR, alleleFrequencyData.gnomAD_genome_AFR),    //  gnomAD_exome_AFR
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_AMR, alleleFrequencyData.gnomAD_genome_AMR),    //  gnomAD_exome_AMR
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_ASJ, alleleFrequencyData.gnomAD_genome_ASJ),    //  gnomAD_exome_ASJ
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_EAS, alleleFrequencyData.gnomAD_genome_EAS),    //  gnomAD_exome_EAS
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_FIN, alleleFrequencyData.gnomAD_genome_FIN),    //  gnomAD_exome_FIN
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_NFE, alleleFrequencyData.gnomAD_genome_NFE),    //  gnomAD_exome_NFE
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_OTH, alleleFrequencyData.gnomAD_genome_OTH),    //  gnomAD_exome_OTH
             alleleFrequencyData.gnomAD_exome_SAS,                               //  gnomAD_exome_SAS
             this.calculateService.formatData(this.calculateService.getExtraData('SIFT', extraData)),              //  SIFT_score
             this.calculateService.formatData(this.calculateService.getExtraData('PolyPhen', extraData)),          //  Polyphen2_HDIV_score
@@ -1121,9 +1083,9 @@ export class VcfService {
             '.',                                                                //  hasClinicalSynopsis
             '.',                                                                //  lossOfFunction
             vcfExtraData.inputPos,                                             //  inputPosInt
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_ALL, alleleFrequencyData.gnomAD_genome_ALL),  //  gnomAD_exome_ALL_Int
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_AFR, alleleFrequencyData.gnomAD_genome_AFR),//  gnomAD_exome_AFR_Int
-            this.getGnomAD(alleleFrequencyData.gnomAD_exome_AMR, alleleFrequencyData.gnomAD_genome_AMR), //  gnomAD_exome_AMR_Int
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_ALL, alleleFrequencyData.gnomAD_genome_ALL),  //  gnomAD_exome_ALL_Int
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_AFR, alleleFrequencyData.gnomAD_genome_AFR),//  gnomAD_exome_AFR_Int
+            this.getDataService.getGnomAD(alleleFrequencyData.gnomAD_exome_AMR, alleleFrequencyData.gnomAD_genome_AMR), //  gnomAD_exome_AMR_Int
             CDS_position,                                                       //  CDS_position
             selectedGene,                                                  // selected_gene
             HGNC_SYMONYMS,                                                  // HGNC_SYMONYMS
@@ -1172,211 +1134,7 @@ export class VcfService {
         fs.appendFileSync(this.annoFile, '\n' + data.join('\t'));
     }
 
-    getRsID(vcfRSID, vepRSID) {
-        // if (vcfRSID != '.') {
-        //     return vcfRSID;
-        // }
-
-        var rsIdArray = vepRSID.split(',');
-        for (var i in rsIdArray) {
-            var rsId = rsIdArray[i]
-            if (rsId.indexOf('rs') != -1) {
-                return rsId;
-            }
-        }
-
-        return '.';
-    }
-
-    getDeletion(Ref, Alt, STRAND) {
-        if (Ref.length <= Alt.length) {
-            return ''
-        }
-        if (Ref.indexOf(Alt) == 0) {
-            return this.getComplementary(Ref.substring(Alt.length), STRAND)
-        }
-
-        var result = this.getShortedRefAlt(Ref, Alt)
-        Ref = result.REF
-        Alt = result.ALT
-
-        if (Ref.length <= Alt.length) {
-            return ''
-        }
-
-        if (Ref.indexOf(Alt) == 0) {
-            return this.getComplementary(Ref.substring(Alt.length), STRAND)
-        } else {
-            return ''
-        }
-    }
-
-    getComplementary(deletion, strand) {
-        if (strand == -1 || strand == "-1") {
-            let deletionRevert = deletion.split("").reverse()
-            let compDel = ''
-            let compArr = {
-                'A': 'T',
-                'T': 'A',
-                'G': 'C',
-                'C': 'G'
-            }
-            for (var i in deletionRevert) {
-                compDel += compArr[deletionRevert[i]]
-            }
-            return compDel
-        } else {
-            return deletion;
-        }
-    }
-
-    getShortedRefAlt(Ref, Alt) {
-        if (Ref.length == 1 || Alt.length == 1) {
-            return {
-                REF: Ref,
-                ALT: Alt
-            }
-        }
-        if (Ref[Ref.length - 1] != Alt[Alt.length - 1]) {
-            return {
-                REF: Ref,
-                ALT: Alt
-            }
-        }
-
-        while (Ref.length > 1 && Alt.length > 1 && Ref[Ref.length - 1] == Alt[Alt.length - 1]) {
-            Ref = Ref.substring(0, Ref.length - 1);
-            Alt = Alt.substring(0, Alt.length - 1);
-        }
-
-        return {
-            REF: Ref,
-            ALT: Alt
-        }
-    }
-
-
-    formatCLINSIG(data) {
-        if (data == '' || data == undefined || data == null) {
-            return data;
-        }
-        var clinsig = data.split("_").join(" ");
-        return clinsig;
-    }
-
-
-    getMAX_AF(gnomAD) {
-        let gnomAD_WES_AF = {
-            AFR: gnomAD.gnomAD_exome_AFR,
-            AMR: gnomAD.gnomAD_exome_AMR,
-            ASJ: gnomAD.gnomAD_exome_ASJ,
-            EAS: gnomAD.gnomAD_exome_EAS,
-            FIN: gnomAD.gnomAD_exome_FIN,
-            NFE: gnomAD.gnomAD_exome_NFE,
-            OTH: gnomAD.gnomAD_exome_OTH,
-            SAS: gnomAD.gnomAD_exome_SAS
-        }
-
-        let gnomAD_WGS_AF = {
-            AFR: gnomAD.gnomAD_genome_AFR,
-            AMR: gnomAD.gnomAD_genome_AMR,
-            ASJ: gnomAD.gnomAD_genome_ASJ,
-            EAS: gnomAD.gnomAD_genome_EAS,
-            FIN: gnomAD.gnomAD_genome_FIN,
-            NFE: gnomAD.gnomAD_genome_NFE,
-            OTH: gnomAD.gnomAD_genome_OTH,
-        }
-
-        let gnomAD_AF
-
-        if (gnomAD_WES_AF.AMR != '.') {
-            gnomAD_AF = gnomAD_WES_AF;
-        } else {
-            gnomAD_AF = gnomAD_WGS_AF;
-        }
-
-        let maxAF: string | number = 0;
-
-        for (var i in gnomAD_AF) {
-            if (gnomAD_AF[i] != '.' && isNaN(gnomAD_AF[i]) == false) {
-                if (maxAF < parseFloat(gnomAD_AF[i])) {
-                    maxAF = gnomAD_AF[i];
-                }
-            }
-        }
-
-        if (maxAF == '.' || maxAF == 0) {
-            return {
-                MAX_AF: '.',
-                MAX_AF_POPS: '.'
-            }
-        }
-
-        let maxAF_POPS = []
-
-        for (var i in gnomAD_AF) {
-            if (maxAF == gnomAD_AF[i]) {
-                maxAF_POPS.push(i)
-            }
-        }
-
-        return {
-            MAX_AF: maxAF,
-            MAX_AF_POPS: maxAF_POPS.join(',')
-        }
-    }
-
-    convert(chrom, pos, ref, alt, gene) {
-        if (ref === '.' || alt === '.') {
-            return [chrom, pos, ref, alt, gene].join('_')
-        }
-        var r_index = 0;
-        var l_index = 0;
-        var min_len = Math.min(alt.length, ref.length);
-
-        while (r_index < min_len) {
-            if (alt.charAt(alt.length - r_index - 1) !== ref.charAt(ref.length - r_index - 1)) break;
-            r_index += 1;
-        }
-        while (l_index < min_len) {
-            if (alt.charAt(l_index) !== ref.charAt(l_index)) break;
-            l_index += 1;
-        }
-        var overlap = Math.max(l_index + r_index - min_len, 0);
-        var l_seg, r_seg, r_alt_seg, r_ref_seg, new_ref, new_alt, new_pos;
-        if (l_index > r_index || l_index === r_index && l_index === min_len) {
-            l_seg = l_index;
-            r_ref_seg = ref.length - r_index + overlap;
-            r_alt_seg = alt.length - r_index + overlap
-        } else {
-            l_seg = l_index - overlap;
-            r_ref_seg = ref.length - r_index;
-            r_alt_seg = alt.length - r_index;
-        }
-        new_ref = ref.slice(l_seg, r_ref_seg);
-        new_alt = alt.slice(l_seg, r_alt_seg);
-        new_pos = parseInt(pos) + parseInt(l_seg);
-        if (new_ref.length === 0) {
-            new_ref = '-';
-            new_pos -= 1;
-        }
-        if (new_alt.length === 0) new_alt = '-';
-
-        return [chrom, new_pos, new_ref, new_alt, gene].join('_')
-    }
-
-
-    getGnomAD(gnomAD_exome, gnomAD_genome) {
-        if (gnomAD_exome != '.') {
-            return gnomAD_exome
-        }
-        if (gnomAD_genome != '.') {
-            return gnomAD_genome
-        }
-        return '.'
-    }
-
-    selectLongestTranscriptByGene(NM_Array, NR_Array, ENST_Array, Other_Array, geneName) {
+    selectLongestTranscriptByGene(NM_Array, NR_Array, ENST_Array, Other_Array, geneName): string {
         var maxGeneLine = ''
 
         if (NM_Array.length > 0) {
@@ -1401,7 +1159,7 @@ export class VcfService {
             let line = transcriptArray[i];
             let lineData = line.split('\t');
             let extraData = lineData[this.annoStream.headings.indexOf('Extra')];
-            let symbol = this.calculateService.formatData(this.getGeneSymbol(extraData))
+            let symbol = this.calculateService.formatData(this.getDataService.getGeneSymbol(extraData))
 
             if (symbol == geneName) {
                 resultArray.push(line)
@@ -1430,6 +1188,11 @@ export class VcfService {
         return maxLine;
     }
 
+    /**
+     * Calculate data from VCF line
+     * @param  {string} data
+     * @return {object}
+     */
     calculateData(data) {
         let chromIndex = this.headings.indexOf('#CHROM')
         let formatIndex = this.headings.indexOf('FORMAT')
@@ -1552,17 +1315,13 @@ export class VcfService {
     writeAfVcf(line, extraData) {
         let infoIndex = this.headings.indexOf('INFO');
         let data = line.split('\t');
-        let infoData = []
-        if (infoIndex != -1) {
-            infoData = data[infoIndex].split(';');
-        }
-
+        let infoData = data[infoIndex].split(';');
         let checkExist = false;
 
         for (var i in infoData) {
             if (infoData[i].indexOf('AF=') == 0 && extraData.alleleFrequency != null) {
                 let currentAF = infoData[i].split('=');
-                
+
                 let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
 
                 infoData[i] = `AF=${AF}`;
@@ -1586,35 +1345,8 @@ export class VcfService {
         fs.appendFileSync(this.AfVcfFile, data.join('\t') + '\n')
     }
 
-    getGeneSymbol(extraData: string) {
-        let VEP_SYMBOL = null
-        let HGNC_SYMBOL = null
-
-        let extraArray = extraData.split(';');
-
-        for (var i in extraArray) {
-            let keyValue = extraArray[i].split('=');
-
-            if (keyValue[0] == 'SYMBOL') {
-                VEP_SYMBOL = keyValue[1];
-            }
-
-            if (keyValue[0] == 'HGNC_SYMBOL') {
-                HGNC_SYMBOL = keyValue[1];
-            }
-
-        }
-
-        if (HGNC_SYMBOL != null) {
-            return HGNC_SYMBOL;
-        } else {
-            return VEP_SYMBOL
-        }
-    }
 
 
 
 
-
-    
 }

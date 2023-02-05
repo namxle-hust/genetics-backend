@@ -6,6 +6,7 @@ import * as Joi from 'joi'
 import { AnnovarService, CommunicationService, VcfService } from './services';
 import { CalculateService } from './services/calculate.service';
 import { CommonService } from './services/common.service';
+import { GetDataService } from './services/get-data.service';
 import { GlobalService } from './services/global.service';
 import { VcfAnalyzerController } from './vcf-analyzer.controller';
 import { VcfAnalyzerService } from './vcf-analyzer.service';
@@ -34,7 +35,8 @@ import { VcfAnalyzerService } from './vcf-analyzer.service';
         AnnovarService,
         VcfService,
         CalculateService,
-        GlobalService
+        GlobalService,
+        GetDataService
     ],
 })
 export class VcfAnalyzerModule { }

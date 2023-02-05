@@ -12,8 +12,10 @@ export class CalculateService {
     }
 
     calculateExac(name, extraData) {
-        let AC = this.formatData(this.getExtraData('ExAC_AC' + name, extraData))
-        let AN = this.formatData(this.getExtraData('ExAC_AN' + name, extraData))
+        let self = this;
+
+        let AC = self.formatData(self.getExtraData('ExAC_AC' + name, extraData))
+        let AN = self.formatData(self.getExtraData('ExAC_AN' + name, extraData))
 
         if (AC == null || AN == null || AN == 0 || AN == '.' || AC == '.') {
             return '.'
@@ -32,7 +34,7 @@ export class CalculateService {
             return null;
         }
 
-        let extraArray = extraData ? extraData.split(';') : []
+        let extraArray = extraData.split(';');
 
         for (var i in extraArray) {
             let keyValue = extraArray[i].split('=');
@@ -625,7 +627,52 @@ export class CalculateService {
         }
     }
 
+    /**
+     * Calculate data from VCF line for LoFeq VCF
+     * @param  {string} infoData: Variant info data. Exp: DP=496;AF=0.060484;SB=2;DP4=221,245,16,14
+     * @return {object}
+     */
+    calculateLoFeqData(infoData) {
+        let data, DP4, readDepth, alleleFrequency, coverage
+
+        /**
+         * Read depth = DP4 = 221 + 245 + 16 + 14 = 496
+         * AF= (DP4[2] + DP4[3]) / Read depth = (16+14) / 496 * 100%= 6%
+         * Coverage = "(221 + 245) : (16 + 14)" = "466 : 30"
+         */
+        data = infoData.split(';')
+
+        DP4 = data[3].split('=')
+
+        // Make sure this is a LoFeq VCF
+        if (DP4[0] != 'DP4') {
+            return {
+                readDepth: null,
+                alleleFrequency: null
+            }
+        }
+
+        DP4 = DP4[1].split(',')
+        // Make sure data is integer
+        DP4.forEach((item, index) => {
+            DP4[index] = parseInt(item)
+        })
+
+        readDepth = DP4[0] + DP4[1] + DP4[2] + DP4[3]
+        alleleFrequency = (DP4[2] + DP4[3]) / readDepth
+        coverage = `${DP4[0] + DP4[1]}:${DP4[2] + DP4[3]}`
+
+        return {
+            readDepth: readDepth,
+            alleleFrequency: alleleFrequency,
+            coverage: coverage
+        }
+    }
+
+
     calculateClinsigFinal(CLINSIG, alleleFrequencyData, codingEffect, gene, CLINSIG_ID, HGMD) {
+        let self = this;
+
         let CLINSIG_FINAL
         let CLINSIG_PRIORITY
         let hasClinicalSynopsis = 0
@@ -645,7 +692,7 @@ export class CalculateService {
             if (/(^pathogenic)|([^(likely\s)]pathogenic)/i.test(CLINSIG)) {
                 CLINSIG_FINAL = 'pathogenic'
                 CLINSIG_PRIORITY = 1
-                if (this.isLossOfFunctionMutation(codingEffect)) {
+                if (self.isLossOfFunctionMutation(codingEffect)) {
                     lossOfFunction = 1
                 }
 
@@ -660,7 +707,7 @@ export class CalculateService {
             else if (/likely\spathogenic/i.test(CLINSIG)) {
                 CLINSIG_FINAL = 'likely pathogenic'
                 CLINSIG_PRIORITY = 2
-                if (this.isLossOfFunctionMutation(codingEffect)) {
+                if (self.isLossOfFunctionMutation(codingEffect)) {
                     lossOfFunction = 1
                 }
                 return {
@@ -674,7 +721,7 @@ export class CalculateService {
             else if (/drug\sresponse/i.test(CLINSIG)) {
                 CLINSIG_FINAL = 'drug response'
                 CLINSIG_PRIORITY = 3.5
-                if (this.isLossOfFunctionMutation(codingEffect)) {
+                if (self.isLossOfFunctionMutation(codingEffect)) {
                     lossOfFunction = 1
                 }
                 return {
@@ -688,7 +735,7 @@ export class CalculateService {
             else if (/uncertain\ssignificance/i.test(CLINSIG)) {
                 CLINSIG_FINAL = 'uncertain significance'
                 CLINSIG_PRIORITY = 3
-                if (this.isLossOfFunctionMutation(codingEffect) && clinicalSynopsisGene.indexOf(gene) != -1) {
+                if (self.isLossOfFunctionMutation(codingEffect) && clinicalSynopsisGene.indexOf(gene) != -1) {
                     CLINSIG_PRIORITY = 2.5
                     hasClinicalSynopsis = 1
                     lossOfFunction = 1
@@ -698,7 +745,7 @@ export class CalculateService {
                 } else if (clinicalSynopsisGene.indexOf(gene) != -1) {
                     CLINSIG_PRIORITY = 2.7
                     hasClinicalSynopsis = 1
-                } else if (this.isLossOfFunctionMutation(codingEffect)) {
+                } else if (self.isLossOfFunctionMutation(codingEffect)) {
                     lossOfFunction = 1
                 }
                 return {
@@ -712,7 +759,7 @@ export class CalculateService {
             else if (/likely\sbenign/i.test(CLINSIG)) {
                 CLINSIG_FINAL = 'likely benign'
                 CLINSIG_PRIORITY = 4
-                if (this.isLossOfFunctionMutation(codingEffect)) {
+                if (self.isLossOfFunctionMutation(codingEffect)) {
                     lossOfFunction = 1
                 }
                 return {
@@ -726,7 +773,7 @@ export class CalculateService {
             else if (/(^benign)|([^(likely\s)]benign)/i.test(CLINSIG)) {
                 CLINSIG_FINAL = 'benign'
                 CLINSIG_PRIORITY = 5
-                if (this.isLossOfFunctionMutation(codingEffect)) {
+                if (self.isLossOfFunctionMutation(codingEffect)) {
                     lossOfFunction = 1
                 }
                 return {
@@ -739,10 +786,10 @@ export class CalculateService {
 
         }
         // Gnomad > 0.05
-        if (this.isBenignA(alleleFrequencyData)) {
+        if (self.isBenignA(alleleFrequencyData)) {
             CLINSIG_FINAL = 'benign'
             CLINSIG_PRIORITY = 5
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
 
@@ -756,75 +803,75 @@ export class CalculateService {
         }
 
         // Check Drug response
-        if (this.isDrugResponseGoldStar(CLINSIG) && GoldStars >= 2) {
+        if (self.isDrugResponseGoldStar(CLINSIG) && GoldStars >= 2) {
             CLINSIG_FINAL = 'drug response'
             CLINSIG_PRIORITY = 3.5
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isBenignA(alleleFrequencyData)) {
+        } else if (self.isBenignA(alleleFrequencyData)) {
             CLINSIG_FINAL = 'benign'
             CLINSIG_PRIORITY = 5
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         }
         else if (alleleFrequencyData.BTG_Concensus == 'P') {
             CLINSIG_FINAL = 'pathogenic'
             CLINSIG_PRIORITY = 1
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         }
         else if (alleleFrequencyData.BTG_Concensus == 'LP') {
             CLINSIG_FINAL = 'likely pathogenic'
             CLINSIG_PRIORITY = 2
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         }
         else if (alleleFrequencyData.BTG_Concensus == 'LB') {
             CLINSIG_FINAL = 'likely benign'
             CLINSIG_PRIORITY = 4
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         }
         else if (alleleFrequencyData.BTG_Concensus == 'B') {
             CLINSIG_FINAL = 'benign'
             CLINSIG_PRIORITY = 5
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         }
         else if (HGMD == 'DM' && alleleFrequencyData.VAR_SCORE >= 0.5) {
             CLINSIG_FINAL = 'pathogenic'
             CLINSIG_PRIORITY = 1
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isPathogenic(CLINSIG)) {
+        } else if (self.isPathogenic(CLINSIG)) {
             CLINSIG_FINAL = 'pathogenic'
             CLINSIG_PRIORITY = 1
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isLikelyPathogenic(CLINSIG)) {
+        } else if (self.isLikelyPathogenic(CLINSIG)) {
             CLINSIG_FINAL = 'likely pathogenic'
             CLINSIG_PRIORITY = 2
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isDrugResponse(CLINSIG)) {
+        } else if (self.isDrugResponse(CLINSIG)) {
             CLINSIG_FINAL = 'drug response'
             CLINSIG_PRIORITY = 3.5
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isUncertainsignificance(CLINSIG)) {
+        } else if (self.isUncertainsignificance(CLINSIG)) {
             CLINSIG_FINAL = 'uncertain significance';
             CLINSIG_PRIORITY = 3
-            if (this.isLossOfFunctionMutation(codingEffect) && clinicalSynopsisGene.indexOf(gene) != -1) {
+            if (self.isLossOfFunctionMutation(codingEffect) && clinicalSynopsisGene.indexOf(gene) != -1) {
                 CLINSIG_PRIORITY = 2.5
                 hasClinicalSynopsis = 1
                 lossOfFunction = 1
@@ -834,25 +881,25 @@ export class CalculateService {
             } else if (clinicalSynopsisGene.indexOf(gene) != -1) {
                 CLINSIG_PRIORITY = 2.7
                 hasClinicalSynopsis = 1
-            } else if (this.isLossOfFunctionMutation(codingEffect)) {
+            } else if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isLikelyBenign(CLINSIG, alleleFrequencyData)) {
+        } else if (self.isLikelyBenign(CLINSIG, alleleFrequencyData)) {
             CLINSIG_FINAL = 'likely benign'
             CLINSIG_PRIORITY = 4
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
-        } else if (this.isBenign(CLINSIG, alleleFrequencyData)) {
+        } else if (self.isBenign(CLINSIG, alleleFrequencyData)) {
             CLINSIG_FINAL = 'benign'
             CLINSIG_PRIORITY = 5
-            if (this.isLossOfFunctionMutation(codingEffect)) {
+            if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         } else {
             CLINSIG_FINAL = 'uncertain significance'
             CLINSIG_PRIORITY = 3
-            if (this.isLossOfFunctionMutation(codingEffect) && clinicalSynopsisGene.indexOf(gene) != -1) {
+            if (self.isLossOfFunctionMutation(codingEffect) && clinicalSynopsisGene.indexOf(gene) != -1) {
                 CLINSIG_PRIORITY = 2.5
                 hasClinicalSynopsis = 1
                 lossOfFunction = 1
@@ -862,7 +909,7 @@ export class CalculateService {
             } else if (clinicalSynopsisGene.indexOf(gene) != -1) {
                 CLINSIG_PRIORITY = 2.7
                 hasClinicalSynopsis = 1
-            } else if (this.isLossOfFunctionMutation(codingEffect)) {
+            } else if (self.isLossOfFunctionMutation(codingEffect)) {
                 lossOfFunction = 1
             }
         }
@@ -986,4 +1033,45 @@ export class CalculateService {
             (data.EUR_AF_1000g != ANNOVAR_NASTRING && data.EUR_AF_1000g < 0.05) ||
             (data.SAS_AF_1000g != ANNOVAR_NASTRING && data.SAS_AF_1000g < 0.05)
     }
+
+
+    convert(chrom, pos, ref, alt, gene) {
+        if (ref === '.' || alt === '.') {
+            return [chrom, pos, ref, alt, gene].join('_')
+        }
+        var r_index = 0;
+        var l_index = 0;
+        var min_len = Math.min(alt.length, ref.length);
+
+        while (r_index < min_len) {
+            if (alt.charAt(alt.length - r_index - 1) !== ref.charAt(ref.length - r_index - 1)) break;
+            r_index += 1;
+        }
+        while (l_index < min_len) {
+            if (alt.charAt(l_index) !== ref.charAt(l_index)) break;
+            l_index += 1;
+        }
+        var overlap = Math.max(l_index + r_index - min_len, 0);
+        var l_seg, r_seg, r_alt_seg, r_ref_seg, new_ref, new_alt, new_pos;
+        if (l_index > r_index || l_index === r_index && l_index === min_len) {
+            l_seg = l_index;
+            r_ref_seg = ref.length - r_index + overlap;
+            r_alt_seg = alt.length - r_index + overlap
+        } else {
+            l_seg = l_index - overlap;
+            r_ref_seg = ref.length - r_index;
+            r_alt_seg = alt.length - r_index;
+        }
+        new_ref = ref.slice(l_seg, r_ref_seg);
+        new_alt = alt.slice(l_seg, r_alt_seg);
+        new_pos = parseInt(pos) + parseInt(l_seg);
+        if (new_ref.length === 0) {
+            new_ref = '-';
+            new_pos -= 1;
+        }
+        if (new_alt.length === 0) new_alt = '-';
+
+        return [chrom, new_pos, new_ref, new_alt, gene].join('_')
+    }
+    
 }
