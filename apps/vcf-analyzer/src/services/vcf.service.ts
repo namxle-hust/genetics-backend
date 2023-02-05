@@ -450,7 +450,7 @@ export class VcfService {
 
             if (result.INFO.indexOf(';CSQ=') != -1) {
                 var vepRL = result.INFO.split(';CSQ=')[1];
-                var geneTranscipt = vepRL.split('|')[6];
+                var geneTranscipt = vepRL ? vepRL.split('|')[6] : ".";
                 result.MT = geneTranscipt
             }
 
@@ -930,12 +930,12 @@ export class VcfService {
 
         var lineLocation = lineData[this.annoStream.headings.indexOf('Location')]
 
-        var vepVarLocation = lineLocation.split('-')
+        var vepVarLocation = lineLocation ? lineLocation.split('-') : []
 
-        vcfExtraData.chrom = vcfExtraData.chrom.split('chr').join('')
+        vcfExtraData.chrom = vcfExtraData.chrom ? vcfExtraData.chrom.split('chr').join('') : ''
 
-        var vepPOS = vepVarLocation[0].split(':')[1];
-        var vepChrom = vepVarLocation[0].split(':')[0].split('chr').join('');
+        var vepPOS = vepVarLocation[0] ? vepVarLocation[0].split(':')[1] : '.'
+        var vepChrom = vepVarLocation[0] && vepVarLocation[0].split(':')[0] ? vepVarLocation[0].split(':')[0].split('chr').join('') : '.'
         var vepALT = lineData[this.annoStream.headings.indexOf('Allele')]
         var vepREF = this.getExtraData('GIVEN_REF', extraData)
         var vcfDataIndex = vcfExtraData.chrom + '_' + vcfExtraData.inputPos + '_' + vcfExtraData.REF + '_' + vcfExtraData.ALT + '_' + gene;
@@ -1008,13 +1008,13 @@ export class VcfService {
         var SIFT_number = '.'
 
         if (SIFT_score != '.') {
-            SIFT_number = SIFT_score.split('(')[1].split(')')[0]
+            SIFT_number = SIFT_score.split('(')[1] ? SIFT_score.split('(')[1].split(')')[0] : '.'
         }
 
         var PolyPhen_number = '.'
 
         if (PolyPhen_score != '.') {
-            PolyPhen_number = PolyPhen_score.split('(')[1].split(')')[0]
+            PolyPhen_number = PolyPhen_score.split('(')[1] ? PolyPhen_score.split('(')[1].split(')')[0]: '.'
         }
 
         var HGNC_SYMONYMS = this.calculateService.formatData(this.getExtraData('HGNC_SYNONYMS', extraData))
@@ -1180,7 +1180,7 @@ export class VcfService {
         //     return vcfRSID;
         // }
 
-        var rsIdArray = vepRSID.split(',');
+        var rsIdArray = vepRSID ? vepRSID.split(',') : []
         for (var i in rsIdArray) {
             var rsId = rsIdArray[i]
             if (rsId.indexOf('rs') != -1) {
@@ -1216,7 +1216,7 @@ export class VcfService {
 
     getComplementary(devarion, strand) {
         if (strand == -1 || strand == "-1") {
-            var devarionRevert = devarion.split("").reverse()
+            var devarionRevert = devarion ?  devarion.split("").reverse() : []
             var compDel = ''
             var compArr = {
                 'A': 'T',
@@ -1529,7 +1529,7 @@ export class VcfService {
                 }
             } else if (format == 'GT:GQ') {
                 result = {
-                    GT: formatData.split(":")[0],
+                    GT: formatData ? formatData.split(":")[0] : '.',
                     readDepth: null,
                     alleleFrequency: null,
                     coverage: null
