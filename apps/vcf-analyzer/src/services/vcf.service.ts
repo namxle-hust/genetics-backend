@@ -236,7 +236,7 @@ export class VcfService {
 
                         this.resumeAnnoStream()
                     } else {
-                        if (line) {
+                        if (line && line.trim()) {
                             let lineData = line.split('\t')
                             let lineString = line;
                             if (line.search('#CHROM') == 0) {
