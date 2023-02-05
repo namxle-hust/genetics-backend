@@ -1,0 +1,11 @@
+data/HGMD.tsv filter=lfs diff=lfs merge=lfs -text
+data/HGNC_Gene_Data.tsv filter=lfs diff=lfs merge=lfs -text
+data/clinvar_data.tsv filter=lfs diff=lfs merge=lfs -text
+data/nan_cla_final.tsv filter=lfs diff=lfs merge=lfs -text
+data/Clinvarv2.tsv filter=lfs diff=lfs merge=lfs -text
+data/HGMD_transcript.tsv filter=lfs diff=lfs merge=lfs -text
+data/INHERITANCE_GENE.tsv filter=lfs diff=lfs merge=lfs -text
+data/clinvar_20190119.tsv filter=lfs diff=lfs merge=lfs -text
+data/nan_clinvar_03_2020.tsv filter=lfs diff=lfs merge=lfs -text
+data/transcript_length.txt filter=lfs diff=lfs merge=lfs -text
+data/CosmicGene_sorted.tsv filter=lfs diff=lfs merge=lfs -text
