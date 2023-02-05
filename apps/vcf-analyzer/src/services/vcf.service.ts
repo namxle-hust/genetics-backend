@@ -1553,7 +1553,11 @@ export class VcfService {
     writeAfVcf(line, extraData) {
         let infoIndex = this.headings.indexOf('INFO');
         let data = line.split('\t');
-        let infoData = data[infoIndex].split(';');
+        let infoData = []
+        if (infoIndex != -1) {
+            infoData = data[infoIndex].split(';');
+        }
+        
         let checkExist = false;
 
         for (var i in infoData) {
