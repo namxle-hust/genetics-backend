@@ -220,14 +220,14 @@ export class VcfService {
 
         return new Promise((resolve, reject) => {
             this.vcfStream = fs.createReadStream(this.vcfFile)
-                .pipe(es ? es.split() : undefined)
+                .pipe(es.split())
                 .pipe(es.mapSync((line) => {
                     this.vcfStream.pause()
 
                     let eventName, extraData
 
                     if (this.lineIndex != null) {
-                        // this.logger.debug(line);
+                        this.logger.debug(line);
                         // This is a data line, analyze it, and read next annotation line
                         this.lineIndex++
 
