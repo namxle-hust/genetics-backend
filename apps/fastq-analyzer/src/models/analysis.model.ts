@@ -20,6 +20,11 @@ export class AnalysisModel implements Analysis {
 }
 
 export class SampleModel implements Sample {
+    firstName: string;
+    lastName: string;
+    dob: string;
+    ethnicity: string;
+    gender: Gender;
     id: number;
     createdAt: Date;
     updatedAt: Date;

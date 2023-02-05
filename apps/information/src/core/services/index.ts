@@ -8,3 +8,5 @@ export * from './variant.service'
 export * from './analysis-detail.service'
 export * from './s3.service'
 export * from './common.service'
+
+export * from './report.service'

@@ -20,6 +20,10 @@ export class AnalysisModel implements Analysis {
 }
 
 export class SampleModel implements Sample {
+    firstName: string;
+    lastName: string;
+    dob: string;
+    ethnicity: string;
     id: number;
     createdAt: Date;
     updatedAt: Date;
@@ -27,6 +31,7 @@ export class SampleModel implements Sample {
     isDelete: boolean;
     userId: number;
     type: SampleType;
+    gender: Gender
     files: File[]
     
 }

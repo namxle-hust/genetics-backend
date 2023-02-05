@@ -31,7 +31,9 @@ export class FastqAnalyzingService {
         await this.communicationService.updateSampleStatusStatus(AnalysisStatus.FASTQ_ANALYZING, analysis.id)
 
         // Create folder
-        await this.commonService.runCommand(`mkdir -p ${this.commonService.getAnalysisDestinationFolder(analysis) }`)
+        let analysisDestinationFolder = this.commonService.getAnalysisDestinationFolder(analysis)
+
+        await this.commonService.runCommand(`mkdir -p ${analysisDestinationFolder} && rm -rf ${analysisDestinationFolder}/*`)
 
         // Download Fastq for analyzing
         await this.downloadFastQFiles(analysis);

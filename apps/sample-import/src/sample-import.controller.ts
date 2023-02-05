@@ -1,22 +1,27 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Logger, Post } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { SampleImportService } from './sample-import.service';
 
 @Controller()
 export class SampleImportController {
-  constructor(private readonly sampleImportService: SampleImportService) {}
 
-  @Get()
-  getHello(): string {
-    return this.sampleImportService.getHello();
-  }
+    private readonly logger = new Logger(SampleImportController.name)
 
-  @Get('test2')
-  test2() {
-    return this.sampleImportService.test2()
-  }
+    constructor(private readonly sampleImportService: SampleImportService) { }
 
-    @Post('test')
-    test() {
-        return this.sampleImportService.test();
+    @Get()
+    getHello(): string {
+        return this.sampleImportService.getHello();
     }
+
+    @Cron(CronExpression.EVERY_30_SECONDS)
+    async import() {
+        try {
+            await this.sampleImportService.importAnalysis()
+
+        } catch (error) {
+            this.logger.error(error)
+        }
+    }
+    
 }

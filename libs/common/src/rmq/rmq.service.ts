@@ -1,9 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { RmqContext, RmqOptions, Transport } from "@nestjs/microservices";
 
 @Injectable({})
 export class RmqService {
+
+    private readonly logger = new Logger(RmqService.name)
 
     constructor(private readonly configService: ConfigService) {
 
@@ -16,7 +18,8 @@ export class RmqService {
                 urls: [this.configService.get<string>('RABBIT_MQ_URI')],
                 queue: this.configService.get<string>(`RABBIT_MQ_${queue}_QUEUE`),
                 noAck: noAck,
-                prefetchCount: 1
+                prefetchCount: 1,
+                isGlobalPrefetchCount: true
             }
         }
     }

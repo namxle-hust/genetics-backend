@@ -1,15 +1,27 @@
 import { Service } from "@app/common/shared/service";
 import { Injectable, Logger } from "@nestjs/common";
+import mongoose from "mongoose";
 import { VariantProjection } from "../constants";
-import { VariantFilterDTO } from "../dto";
 import { IVariantFilter, TableFindInput, VariantFilterConditionModel } from "../models";
-import { VariantRepository } from "../repository/variant.repository";
 
 @Injectable()
 export class VariantService extends Service {
 
     constructor() {
         super()
+    }
+
+    buildPgxCondition() {
+        return {
+            "PGx": 1
+        }
+    }
+
+    buildVariantDetailConditions(_id: string) {
+        let objectId = new mongoose.Types.ObjectId(_id);
+        return {
+            "_id": objectId
+        };
     }
 
     buildOffset(criteria: TableFindInput<IVariantFilter, IVariantFilter>) {
@@ -54,17 +66,83 @@ export class VariantService extends Service {
         pipe = [
             ...pipe,
             $project,
-            $count
+            $count,
         ]
 
         return pipe
     }
 
+    buildSort() {
+        return {
+            "$sort": { CLINSIG_PRIORITY: 1 }
+        }
+    }
+
+    buildClinsigPriority() {
+        return {
+            "$ifNull": [
+                "$CLINSIG_PRIORITY",
+                {
+                    "$cond": {
+                        "if": {
+                            "$eq": ["$CLINSIG_FINAL", "drug response"]
+                        },
+                        "then": 0,
+                        "else": {
+                            "$cond": {
+                                "if": {
+                                    "$eq": ["$CLINSIG_FINAL", "pathogenic"]
+                                },
+                                "then": 1,
+                                "else": {
+                                    "$cond": {
+                                        "if": {
+                                            "$eq": ["$CLINSIG_FINAL", "likely pathogenic"]
+                                        },
+                                        "then": 2,
+                                        "else": {
+                                            "$cond": {
+                                                "if": {
+                                                    "$eq": ["$CLINSIG_FINAL", "uncertain significance"]
+                                                },
+                                                "then": 3,
+                                                "else": {
+                                                    "$cond": {
+                                                        "if": {
+                                                            "$eq": ["$CLINSIG_FINAL", "likely benign"]
+                                                        },
+                                                        "then": 4,
+                                                        "else": {
+                                                            "$cond": {
+                                                                "if": {
+                                                                    "$eq": ["$CLINSIG_FINAL", "benign"]
+                                                                },
+                                                                "then": 5,
+                                                                "else": 6
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+
+    }
+
     buildPipe(criteria: TableFindInput<IVariantFilter, IVariantFilter>): Array<{ [key: string]: any }> {
-        const $project = { $project: VariantProjection };
+        const CLINSIG_PRIORITY = this.buildClinsigPriority();
+        const $project = { $project: { ...VariantProjection, CLINSIG_PRIORITY } };
         const $match = this.buildMatchAndCondition(criteria.where)
         const $offset = this.buildOffset(criteria);
         const $limit = this.buildLimit(criteria);
+        const $sort = this.buildSort()
 
         let pipeFind = [];
 
@@ -72,12 +150,16 @@ export class VariantService extends Service {
             pipeFind.push($match)
         }
 
+
         pipeFind = [
             ...pipeFind,
             $project,
+            $sort,
             $offset,
             $limit
         ]
+
+        // this.logger.debug(pipeFind)
 
         return pipeFind
     }

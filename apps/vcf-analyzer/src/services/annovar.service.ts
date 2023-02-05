@@ -16,7 +16,6 @@ export class AnnovarService {
 
     private vepDir: string
     private vepCommand: string
-    private tmpFolder: string
 
     constructor(
         private readonly commonService: CommonService,
@@ -26,15 +25,12 @@ export class AnnovarService {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
         this.vepDir = this.configService.get<string>('VEP_DIR')
         this.vepCommand = this.configService.get<string>('VEP_COMMAND')
-        this.tmpFolder = this.configService.get<string>('TMP_DIR')
 
     }
 
     getVepOutput(analysis: AnalysisModel): string {
-        return `${this.tmpFolder}/analysis_${analysis.id}_${VEP_OUTPUT}`
+        return `${this.commonService.getTmpFolderFormat(analysis)}_${VEP_OUTPUT}`
     }
-
-    
 
     async getRowCount(vcfFilePath: string) {
         let command = `less ${vcfFilePath} | awk -F"\t" '{ if (index($0, "#") != 1) { split($5,a,","); col8 = $8; for (i in a){ $5=a[i]; $8=col8";VARINDEX="i; print }  }}' | wc -l`
@@ -209,10 +205,5 @@ export class AnnovarService {
                 }
             });
         })
-    }
-
-
-    async runAnnotation() {
-
     }
 }

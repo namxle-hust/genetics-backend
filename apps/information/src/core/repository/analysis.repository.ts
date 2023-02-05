@@ -2,7 +2,7 @@ import { Analysis, PrismaService, Sample } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AnalysisFilterDTO } from "../dto";
-import { IAnalysisCreateInput, IAnalysisFilter, IAnalysisFindInput, IAnalysisUpdateInput, TableFindInput } from "../models";
+import { IAnalysisCreateInput, IAnalysisFilter, IAnalysisFindInput, IAnalysisRemoveInput, IAnalysisUpdateInput, TableFindInput } from "../models";
 
 @Injectable()
 export class AnalysisRepository {
@@ -22,6 +22,22 @@ export class AnalysisRepository {
             }
             throw error;
         }
+    }
+
+    async findSampleByAnalysis(id: number): Promise<Sample> {
+        const analysis = await this.prisma.analysis.findUnique({
+            where: { id: id },
+            include: {
+                sample: true,
+                workspace: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+        })
+
+        return analysis.sample;
     }
 
     async findById(id: number): Promise<Analysis> {
@@ -96,7 +112,7 @@ export class AnalysisRepository {
         return analysis
     }
 
-    async update(id: number, data: IAnalysisUpdateInput | IAnalysisFindInput): Promise<Analysis> {
+    async update(id: number, data: IAnalysisUpdateInput | IAnalysisRemoveInput): Promise<Analysis> {
         try {
             const analysis = await this.prisma.analysis.update({
                 where: { id: id }, data: data

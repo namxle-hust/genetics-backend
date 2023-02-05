@@ -1,14 +1,19 @@
 import { RmqModule, SAMPLE_STATUS_PROCESSOR } from '@app/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import * as Joi from 'joi'
 import { AnnovarService, CommunicationService, VcfService } from './services';
+import { CalculateService } from './services/calculate.service';
 import { CommonService } from './services/common.service';
+import { GetDataService } from './services/get-data.service';
+import { GlobalService } from './services/global.service';
 import { VcfAnalyzerController } from './vcf-analyzer.controller';
 import { VcfAnalyzerService } from './vcf-analyzer.service';
 
 @Module({
     imports: [
+        EventEmitterModule.forRoot(),
         ConfigModule.forRoot({
             isGlobal: true,
             validationSchema: Joi.object({
@@ -28,7 +33,10 @@ import { VcfAnalyzerService } from './vcf-analyzer.service';
         CommunicationService,
         CommonService,
         AnnovarService,
-        VcfService
+        VcfService,
+        CalculateService,
+        GlobalService,
+        GetDataService
     ],
 })
 export class VcfAnalyzerModule { }

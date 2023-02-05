@@ -18,7 +18,7 @@ export class CommonService {
     async runCommand(command: string): Promise<any> {
         this.logger.log(command)
         return new Promise((resolve, reject) => {
-            child.exec(command, (error, stdout, stderr) => {
+            child.exec(command, { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
                 if (error) {
                     return reject(error)
                 }
@@ -32,11 +32,11 @@ export class CommonService {
     }
 
     getUploadCmd(source, destination) {
-        return `aws s3 cp ${source} s3://${this.s3Bucket}/${destination} --profile ${this.s3Profile}`
+        return `aws s3 cp ${source} s3://${this.s3Bucket}/${destination} --profile ${this.s3Profile} >/dev/null 2>&1`
     }
 
     getDownloadCmd(source, destination) {
-        return `aws s3 cp s3://${this.s3Bucket}/${source} ${destination} --profile ${this.s3Profile}`
+        return `aws s3 cp s3://${this.s3Bucket}/${source} ${destination} --profile ${this.s3Profile} >/dev/null 2>&1`
     }
 
     getAnalysisDestinationFolder(analysis: AnalysisModel): string {

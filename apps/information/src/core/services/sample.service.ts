@@ -1,7 +1,7 @@
 import { Sample } from '@app/prisma';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { FileCreateDTO, SampleCreateDTO, SampleFilterDTO, SampleUpdateDTO, TableDTO } from '../dto';
-import { ISampleCreateInput, ISampleFilter, ISampleFindInput, ISampleUpdateInput, TableFindInput } from '../models';
+import { ISampleCreateInput, ISampleFilter, ISampleFindInput, ISampleUpdateInput, SampleFindInput, TableFindInput } from '../models';
 import { TableOutputEntity, SampleEntity } from '../entities';
 import { SampleRepository } from '../repository';
 import { FileService } from './file.service';
@@ -16,7 +16,9 @@ export class SampleService {
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<ISampleFindInput, ISampleFilter>(dto, { userId: userId, isDelete: false });
+        let findInput: ISampleFindInput = new SampleFindInput(dto, userId)
+
+        let tableFindDto = new TableFindInput<ISampleFindInput, ISampleFilter>(dto, findInput);
 
         const total = await this.sampleRepository.count(tableFindDto);
 
@@ -63,7 +65,12 @@ export class SampleService {
         let data: ISampleCreateInput = {
             userId: userId,
             name: dto.name,
-            type: dto.type
+            type: dto.type,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            dob: dto.dob,
+            ethnicity: dto.ethnicity,
+            gender: dto.gender
         }
 
         const sample = await this.sampleRepository.create(data);

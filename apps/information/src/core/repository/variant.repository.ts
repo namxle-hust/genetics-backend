@@ -9,7 +9,11 @@ export class VariantRepository {
 
     }
 
-    async find(collectionName: string, pipe: Array<{ [key: string]: any }>): Promise<any[]> {
+    async aggregate(collectionName: string, pipe: Array<{ [key: string]: any }>): Promise<any[]> {
         return await this.db.collection(collectionName).aggregate(pipe, { allowDiskUse: true }).toArray();   
+    }
+
+    async find(collectionName: string, conditions: { [key: string]: any }): Promise<any[]> {
+        return await this.db.collection(collectionName).find(conditions).toArray()
     }
 }

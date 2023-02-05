@@ -1,7 +1,7 @@
 import { Workspace } from '@app/prisma';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { TableDTO, WorkspaceFilterDTO } from '../dto';
-import { TableFindInput } from '../models';
+import { TableFindInput, WorkspaceFindInput } from '../models';
 import { WorkspaceCreateDTO, WorkspaceUpdateDTO } from '../dto';
 import { TableOutputEntity, WorkspaceEntity } from '../entities';
 import { IWorkspaceCreateInput, IWorkspaceFindInput, IWorkspaceUpdateInput } from '../models';
@@ -17,7 +17,9 @@ export class WorkspaceService {
             total: 0
         }
 
-        let tableFindDto = new TableFindInput<IWorkspaceFindInput, WorkspaceFilterDTO>(dto, { userId: userId });
+        let findInput: IWorkspaceFindInput = new WorkspaceFindInput(dto, userId)
+
+        let tableFindDto = new TableFindInput<IWorkspaceFindInput, WorkspaceFilterDTO>(dto, findInput);
         
         const total = await this.workspaceRepository.count(tableFindDto);
 

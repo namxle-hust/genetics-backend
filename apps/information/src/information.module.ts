@@ -10,6 +10,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { FileModule } from './file/file.module';
 import { SampleModule } from './sample/sample.module';
 import { AnalysisModule } from './analysis/analysis.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
     imports: [
@@ -44,7 +45,8 @@ import { AnalysisModule } from './analysis/analysis.module';
         WorkspaceModule,
         FileModule,
         SampleModule,
-        AnalysisModule
+        AnalysisModule,
+        ReportModule
     ],
     controllers: []
 })

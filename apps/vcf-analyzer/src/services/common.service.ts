@@ -7,8 +7,10 @@ import { AnalysisModel } from "../models";
 export class CommonService {
     private readonly logger = new Logger(CommonService.name)
 
+    private tmpFolder: string;
 
     constructor(private configService: ConfigService) {
+        this.tmpFolder = this.configService.get<string>('TMP_DIR')
     }
 
     async runCommand(command: string): Promise<any> {
@@ -23,6 +25,11 @@ export class CommonService {
                 }
             });
         })
+    }
+
+
+    getTmpFolderFormat(analysis: AnalysisModel) {
+        return `${this.tmpFolder}/analysis_${analysis.id}`
     }
 
     getAnalysisFolder(analysis: AnalysisModel) {

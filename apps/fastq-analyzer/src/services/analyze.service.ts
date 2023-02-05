@@ -57,7 +57,7 @@ export class AnalyzeService {
 
         const files = analysis.sample.files;
 
-        const SampleName = analysis.name.replace(' ', '_');
+        const SampleName = analysis.name.replace(/ /gm, '_');
 
         const R1Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
         const R2Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
@@ -93,13 +93,22 @@ export class AnalyzeService {
         const R1Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
         const R2Fastq = `${this.analysisFolder}/${files[0].uploadedName}`
 
-        const SampleName = analysis.name.replace(' ', '_');
+        const SampleName = analysis.name.replace(/ /gm, '_');
 
         const VcfHcOutput = 'vqsr_SNP_INDEL.hc.recaled.vcf.gz'
 
+        const changeDirCommand = `cd ${this.analysisFolder}`
+
         const sentieonCommand = `${this.sentieonScript} ${R1Fastq} ${R2Fastq} ${SampleName}`
 
-        this.commonService.runCommand(sentieonCommand);
+        const commands = [
+            changeDirCommand,
+            sentieonCommand
+        ]
+
+        const command = commands.join(' && ')
+
+        await this.commonService.runCommand(command);
 
         return `${this.analysisFolder}/${VcfHcOutput}`
     }
@@ -114,7 +123,6 @@ export class AnalyzeService {
 
         await this.vcfService.renameOutput(output, analysis);
 
-        return true;   
     }
     
 }

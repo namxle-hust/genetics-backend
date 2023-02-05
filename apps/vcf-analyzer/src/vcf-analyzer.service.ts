@@ -1,23 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommonService } from './services/common.service';
 import { AnalysisModel } from './models';
 import { AnnovarService, VcfService } from './services';
-import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED } from '@app/common';
+import { FASTQ_OUTPUT_VCF, INTERSECT_BED_CMD, VCF_APPLIED_BED, VCF_BGZIP_CMD, VCF_FILE, VCF_MODIFIED_FILE, VCF_ORIGINAL_FILE, VCF_ORIGINAL_COMPRESSED_FILE, VCF_SORT_CMD, VCF_TABIX_CMD, FASTQ_OUTPUT_VCF_COMPRESSED, ANALYZING_FILE, VCF_FORMAT_TMP_FILE } from '@app/common';
 import { SampleType, VcfType } from '@app/prisma';
 import * as fs from 'fs'
 
 @Injectable()
 export class VcfAnalyzerService {
 
+    private readonly logger = new Logger(VcfAnalyzerService.name)
+
+
     private defaultBedFile: string;
 
     private analysisFolder: string
 
-    private uploadFolder: string
+    private s3UploadFolder: string
+    private s3Dir: string
 
 
     private vcfModified: string
+    private vcfOriginalTmp: string
     private vcfOriginal: string
     private vcfBed: string
     private vcfFile: string
@@ -35,9 +40,55 @@ export class VcfAnalyzerService {
         private readonly vcfService: VcfService
     ) {
         this.defaultBedFile = this.configService.get<string>('DEFAULT_BED');
-        this.uploadFolder = this.configService.get<string>('')
+        this.s3UploadFolder = this.configService.get<string>('S3_UPLOAD_FOLDER')
+        this.s3Dir = this.configService.get<string>('S3_DIR')
 
     }
+
+    async checkInstanceStatus() {
+        let instanceStatusFile = this.configService.get<string>('INSTANCE_STATUS_FILE');
+
+        if (fs.existsSync(instanceStatusFile)) {
+            return true
+        }
+
+        await this.commonService.runCommand(`touch ${instanceStatusFile}`);
+
+        return false;
+    }
+
+    // async checkAnalysisStatus(analysis: AnalysisModel): Promise<boolean> {
+    //     let analysisFolder = this.commonService.getAnalysisFolder(analysis);
+
+    //     let path = `${analysisFolder}/${ANALYZING_FILE}`
+
+    //     if (fs.existsSync(path)) {
+    //         return true;
+    //     }
+
+    //     await this.commonService.runCommand(`touch ${path}`);
+
+    //     return false;
+    // }
+
+    async updateInstanceStatus() {
+        let instanceStatusFile = this.configService.get<string>('INSTANCE_STATUS_FILE');
+
+        if (fs.existsSync(instanceStatusFile)) {
+            await this.commonService.runCommand(`rm ${instanceStatusFile}`);
+        }
+
+    }
+
+    // async updateAnalysisStatus(analysis: AnalysisModel) {
+    //     let analysisFolder = this.commonService.getAnalysisFolder(analysis);
+
+    //     let path = `${analysisFolder}/${ANALYZING_FILE}`
+
+    //     if (fs.existsSync(path)) {
+    //         await this.commonService.runCommand(`rm ${path}`);
+    //     }
+    // }
 
     async analyze(analysis: AnalysisModel) {
         this.analysisFolder = this.commonService.getAnalysisFolder(analysis);
@@ -46,6 +97,7 @@ export class VcfAnalyzerService {
         this.vcfBed = `${this.analysisFolder}/${VCF_APPLIED_BED}`
         this.vcfFile = `${this.analysisFolder}/${VCF_FILE}`
         this.vcfModified = `${this.analysisFolder}/${VCF_MODIFIED_FILE}`
+        this.vcfOriginalTmp = `${this.analysisFolder}/${VCF_FORMAT_TMP_FILE}`
         this.vepOutput = this.annovarService.getVepOutput(analysis)
        
 
@@ -58,7 +110,12 @@ export class VcfAnalyzerService {
         await this.prepareFile();
 
         await this.annovarService.runVEP(this.vepInput ,this.vepOutput)
-        
+
+        // Run Vcf Analyze
+        await this.vcfService.run(this.vcfFile, analysis, this.vepOutput)
+
+        this.logger.log('Done Analysis')
+
     }
 
     async preprocess() {
@@ -76,34 +133,45 @@ export class VcfAnalyzerService {
 
         } else {
             // Get only first element because vcf only allow upload 1 file
-            uploadPath = `${this.uploadFolder}/${this.analysis.sample.files[0].uploadedName}`
+            uploadPath = `${this.s3Dir}/${this.s3UploadFolder}/${this.analysis.sample.files[0].uploadedName}`
 
+            
             // Check if it is vcf.gz file
             this.isGZ = uploadPath.indexOf('vcf.gz') != -1 ? true : false
-
+            
         }
-
+        
         if (!fs.existsSync(uploadPath)) {
             let error = this.commonService.customError('Synchronizing');
+            this.logger.log(uploadPath)
             throw error;
         }
 
         this.vcfOriginal = `${this.analysisFolder}/${this.isGZ ? VCF_ORIGINAL_COMPRESSED_FILE : VCF_ORIGINAL_FILE}`
 
-        let command = `cp ${uploadPath} ${this.vcfOriginal}`
+        let copyCommand = `cp ${uploadPath} ${this.vcfOriginal}`
+        let createDirCommand = `mkdir -p ${this.analysisFolder}`
 
-        await this.commonService.runCommand(command);
+        let commands = [
+            createDirCommand,
+            copyCommand
+        ]
+
+        await this.commonService.runCommand(commands.join(' && '));
     }
 
     async fomatVcfFile() {
         let zipFileCommand = 'ls'
-
+        let preformatCommand = `less ${this.vcfOriginal} > ${this.vcfOriginalTmp}`
+        
         if (this.isGZ) {
             zipFileCommand = `bgzip -f ${this.vcfFile}`
+            preformatCommand = `bgzip -cd ${this.vcfOriginal} > ${this.vcfOriginalTmp}`
         }
 
         let commands = [
-            `less ${this.vcfOriginal} | awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' > ${this.vcfFile}`,
+            preformatCommand,
+            `awk 'BEGIN{OFS="\t"} { if(index($0, "#") == 1) {print $0;} else { if( $9== "GT:GQ:AD:DP:VF:NL:SB:NC:US") {} else { split($1,a,"chr"); if(a[2] != NULL ) { $1 = a[2];}; print $0;} } }' ${this.vcfOriginalTmp} > ${this.vcfFile}`,
             zipFileCommand
         ]
 
@@ -115,7 +183,7 @@ export class VcfAnalyzerService {
 
     async applyBedFile() {
 
-        let count = await this.annovarService.getRowCount(this.vcfOriginal);
+        let count = await this.annovarService.getRowCount(this.vcfOriginalTmp);
 
         let options = [
             `-b ${this.defaultBedFile}`,
@@ -139,6 +207,15 @@ export class VcfAnalyzerService {
 
         await this.commonService.runCommand(command);
 
+        // Compressed bed & get tabix
+        commands = [
+            `bgzip -f ${this.vcfBed}`,
+            `tabix -f ${this.vcfBed}.gz`
+        ]
+
+        command = commands.join(' && ');
+
+        await this.commonService.runCommand(command);
     }
 
 

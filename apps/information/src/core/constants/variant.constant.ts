@@ -61,6 +61,7 @@ export const VariantFields = [
     "1000g_EAS_AF",
     "HGNC_SYMONYMS",
     "HGNC_PRE_SYMBOL"
+    
 ]
 
 export const VariantProjection = VariantFields.reduce((o, key) => ({ ...o, [key]: `$${key}` }), {})
