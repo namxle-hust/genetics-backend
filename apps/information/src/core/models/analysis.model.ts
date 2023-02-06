@@ -60,7 +60,7 @@ export class AnalysisFindInput implements IAnalysisFindInput {
 
         if (dto.filter.status && dto.filter.status.length > 0) {
             this.status = {
-                in: dto.filter.status
+                in: dto.filter.status.map(status => AnalysisStatus[status as keyof typeof AnalysisStatus])
             }
         }
 
