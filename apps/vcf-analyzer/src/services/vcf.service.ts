@@ -241,26 +241,23 @@ export class VcfService {
                             this.vcfStream.resume()
                         }
                     } else {
-                        if (line) {
-                            let lineData = line.split('\t')
-                            let lineString = line;
-                            if (line.search('#CHROM') == 0) {
-                                // This is the heading line, let's save it for later use
-                                this.lineIndex = 0
-                                this.headings = line.split('\t')
-                                this.logger.log(this.headings)
-                                //lineData.splice(-1,1)
-                                lineString = lineData.join('\t')
-                            }
-
-                            fs.appendFileSync(this.AfVcfFile, lineString + '\n')
-
-                            this.vcfStream.extraData = []
-
-                            // this.logger.debug(line);
-                            this.vcfStream.resume()
+                        let lineData = line.split('\t')
+                        let lineString = line;
+                        if (line.search('#CHROM') == 0) {
+                            // This is the heading line, let's save it for later use
+                            this.lineIndex = 0
+                            this.headings = line.split('\t')
+                            this.logger.log(this.headings)
+                            //lineData.splice(-1,1)
+                            lineString = lineData.join('\t')
                         }
 
+                        fs.appendFileSync(this.AfVcfFile, lineString + '\n')
+
+                        this.vcfStream.extraData = []
+
+                        // this.logger.debug(line);
+                        this.vcfStream.resume()
                     }
                 }))
                 .on('error', (error) => {
@@ -488,7 +485,6 @@ export class VcfService {
                 this.annoStream.pause()
 
                 if (!this.annoStream.passedHeading) {
-
                     if (line.search('#Uploaded_variation') == 0) {
                         this.annoStream.passedHeading = true
                         this.annoStream.headings = line.split('\t')
@@ -854,7 +850,7 @@ export class VcfService {
 
         let tmpcosmicIds = this.getDataService.getCosmicIds(lineData[this.annoStream.headings.indexOf('Existing_variation')]);
 
-        let cosmicIds = '.'      
+        let cosmicIds = '.'
         let cosmic = '.'
 
         if (tmpcosmicIds && tmpcosmicIds.length > 0) {
