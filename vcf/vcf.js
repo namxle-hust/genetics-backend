@@ -414,7 +414,7 @@ class VCF {
         let self = this;
         let infoIndex = self.headings.indexOf('INFO');
         let data = line.split('\t');
-        let infoData = data[infoIndex].split(';');
+        let infoData = data[infoIndex] ? data[infoIndex].split(';') : [];
         let checkExist = false;
 
         for (var i in infoData) {
