@@ -19,7 +19,7 @@ export class AnalysisService {
 
         let findInput: IAnalysisFindInput = new AnalysisFindInput(dto, userId);
 
-        this.logger.debug(findInput);
+        this.logger.debug(JSON.stringify(findInput));
 
         let tableFindDto = new TableFindInput<IAnalysisFindInput, AnalysisFilterDTO>(dto, findInput);
 
