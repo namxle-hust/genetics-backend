@@ -168,14 +168,19 @@ class VCF {
                 let eventName, extraData
                 
                 if (self.lineIndex != null) {
-                    // This is a data line, analyze it, and read next annotation line
-                    self.lineIndex++
+                    if (line) {
+                        // This is a data line, analyze it, and read next annotation line
+                        self.lineIndex++
 
-                    self.vcfStream.extraData = self.analyzeLine(line)
+                        self.vcfStream.extraData = self.analyzeLine(line)
 
-                    self.writeAfVcf(line, self.vcfStream.extraData);
+                        self.writeAfVcf(line, self.vcfStream.extraData);
 
-                    self.resumeAnnoStream()
+                        self.resumeAnnoStream()
+                    } else {
+                        self.vcfStream.resume()
+                    }
+                    
                 } else {
             		let lineData = line.split('\t')
             		let lineString = line;
