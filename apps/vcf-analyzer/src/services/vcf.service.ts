@@ -1165,7 +1165,7 @@ export class VcfService {
         }
 
         if (resultArray.length == 0) {
-            return false;
+            return '';
         }
 
         let maxLine = resultArray[0];
