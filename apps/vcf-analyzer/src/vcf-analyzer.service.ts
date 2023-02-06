@@ -112,7 +112,7 @@ export class VcfAnalyzerService {
         await this.annovarService.runVEP(this.vepInput ,this.vepOutput)
 
         // Run Vcf Analyze
-        await this.vcfService.run(this.vcfFile, analysis, this.vepOutput)
+        // await this.vcfService.run(this.vcfFile, analysis, this.vepOutput)
 
         this.logger.log('Done Analysis')
 
