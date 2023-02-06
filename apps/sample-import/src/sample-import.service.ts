@@ -50,6 +50,7 @@ export class SampleImportService {
 
 
     async importAnalysis() {
+        let analysisId;
         try {
             const analysisImporting = await this.importRepository.getAnalysisByStatus(AnalysisStatus.IMPORTING)
 
@@ -57,6 +58,8 @@ export class SampleImportService {
                 const analysis = await this.importRepository.findFirstOrThrow(AnalysisStatus.IMPORT_QUEUING);
 
                 this.logger.log(analysis);
+
+                analysisId = analysis.id;
 
                 this.importRepository.updateAnalysisStatus(analysis.id, { status: AnalysisStatus.IMPORTING })
 
@@ -78,6 +81,9 @@ export class SampleImportService {
         } catch (error) {
             if (error instanceof NotFoundError) {
                 return;   
+            }
+            if (analysisId) {
+                this.importRepository.updateAnalysisStatus(analysisId, { status: AnalysisStatus.ERROR })
             }
             this.logger.error(error);
         }   
