@@ -1,11 +1,14 @@
 import { NotFoundError, AnalysisStatus, Analysis } from '@app/prisma';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { AnalysisCreateDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO } from '../dto';
 import { AnalysisFindInput, IAnalysisCreateInput, IAnalysisFindInput, IAnalysisUpdateInput, TableFindInput } from '../models';
 import { TableOutputEntity, AnalysisEntity } from '../entities';
 import { AnalysisRepository, SampleRepository } from '../repository';
 @Injectable({})
 export class AnalysisService {
+
+    private readonly logger = new Logger(AnalysisService.name)
+
     constructor(private readonly analysisRepository: AnalysisRepository, private readonly sampleRepository: SampleRepository) { }
     
     async getAnalyses(dto: TableDTO<AnalysisFilterDTO>, userId: number): Promise<TableOutputEntity<AnalysisEntity>> {
@@ -15,6 +18,8 @@ export class AnalysisService {
         }
 
         let findInput: IAnalysisFindInput = new AnalysisFindInput(dto, userId);
+
+        this.logger.debug(findInput);
 
         let tableFindDto = new TableFindInput<IAnalysisFindInput, AnalysisFilterDTO>(dto, findInput);
 
