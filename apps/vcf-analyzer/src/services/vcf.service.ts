@@ -313,7 +313,9 @@ export class VcfService {
                         // Move anno file from tmp dir to S3 dir
                         // Remote origin anno file
 
-                        let command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand} && rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
+                        let removeCommand = `rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
+
+                        let command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand}`
 
 
                         child.exec(command, (error, stdout, stderr) => {
