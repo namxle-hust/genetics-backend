@@ -125,7 +125,7 @@ export class VcfService {
             // Upload files to s3
             await this.uploadFiles();
 
-            await this.removeFiles()
+            // await this.removeFiles()
         } catch (error) {
             // await this.removeFiles()
             throw error
@@ -228,7 +228,7 @@ export class VcfService {
 
                     if (this.lineIndex != null) {
                         if (line) {
-                            this.logger.debug(line);
+                            // this.logger.debug(line);
                             // This is a data line, analyze it, and read next annotation line
                             this.lineIndex++
 
