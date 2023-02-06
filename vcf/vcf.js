@@ -159,14 +159,14 @@ class VCF {
      */
     readVcf () {
         let self = this
+        console.log('Read VCF');
         this.vcfStream = fs.createReadStream(this.vcfFile)
             .pipe(es.split())
             .pipe(es.mapSync((line) =>  {
                 self.vcfStream.pause()
 
                 let eventName, extraData
-
-                console.log('Read VCF');
+                
                 if (self.lineIndex != null) {
                     // This is a data line, analyze it, and read next annotation line
                     self.lineIndex++
