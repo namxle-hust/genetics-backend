@@ -100,7 +100,6 @@ export class VcfAnalyzerService {
         this.vcfOriginalTmp = `${this.analysisFolder}/${VCF_FORMAT_TMP_FILE}`
         this.vepOutput = this.annovarService.getVepOutput(analysis)
        
-
         await this.preprocess();
 
         await this.fomatVcfFile();
@@ -112,7 +111,7 @@ export class VcfAnalyzerService {
         await this.annovarService.runVEP(this.vepInput ,this.vepOutput)
 
         // Run Vcf Analyze
-        // await this.vcfService.run(this.vcfFile, analysis, this.vepOutput)
+        await this.vcfService.run(this.vcfFile, analysis, this.vepOutput)
 
         this.logger.log('Done Analysis')
 
@@ -120,6 +119,10 @@ export class VcfAnalyzerService {
 
     async preprocess() {
         let uploadPath;
+
+        let cleanCommand = `rm -rf ${this.analysisFolder}/analysis*`;
+
+        await this.commonService.runCommand(cleanCommand);
 
         if (this.analysis.sample.type == SampleType.FASTQ) {
             if (this.analysis.vcfType == VcfType.WES) {
@@ -234,7 +237,7 @@ export class VcfAnalyzerService {
         let bgzipCmd = `${VCF_BGZIP_CMD} -f ${this.vcfFile}`
         let tabixCmd = `${VCF_TABIX_CMD} -f ${this.vcfFile}.gz`
 
-        this.vepInput = `${this.vcfFile}.gz`
+        this.vepInput = `${this.vcfFile}`
 
         let commands = [
             sortCmd,
