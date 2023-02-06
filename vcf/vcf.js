@@ -166,6 +166,7 @@ class VCF {
 
                 let eventName, extraData
 
+                console.log('Read VCF');
                 if (self.lineIndex != null) {
                     // This is a data line, analyze it, and read next annotation line
                     self.lineIndex++
@@ -2118,7 +2119,7 @@ class VCF {
      * @return {string}
      */
     getVarLocation (data) {
-        let variantOntology = Ontology.VARIANT_ONTOLOGY;
+        let variantOntology = HELPER.VARIANT_ONTOLOGY;
 
         for (var i in variantOntology) {
             if (data == variantOntology[i][0]) {

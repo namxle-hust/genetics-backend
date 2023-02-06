@@ -10,6 +10,10 @@ let updateAnnotation = async () => {
     return new Promise((resolve, reject) => {
         let vcfHandler = new VCF.VCF()
 
+        console.log(vcfFile)
+        console.log(analysisId)
+        console.log(vepOutput)
+
         vcfHandler.run(analysisId, vcfFile, vepOutput)
 
         vcfHandler.vcfEvents.on('completed', (result) => {
