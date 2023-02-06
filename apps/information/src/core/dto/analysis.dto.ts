@@ -7,7 +7,7 @@ import { Type } from "class-transformer";
 
 export class AnalysisFilterDTO implements IAnalysisFilter {
     @ApiProperty()
-    @IsString()
+    @IsNumber()
     @IsOptional()
     workspaceId: number;
 
