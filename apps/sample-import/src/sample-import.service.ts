@@ -43,7 +43,7 @@ export class SampleImportService {
 
         const annoPgxFile = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${RESULT_ANNO_PGX_FILE}`;
 
-        let command = `awk -F"\t" 'FNR==NR{a[$1]=1; next}{ if ($1 == "sampleId") { print $0"\tPGx"; } else { PGx = "."; if (a[$9] == 1) { PGx = 1; } print $0"\t"PGx; } }' ${pgxSource} ${annoFile} > ${annoPgxFile}`
+        let command = `awk -F"\t" 'FNR==NR{a[$1]=1; next}{ if ($1 == "analysisId") { print $0"\tPGx"; } else { PGx = "."; if (a[$9] == 1) { PGx = 1; } print $0"\t"PGx; } }' ${pgxSource} ${annoFile} > ${annoPgxFile}`
 
         await this.commonService.runCommand(command);
     }
