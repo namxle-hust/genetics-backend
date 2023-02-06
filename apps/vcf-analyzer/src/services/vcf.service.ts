@@ -227,19 +227,16 @@ export class VcfService {
                     let eventName, extraData
 
                     if (this.lineIndex != null) {
-                        if (line) {
-                            // this.logger.debug(line);
-                            // This is a data line, analyze it, and read next annotation line
-                            this.lineIndex++
+                        // this.logger.debug(line);
+                        // This is a data line, analyze it, and read next annotation line
+                        this.lineIndex++
 
-                            this.vcfStream.extraData = this.analyzeLine(line)
+                        this.vcfStream.extraData = this.analyzeLine(line)
 
-                            this.writeAfVcf(line, this.vcfStream.extraData);
+                        this.writeAfVcf(line, this.vcfStream.extraData);
 
-                            this.resumeAnnoStream()
-                        } else {
-                            this.vcfStream.resume()
-                        }
+                        this.resumeAnnoStream()
+
                     } else {
                         let lineData = line.split('\t')
                         let lineString = line;
@@ -1314,36 +1311,38 @@ export class VcfService {
     }
 
     writeAfVcf(line, extraData) {
-        let infoIndex = this.headings.indexOf('INFO');
-        let data = line.split('\t');
-        let infoData = data[infoIndex].split(';');
-        let checkExist = false;
+        if (line) {
+            let infoIndex = this.headings.indexOf('INFO');
+            let data = line.split('\t');
+            let infoData = data[infoIndex].split(';');
+            let checkExist = false;
 
-        for (var i in infoData) {
-            if (infoData[i].indexOf('AF=') == 0 && extraData.alleleFrequency != null) {
-                let currentAF = infoData[i].split('=');
+            for (var i in infoData) {
+                if (infoData[i].indexOf('AF=') == 0 && extraData.alleleFrequency != null) {
+                    let currentAF = infoData[i].split('=');
 
+                    let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
+
+                    infoData[i] = `AF=${AF}`;
+                    data[infoIndex] = infoData.join(';')
+                }
+
+                if (infoData[i].indexOf('AF=') == 0) {
+                    checkExist = true;
+                }
+            }
+
+            if (checkExist == false) {
                 let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
-
-                infoData[i] = `AF=${AF}`;
+                infoData.push(`AF=${AF}`)
                 data[infoIndex] = infoData.join(';')
+                this.checkAF = false;
             }
 
-            if (infoData[i].indexOf('AF=') == 0) {
-                checkExist = true;
-            }
+            //data.splice(-1,1);
+
+            fs.appendFileSync(this.AfVcfFile, data.join('\t') + '\n')
         }
-
-        if (checkExist == false) {
-            let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
-            infoData.push(`AF=${AF}`)
-            data[infoIndex] = infoData.join(';')
-            this.checkAF = false;
-        }
-
-        //data.splice(-1,1);
-
-        fs.appendFileSync(this.AfVcfFile, data.join('\t') + '\n')
     }
 
 
