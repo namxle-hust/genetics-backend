@@ -62,7 +62,7 @@ class VCF {
      * @param {string} originAnnoFile
      */
     run (analysisId, vcfFile , originAnnoFile) {
-        let fileNoExt = `analysis_${analysisId}`
+        let fileNoExt = `analysis_${analysisId}_run`
 
         this.analysisId = analysisId
         this.vcfFile = `${vcfFile}`
