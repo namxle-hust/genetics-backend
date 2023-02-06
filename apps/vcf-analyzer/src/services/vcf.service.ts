@@ -125,7 +125,7 @@ export class VcfService {
             // Upload files to s3
             await this.uploadFiles();
 
-            await this.removeFiles()
+            // await this.removeFiles()
         } catch (error) {
             // await this.removeFiles()
             throw error
@@ -220,7 +220,7 @@ export class VcfService {
 
         return new Promise((resolve, reject) => {
             this.vcfStream = fs.createReadStream(this.vcfFile)
-                .pipe(es ? es.split() : undefined)
+                .pipe(es.split())
                 .pipe(es.mapSync((line) => {
                     this.vcfStream.pause()
 
@@ -236,28 +236,25 @@ export class VcfService {
                         this.writeAfVcf(line, this.vcfStream.extraData);
 
                         this.resumeAnnoStream()
+
                     } else {
-                        if (line) {
-                            let lineData = line.split('\t')
-                            let lineString = line;
-                            if (line.search('#CHROM') == 0) {
-                                // This is the heading line, let's save it for later use
-                                this.lineIndex = 0
-                                this.headings = line.split('\t')
-                                this.logger.log(this.headings)
-                                //lineData.splice(-1,1)
-                                lineString = lineData.join('\t')
-                            }
-
-                            fs.appendFileSync(this.AfVcfFile, lineString + '\n')
-
-                            this.vcfStream.extraData = []
-
-                            // this.logger.debug(line);
-
-                            this.vcfStream.resume()
-
+                        let lineData = line.split('\t')
+                        let lineString = line;
+                        if (line.search('#CHROM') == 0) {
+                            // This is the heading line, let's save it for later use
+                            this.lineIndex = 0
+                            this.headings = line.split('\t')
+                            this.logger.log(this.headings)
+                            //lineData.splice(-1,1)
+                            lineString = lineData.join('\t')
                         }
+
+                        fs.appendFileSync(this.AfVcfFile, lineString + '\n')
+
+                        this.vcfStream.extraData = []
+
+                        // this.logger.debug(line);
+                        this.vcfStream.resume()
                     }
                 }))
                 .on('error', (error) => {
@@ -289,13 +286,13 @@ export class VcfService {
                             tabixComand = `bgzip -f ${this.AfVcfFile} && tabix -f ${compressedFile} && rm -rf ${compressedFileDist} ${tabixFileDist} && mv -f ${compressedFile} ${compressedFileDist} && mv -f ${tabixFile} ${tabixFileDist} && `
                         }
 
-                        let clearRefAlt = `awk -F"\t" 'BEGIN{OFS="\t"}{ref = $7;alt = $8; chrom = $5; pos = $6; gene = $16; if(index($0, "sampleId") == 1) { print $0;} else if (length(ref) == 1 || length(alt) == 1) { $83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else if (substr(ref,length(ref),1) != substr(alt,length(alt),1)) {$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else {while (length(ref) != 1 && length(alt) != 1 && substr(ref,length(ref),1) == substr(alt,length(alt),1)) {ref = substr(ref, 1, length(ref)-1);alt = substr(alt, 1, length(alt)-1);}$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;}}' ${this.annoFile} >  ${this.annoFile}_temp && mv -f ${this.annoFile}_temp ${this.annoFile} && `
+                        let clearRefAlt = `awk -F"\t" 'BEGIN{OFS="\t"}{ref = $7;alt = $8; chrom = $5; pos = $6; gene = $16; if(index($0, "analysisId") == 1) { print $0;} else if (length(ref) == 1 || length(alt) == 1) { $83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else if (substr(ref,length(ref),1) != substr(alt,length(alt),1)) {$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;} else {while (length(ref) != 1 && length(alt) != 1 && substr(ref,length(ref),1) == substr(alt,length(alt),1)) {ref = substr(ref, 1, length(ref)-1);alt = substr(alt, 1, length(alt)-1);}$83=chrom"_"pos"_"ref"_"alt"_"gene; print $0;}}' ${this.annoFile} >  ${this.annoFile}_temp && mv -f ${this.annoFile}_temp ${this.annoFile} && `
 
                         // Add ClinVar
-                        let clinVarCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$7]=$5"\t"$6"\t"$8"\t"$9"\t"$10"\t"$11; b[$1"_"$2"_"$3"_"$4"_"$7]=$12; next}{ curation = (length(b[$83]) == 0) ? "." : b[$83]; if(index($0, "sampleId") == 1) {print $0"\tCLNACC\tCLNSIG_BTG\treview_status\tlast_evaluated\tgold_stars\tconsensus_score\tcuration"} else if (length(a[$83]) == 0) { print $0"\t.\t.\t.\t.\t.\t.\t"curation } else { print $0"\t"a[$83]"\t"curation }}' ${this._clinvarDir} ${this.annoFile}  > ${this.vcfHGMDFile} `
+                        let clinVarCommand = `awk -F"\t" 'FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$7]=$5"\t"$6"\t"$8"\t"$9"\t"$10"\t"$11; b[$1"_"$2"_"$3"_"$4"_"$7]=$12; next}{ curation = (length(b[$83]) == 0) ? "." : b[$83]; if(index($0, "analysisId") == 1) {print $0"\tCLNACC\tCLNSIG_BTG\treview_status\tlast_evaluated\tgold_stars\tconsensus_score\tcuration"} else if (length(a[$83]) == 0) { print $0"\t.\t.\t.\t.\t.\t.\t"curation } else { print $0"\t"a[$83]"\t"curation }}' ${this._clinvarDir} ${this.annoFile}  > ${this.vcfHGMDFile} `
 
                         // Add Nan ClinVar
-                        let BTGConcensusCommand = `&& awk -F"\t" 'FNR==NR{a[$1]=$2; next}{ if(index($0, "sampleId") == 1) {print $0"\tBTG_Concensus"} else if (length(a[$5"-"$6"-"$7"-"$8"-"$16]) == 0) { print $0"\t." } else { print $0"\t"a[$5"-"$6"-"$7"-"$8"-"$16] }}' ${this._clinvarBTG} ${this.vcfHGMDFile}  > ${this.vcfHGMDFile}_temp && mv -f ${this.vcfHGMDFile}_temp ${this.vcfHGMDFile} `
+                        let BTGConcensusCommand = `&& awk -F"\t" 'FNR==NR{a[$1]=$2; next}{ if(index($0, "analysisId") == 1) {print $0"\tBTG_Concensus"} else if (length(a[$5"-"$6"-"$7"-"$8"-"$16]) == 0) { print $0"\t." } else { print $0"\t"a[$5"-"$6"-"$7"-"$8"-"$16] }}' ${this._clinvarBTG} ${this.vcfHGMDFile}  > ${this.vcfHGMDFile}_temp && mv -f ${this.vcfHGMDFile}_temp ${this.vcfHGMDFile} `
 
                         // Add Nan Clinvar 03 2020
                         clinVarCommand += BTGConcensusCommand;
@@ -305,12 +302,14 @@ export class VcfService {
                         let addCosmicID = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$2]=$1; next}{if(length(a[$14]) == 0){ print $0; } else { if (a[$14] == $16) { print $0; } else { $14 = "."; print $0;}  } }' ${this._cosmic} ${this.vcfHGMDFile} > ${this.annoFile} `
 
                         // Add HGMD
-                        let hgmdCommand = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$5]=$6; next}{ if(index($0, "sampleId") == 1) {print $0"\tHGMD"} else if (length(a[$83]) == 0) { print $0"\t."; } else { print $0"\tDM"; }}' ${this._hgmdPath} ${this.annoFile} > ${this.vcfHgmdClinvarFile}`
+                        let hgmdCommand = `&& awk -F"\t" 'BEGIN{OFS="\t"}FNR==NR{a[$1"_"$2"_"$3"_"$4"_"$5]=$6; next}{ if(index($0, "analysisId") == 1) {print $0"\tHGMD"} else if (length(a[$83]) == 0) { print $0"\t."; } else { print $0"\tDM"; }}' ${this._hgmdPath} ${this.annoFile} > ${this.vcfHgmdClinvarFile}`
 
                         // Move anno file from tmp dir to S3 dir
                         // Remote origin anno file
 
-                        let command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand} && rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
+                        let removeCommand = `rm -f ${this.annoFile} && rm -f ${this.vcfTranscriptFile} && rm -f ${this.originVepFile}`
+
+                        let command = `${tabixComand}${clearRefAlt}${clinVarCommand} ${addCosmicID} ${hgmdCommand}`
 
 
                         child.exec(command, (error, stdout, stderr) => {
@@ -483,13 +482,12 @@ export class VcfService {
                 this.annoStream.pause()
 
                 if (!this.annoStream.passedHeading) {
-
                     if (line.search('#Uploaded_variation') == 0) {
                         this.annoStream.passedHeading = true
                         this.annoStream.headings = line.split('\t')
 
                         let annoHeadings = [
-                            "sampleId",
+                            "analysisId",
                             "readDepth",
                             "alleleFrequency",
                             "coverage",
@@ -849,7 +847,7 @@ export class VcfService {
 
         let tmpcosmicIds = this.getDataService.getCosmicIds(lineData[this.annoStream.headings.indexOf('Existing_variation')]);
 
-        let cosmicIds = '.'      
+        let cosmicIds = '.'
         let cosmic = '.'
 
         if (tmpcosmicIds && tmpcosmicIds.length > 0) {
@@ -1008,7 +1006,7 @@ export class VcfService {
         let TrimmedVariant = this.calculateService.convert(vcfExtraData.chrom, vcfExtraData.inputPos, vcfExtraData.REF, vcfExtraData.ALT[0], gene)
 
         let data = [
-            vcfExtraData.sampleId,                                              //  sampleId
+            vcfExtraData.analysisId,                                            //  analysisId
             vcfExtraData.readDepth,                                             //  readDepth
             vcfExtraData.alleleFrequency,                                       //  alleleFrequency
             vcfExtraData.coverage,                                              //  coverage
@@ -1167,7 +1165,7 @@ export class VcfService {
         }
 
         if (resultArray.length == 0) {
-            return false;
+            return '';
         }
 
         let maxLine = resultArray[0];
@@ -1313,36 +1311,38 @@ export class VcfService {
     }
 
     writeAfVcf(line, extraData) {
-        let infoIndex = this.headings.indexOf('INFO');
-        let data = line.split('\t');
-        let infoData = data[infoIndex].split(';');
-        let checkExist = false;
+        if (line) {
+            let infoIndex = this.headings.indexOf('INFO');
+            let data = line.split('\t');
+            let infoData = data[infoIndex].split(';');
+            let checkExist = false;
 
-        for (var i in infoData) {
-            if (infoData[i].indexOf('AF=') == 0 && extraData.alleleFrequency != null) {
-                let currentAF = infoData[i].split('=');
+            for (var i in infoData) {
+                if (infoData[i].indexOf('AF=') == 0 && extraData.alleleFrequency != null) {
+                    let currentAF = infoData[i].split('=');
 
+                    let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
+
+                    infoData[i] = `AF=${AF}`;
+                    data[infoIndex] = infoData.join(';')
+                }
+
+                if (infoData[i].indexOf('AF=') == 0) {
+                    checkExist = true;
+                }
+            }
+
+            if (checkExist == false) {
                 let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
-
-                infoData[i] = `AF=${AF}`;
+                infoData.push(`AF=${AF}`)
                 data[infoIndex] = infoData.join(';')
+                this.checkAF = false;
             }
 
-            if (infoData[i].indexOf('AF=') == 0) {
-                checkExist = true;
-            }
+            //data.splice(-1,1);
+
+            fs.appendFileSync(this.AfVcfFile, data.join('\t') + '\n')
         }
-
-        if (checkExist == false) {
-            let AF = Math.round(extraData.alleleFrequency * 1000) / 1000
-            infoData.push(`AF=${AF}`)
-            data[infoIndex] = infoData.join(';')
-            this.checkAF = false;
-        }
-
-        //data.splice(-1,1);
-
-        fs.appendFileSync(this.AfVcfFile, data.join('\t') + '\n')
     }
 
 

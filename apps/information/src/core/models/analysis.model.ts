@@ -5,7 +5,7 @@ export interface IAnalysisFilter {
     workspaceId?: number
     sampleId?: number
     vcfType?: VcfType
-    status?: AnalysisStatus
+    status?: AnalysisStatus[]
 }
 
 export interface IAnalysisFindInput {
@@ -14,6 +14,9 @@ export interface IAnalysisFindInput {
     }
     isDeleted: boolean
     sampleId?: number
+    status: {
+        in: AnalysisStatus[]
+    }
     workspaceId?: number
     vcfType: VcfType
     workspace: {
@@ -27,6 +30,9 @@ export class AnalysisFindInput implements IAnalysisFindInput {
     }
     isDeleted: boolean
     sampleId?: number
+    status: {
+        in: AnalysisStatus[]
+    }
     workspaceId?: number
     vcfType: VcfType
     workspace: {
@@ -50,6 +56,12 @@ export class AnalysisFindInput implements IAnalysisFindInput {
 
         if (dto.filter.sampleId) {
             this.sampleId = dto.filter.sampleId
+        }
+
+        if (dto.filter.status && dto.filter.status.length > 0) {
+            this.status = {
+                in: dto.filter.status.map(status => AnalysisStatus[status as keyof typeof AnalysisStatus])
+            }
         }
 
         this.workspace = {

@@ -43,13 +43,14 @@ export class SampleImportService {
 
         const annoPgxFile = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${RESULT_ANNO_PGX_FILE}`;
 
-        let command = `awk -F"\t" 'FNR==NR{a[$1]=1; next}{ if ($1 == "sampleId") { print $0"\tPGx"; } else { PGx = "."; if (a[$9] == 1) { PGx = 1; } print $0"\t"PGx; } }' ${pgxSource} ${annoFile} > ${annoPgxFile}`
+        let command = `awk -F"\t" 'FNR==NR{a[$1]=1; next}{ if ($1 == "analysisId") { print $0"\tPGx"; } else { PGx = "."; if (a[$9] == 1) { PGx = 1; } print $0"\t"PGx; } }' ${pgxSource} ${annoFile} > ${annoPgxFile}`
 
         await this.commonService.runCommand(command);
     }
 
 
     async importAnalysis() {
+        let analysisId;
         try {
             const analysisImporting = await this.importRepository.getAnalysisByStatus(AnalysisStatus.IMPORTING)
 
@@ -57,6 +58,8 @@ export class SampleImportService {
                 const analysis = await this.importRepository.findFirstOrThrow(AnalysisStatus.IMPORT_QUEUING);
 
                 this.logger.log(analysis);
+
+                analysisId = analysis.id;
 
                 this.importRepository.updateAnalysisStatus(analysis.id, { status: AnalysisStatus.IMPORTING })
 
@@ -78,6 +81,9 @@ export class SampleImportService {
         } catch (error) {
             if (error instanceof NotFoundError) {
                 return;   
+            }
+            if (analysisId) {
+                this.importRepository.updateAnalysisStatus(analysisId, { status: AnalysisStatus.ERROR })
             }
             this.logger.error(error);
         }   
