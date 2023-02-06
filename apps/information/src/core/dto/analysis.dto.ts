@@ -3,6 +3,7 @@ import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf
 import { SampleExists, Trim, WorkspaceExist } from "../decorators";
 import { AnalysisStatus, Gender, VcfType } from "@app/prisma";
 import { IAnalysisFilter } from "../models";
+import { Type } from "class-transformer";
 
 export class AnalysisFilterDTO implements IAnalysisFilter {
     @ApiProperty()
@@ -21,9 +22,9 @@ export class AnalysisFilterDTO implements IAnalysisFilter {
     analysisType: VcfType;
 
     @ApiProperty()
-    @IsString()
+    @IsArray()
     @IsOptional()
-    status: AnalysisStatus;
+    status: AnalysisStatus[]
 }
 
 export class AnalysisCreateDTO {
