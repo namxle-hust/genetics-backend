@@ -160,7 +160,8 @@ services:
     tty: true
     container_name: jupyter-3.7
     image: jupyter/datascience-notebook:python-3.7
-    
+    ports:
+      - '8888:8888'
 
 volumes:
   postgres_data_volume:
