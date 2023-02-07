@@ -12,9 +12,9 @@ export class AnalysisFilterDTO implements IAnalysisFilter {
     workspaceId: number;
 
     @ApiProperty()
-    @IsString()
+    @IsArray()
     @IsOptional()
-    sampleId: number;
+    sampleId: number[];
     
     @ApiProperty()
     @IsString()

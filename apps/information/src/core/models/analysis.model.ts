@@ -3,7 +3,7 @@ import { TableDTO } from "../dto"
 
 export interface IAnalysisFilter {
     workspaceId?: number
-    sampleId?: number
+    sampleId?: number[]
     vcfType?: VcfType
     status?: AnalysisStatus[]
 }
@@ -13,7 +13,9 @@ export interface IAnalysisFindInput {
         contains: string
     }
     isDeleted: boolean
-    sampleId?: number
+    sampleId?: {
+        in: number[]
+    }
     status: {
         in: AnalysisStatus[]
     }
@@ -29,7 +31,9 @@ export class AnalysisFindInput implements IAnalysisFindInput {
         contains: string
     }
     isDeleted: boolean
-    sampleId?: number
+    sampleId?: {
+        in: number[]
+    }
     status: {
         in: AnalysisStatus[]
     }
@@ -55,7 +59,9 @@ export class AnalysisFindInput implements IAnalysisFindInput {
         }
 
         if (dto.filter.sampleId) {
-            this.sampleId = dto.filter.sampleId
+            this.sampleId = {
+                in: dto.filter.sampleId
+            }
         }
 
         if (dto.filter.status && dto.filter.status.length > 0) {
