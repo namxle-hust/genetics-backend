@@ -158,6 +158,7 @@ services:
 
   notebook-service:
     tty: true
+    privileged: true
     container_name: jupyter-3.7
     image: jupyter/datascience-notebook:python-3.7
     ports:
