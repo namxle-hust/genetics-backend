@@ -87,8 +87,6 @@ export class SampleImportService {
 
                 // Import to mongodb
                 await this.mongoImport(analysis);
-                
-                this.logger.log('Done import');
 
                 const totalVariants = await this.getTotalVariant(analysis);
 
@@ -98,7 +96,9 @@ export class SampleImportService {
                     totalVariants: totalVariants
                 }
 
-                this.importRepository.updateAnalysisStatus(analysis.id, data)
+                await this.importRepository.updateAnalysisStatus(analysis.id, data)
+
+                this.logger.log('Done import');
             }
         } catch (error) {
             if (error instanceof NotFoundError) {

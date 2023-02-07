@@ -125,9 +125,9 @@ export class VcfService {
             // Upload files to s3
             await this.uploadFiles();
 
-            // await this.removeFiles()
+            await this.removeFiles()
         } catch (error) {
-            // await this.removeFiles()
+            await this.removeFiles()
             throw error
         }
 
