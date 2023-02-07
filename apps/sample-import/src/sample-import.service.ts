@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { ANALYSIS_COLLECTION_PREFIX } from '@app/common/mongodb';
 import { CommonService } from './common.service';
 import { IAnalysisUpdate } from './analysis.model';
+import { AnalysisMongo } from './analysis-mongo.repository';
 
 @Injectable()
 export class SampleImportService {
@@ -24,7 +25,8 @@ export class SampleImportService {
         @InjectDb() private readonly db: Db,
         private readonly importRepository: ImportRepository,
         private configService: ConfigService,
-        private commonService: CommonService
+        private commonService: CommonService,
+        private analysisMongo: AnalysisMongo
     ) {
         this.s3Dir = this.configService.get<string>('S3_DIR');
         this.s3AnalysesFolder = this.configService.get<string>('S3_ANALYSES_FOLDER')
@@ -46,6 +48,23 @@ export class SampleImportService {
         let command = `awk -F"\t" 'FNR==NR{a[$1]=1; next}{ if ($1 == "analysisId") { print $0"\tPGx"; } else { PGx = "."; if (a[$9] == 1) { PGx = 1; } print $0"\t"PGx; } }' ${pgxSource} ${annoFile} > ${annoPgxFile}`
 
         await this.commonService.runCommand(command);
+    }
+
+    async getTotalVariant(analysis: Analysis): Promise<number> {
+        try {
+            const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analysis.id}`
+
+            let cond = {
+                selected_variant:  { $ne: 0 }
+            }
+
+            const total = await this.analysisMongo.count(collectionName, cond);
+
+            return total
+
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
 
@@ -71,9 +90,12 @@ export class SampleImportService {
                 
                 this.logger.log('Done import');
 
+                const totalVariants = await this.getTotalVariant(analysis);
+
                 let data: IAnalysisUpdate = {
                     status: AnalysisStatus.ANALYZED,
-                    vcfFilePath: `${VCF_APPLIED_BED}.gz`
+                    vcfFilePath: `${VCF_APPLIED_BED}.gz`,
+                    totalVariants: totalVariants
                 }
 
                 this.importRepository.updateAnalysisStatus(analysis.id, data)
