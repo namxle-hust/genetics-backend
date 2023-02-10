@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { ANALYSIS_COLLECTION_PREFIX } from '@app/common/mongodb';
 import { CommonService } from './common.service';
 import { IAnalysisUpdate } from './analysis.model';
+import { AnalysisMongo } from './analysis-mongo.repository';
 
 @Injectable()
 export class SampleImportService {
@@ -24,7 +25,8 @@ export class SampleImportService {
         @InjectDb() private readonly db: Db,
         private readonly importRepository: ImportRepository,
         private configService: ConfigService,
-        private commonService: CommonService
+        private commonService: CommonService,
+        private analysisMongo: AnalysisMongo
     ) {
         this.s3Dir = this.configService.get<string>('S3_DIR');
         this.s3AnalysesFolder = this.configService.get<string>('S3_ANALYSES_FOLDER')
@@ -48,6 +50,23 @@ export class SampleImportService {
         await this.commonService.runCommand(command);
     }
 
+    async getTotalVariant(analysis: Analysis): Promise<number> {
+        try {
+            const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analysis.id}`
+
+            let cond = {
+                selected_variant:  { $ne: 0 }
+            }
+
+            const total = await this.analysisMongo.count(collectionName, cond);
+
+            return total
+
+        } catch (error) {
+            this.logger.error(error);
+        }
+    }
+
 
     async importAnalysis() {
         let analysisId;
@@ -68,15 +87,18 @@ export class SampleImportService {
 
                 // Import to mongodb
                 await this.mongoImport(analysis);
-                
-                this.logger.log('Done import');
+
+                const totalVariants = await this.getTotalVariant(analysis);
 
                 let data: IAnalysisUpdate = {
                     status: AnalysisStatus.ANALYZED,
-                    vcfFilePath: `${VCF_APPLIED_BED}.gz`
+                    vcfFilePath: `${VCF_APPLIED_BED}.gz`,
+                    totalVariants: totalVariants
                 }
 
-                this.importRepository.updateAnalysisStatus(analysis.id, data)
+                await this.importRepository.updateAnalysisStatus(analysis.id, data)
+
+                this.logger.log('Done import');
             }
         } catch (error) {
             if (error instanceof NotFoundError) {

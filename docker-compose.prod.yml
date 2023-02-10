@@ -158,7 +158,23 @@ services:
   #   networks:
   #     - genetics
 
+  notebook-service:
+    tty: true
+    privileged: true
+    container_name: jupyter-3.7
+    image: jupyter/datascience-notebook:python-3.7
+    ports:
+      - '8888:8888'
+    volumes:
+      - notebook_volume:/home/jovyan/work
+
 volumes:
+  notebook_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/user/genetics/notebook-work
   postgres_data_volume:
     driver: local
     driver_opts:
