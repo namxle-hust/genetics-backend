@@ -74,7 +74,7 @@ export class AnalysisDetailService extends Service {
         let secret = this.configService.get<string>('IGV_SECRET_KEY');
         let folder = this.configService.get<string>('IGV_SERVER_FOLDER');
 
-        let uri = `${folder}/${path}`
+        let uri = `/${folder}/${path}`
 
         let today = new Date();
 		let minute_exist = today.getMinutes() + 30;
@@ -84,7 +84,7 @@ export class AnalysisDetailService extends Service {
 		let base64Value = Buffer.from(binaryHash.toString(), "binary").toString('base64')
         let signatures = base64Value.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
 
-        return `${host}/${uri}?Signatures=${signatures}&Expires=${expires}`
+        return `${host}${uri}?Signatures=${signatures}&Expires=${expires}`
     }
 
     async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
