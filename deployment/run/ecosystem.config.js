@@ -43,7 +43,11 @@ module.exports = {
                 "NODE_ENV": "production",
 
                 "JWT_SECRET": "secret",
-                "POSTGRES_URI": "postgresql://postgres:123@localhost:5434/genetics?schema=public"
+                "POSTGRES_URI": "postgresql://postgres:123@localhost:5434/genetics?schema=public",
+
+                "IGV_SECRET_KEY": "itisawsomekey1599",
+                "IGV_FILE_HOST": "https://data.btgenomics.com",
+                "IGV_SERVER_FOLDER": "user_files/gentics-data"
             }
         }
     ]

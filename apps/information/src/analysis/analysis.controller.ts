@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../core/decorators';
 import { AnalysisCreateDTO, AnalysisDeleteManyDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO, VariantFilterDTO } from '../core/dto';
-import { AnalysisEntity, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from '../core/entities';
+import { AnalysisEntity, IgvUrlEntity, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from '../core/entities';
 import { JwtGuard } from '../core/guards';
 import { AnalysisService, AnalysisDetailService, VariantService } from '../core/services';
-
+import { Request } from 'express';
 
 @Controller('analysis')
 @UseGuards(JwtGuard)
@@ -39,6 +39,13 @@ export class AnalysisController {
     async getVariantDetail(@Param('analysisId', ParseIntPipe) analysisId, @Param('variantId') variantId) {
         const data = await this.analysisDetailService.getVariantDetail(analysisId, variantId)
         return new VariantEntity(data[0])
+    }
+
+    @Get(':analysisId/igv-url')
+    @ApiCreatedResponse({ type: IgvUrlEntity })
+    async getIgvLink(@Param('analysisId', ParseIntPipe) analysisId, @Req() request: Request) {
+        const data = await this.analysisDetailService.getIgvURLs(analysisId, request.ip)
+        return new IgvUrlEntity(data)
     }
 
     @Get(':id/qc-url')

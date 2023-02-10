@@ -1,10 +1,24 @@
 import { VariantModel } from "../models"
-
 export class VariantQCUrlEntity {
     url: string
 
     constructor(url) {
         this.url = url
+    }
+}
+
+export interface IIgvUrl {
+    bamUrl: string;
+    indexBamUrl: string
+}
+
+export class IgvUrlEntity implements IIgvUrl {
+    bamUrl: string
+    indexBamUrl: string
+
+    constructor(partial: Partial<IgvUrlEntity>) {
+        this.bamUrl = partial.bamUrl;
+        this.indexBamUrl = partial.indexBamUrl
     }
 }
 

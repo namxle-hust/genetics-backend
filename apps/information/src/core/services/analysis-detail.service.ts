@@ -1,15 +1,17 @@
 
 import { ANALYSIS_COLLECTION_PREFIX } from "@app/common/mongodb";
 import { Service } from "@app/common/shared/service";
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TableDTO, VariantFilterDTO } from "../dto";
-import { TableOutputEntity, VariantEntity, VariantQCUrlEntity } from "../entities";
+import { IIgvUrl, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from "../entities";
 import { IVariantFilter, TableFindInput, VariantModel } from "../models";
 import { AnalysisRepository, VariantRepository } from "../repository";
 import { CommonService } from "./common.service";
 import { S3Service } from "./s3.service";
 import { VariantService } from "./variant.service";
+import * as crypto from 'crypto'
+import { NotFoundError } from "rxjs";
 
 
 @Injectable({})
@@ -66,6 +68,38 @@ export class AnalysisDetailService extends Service {
 
         return this.buildQCUrl(singedUrl, tbiSingedUrl)
     }
+
+    async getIgvLink(path: string, clientIp: string): Promise<string> {
+        let host = this.configService.get<string>('IGV_FILE_HOST');
+        let secret = this.configService.get<string>('IGV_SECRET_KEY');
+        let folder = this.configService.get<string>('IGV_SERVER_FOLDER');
+
+        let uri = `${folder}/${path}`
+
+        let today = new Date();
+		let minute_exist = today.getMinutes() + 30;
+		let expires = Math.round(new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), minute_exist, today.getSeconds()).getTime() / 1000);
+		let input = uri + clientIp + expires + " " + secret;
+		let binaryHash = crypto.createHash("md5").update(input).digest();
+		let base64Value = new Buffer(binaryHash.toString(), "binary").toString('base64')
+        let signatures = base64Value.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
+
+        return `${host}/${uri}/?Signatures=${signatures}&Expires=${expires}`
+    }
+
+    async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
+        let bamPath = `${analysisId}/realigned.bam`
+        let indexBamPath = `${analysisId}/realigned.bam.bai`
+
+        let bamUrl = await this.getIgvLink(bamPath, clientIp);
+        let indexBamUrl = await this.getIgvLink(indexBamPath, clientIp);
+       
+        return {
+            bamUrl: bamUrl,
+            indexBamUrl: indexBamUrl
+        }
+    }
+
 
     buildQCUrl(s3Url: string, tbiUrl: string): string {
         const params = {

@@ -90,7 +90,6 @@ export class AnalysisService {
             return data;
         } catch(error) {
             if (error instanceof NotFoundError) {
-                console.log(123);
                 throw new HttpException('Analysis Not Found', HttpStatus.NOT_FOUND)
             }
             throw error;
