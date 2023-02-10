@@ -44,7 +44,8 @@ export class AnalysisController {
     @Get(':analysisId/igv-url')
     @ApiCreatedResponse({ type: IgvUrlEntity })
     async getIgvLink(@Param('analysisId', ParseIntPipe) analysisId, @Req() request: Request) {
-        const data = await this.analysisDetailService.getIgvURLs(analysisId, request.ip)
+        const ip = request.headers['x-real-ip'] ? request.header['x-real-ip'] : request.ip ? request.ip.replace(/::ffff:/g, "") : undefined
+        const data = await this.analysisDetailService.getIgvURLs(analysisId, ip)
         return new IgvUrlEntity(data)
     }
 
