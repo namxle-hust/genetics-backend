@@ -11,7 +11,7 @@
     "docker-build:vcf": "docker compose -f docker-compose.prod.yml up -d --build -V vcf-analyzer-service",
     "docker-build:import": "docker compose -f docker-compose.prod.yml up -d --build -V sample-import",
     "build": "nest build",
-    "build:information": "nest build information",
+    "build:information": "nest build information && pm2 restart information-service",
     "build:fastq": "nest build fastq-analyzer",
     "build:samples-handler": "nest build samples-handler",
     "build:status-processor": "nest build sample-status-processor",

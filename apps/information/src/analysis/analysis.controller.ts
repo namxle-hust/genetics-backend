@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../core/decorators';
 import { AnalysisCreateDTO, AnalysisDeleteManyDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO, VariantFilterDTO } from '../core/dto';
@@ -11,6 +11,8 @@ import { Request } from 'express';
 @UseGuards(JwtGuard)
 @ApiTags('analysis')
 export class AnalysisController {
+    private readonly logger = new Logger(AnalysisController.name)
+
     constructor(
         private analysisService: AnalysisService, 
         private analysisDetailService: AnalysisDetailService,
@@ -44,6 +46,7 @@ export class AnalysisController {
     @Get(':analysisId/igv-url')
     @ApiCreatedResponse({ type: IgvUrlEntity })
     async getIgvLink(@Param('analysisId', ParseIntPipe) analysisId, @Req() request: Request) {
+        this.logger.debug(request.headers);
         const ip = request.headers['x-real-ip'] ? request.header['x-real-ip'] : request.ip ? request.ip.replace(/::ffff:/g, "") : undefined
         const data = await this.analysisDetailService.getIgvURLs(analysisId, ip)
         return new IgvUrlEntity(data)
