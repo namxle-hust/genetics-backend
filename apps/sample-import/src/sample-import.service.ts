@@ -124,8 +124,8 @@ export class SampleImportService {
         let tbiSource = `${vcfSource}.tbi`
 
         let commands = [
-            `aws s3 cp ${vcfSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/ --profile ${this.s3Profile} > /dev/null`,
-            `aws s3 cp ${tbiSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/ --profile ${this.s3Profile} > /dev/null`,
+            `aws s3 cp ${vcfSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/ > /dev/null`,
+            `aws s3 cp ${tbiSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/ > /dev/null`,
         ]
 
         let command = commands.join(' && ')
