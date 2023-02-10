@@ -12,6 +12,7 @@ import { S3Service } from "./s3.service";
 import { VariantService } from "./variant.service";
 import * as crypto from 'crypto'
 import { NotFoundError } from "rxjs";
+import { Buffer } from "buffer";
 
 
 @Injectable({})
@@ -80,8 +81,8 @@ export class AnalysisDetailService extends Service {
 		let minute_exist = today.getMinutes() + 30;
 		let expires = Math.round(new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), minute_exist, today.getSeconds()).getTime() / 1000);
 		let input = uri + clientIp + expires + " " + secret;
-		let binaryHash = crypto.createHash("md5").update(input).digest();
-		let base64Value = Buffer.from(binaryHash.toString(), "binary").toString('base64')
+		let binaryHash = crypto.createHash("md5").update(input).digest().toString('hex');
+		let base64Value = Buffer.from(binaryHash, "binary").toString('base64')
         let signatures = base64Value.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
 
         return `${host}${uri}?Signatures=${signatures}&Expires=${expires}`
