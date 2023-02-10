@@ -82,8 +82,7 @@ export class AnalysisDetailService extends Service {
 		let expires = Math.round(new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), minute_exist, today.getSeconds()).getTime() / 1000);
 		let input = uri + clientIp + expires + " " + secret;
 		let binaryHash = crypto.createHash("md5").update(input).digest().toString('hex');
-		let base64Value = Buffer.from(binaryHash, "binary").toString('base64')
-        let signatures = base64Value.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
+        let signatures = binaryHash.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
 
         return `${host}${uri}?Signatures=${signatures}&Expires=${expires}`
     }
