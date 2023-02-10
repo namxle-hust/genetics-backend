@@ -18,7 +18,6 @@ services:
     volumes:
       - /usr/src/app/node_modules
       - s3_data_volume:/home/s3
-      - aws_config_volume:/root/.aws
     ports:
       - '3000:3000'
     networks:
@@ -208,12 +207,6 @@ volumes:
       o: bind
       type: none
       device: /data/genetics/s3
-  aws_config_volume:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: /home/user/genetics/aws-config
   genetics_vep_info_volume:
 
 networks:
