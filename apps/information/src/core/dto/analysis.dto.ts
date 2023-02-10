@@ -7,14 +7,14 @@ import { Type } from "class-transformer";
 
 export class AnalysisFilterDTO implements IAnalysisFilter {
     @ApiProperty()
-    @IsString()
+    @IsArray()
     @IsOptional()
-    workspaceId: number;
+    workspaceId: number[];
 
     @ApiProperty()
-    @IsString()
+    @IsArray()
     @IsOptional()
-    sampleId: number;
+    sampleId: number[];
     
     @ApiProperty()
     @IsString()
