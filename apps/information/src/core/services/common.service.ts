@@ -3,7 +3,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ANALYSES_FOLDER } from "../constants";
 import * as child from 'child_process';
 
-@Injectable({})
+@Injectable()
 export class CommonService {
 
     private readonly logger = new Logger(CommonService.name)
