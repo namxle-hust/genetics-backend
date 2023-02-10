@@ -10,7 +10,7 @@ COPY . .
 
 RUN yarn build:import
 
-FROM namxle/ubuntu:18.04 as production
+FROM namxle/genetics-ubuntu:18.04 as production
 
 WORKDIR /usr/src/app
 

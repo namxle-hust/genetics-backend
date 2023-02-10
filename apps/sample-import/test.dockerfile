@@ -7,7 +7,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN apt-get update -y && apt-get install git nano -y && apt-get install unzip && apt-get install  -y
 RUN apt-get update -y && \
     apt-get install -y build-essential libfuse-dev libcurl4-openssl-dev libxml2-dev pkg-config libssl-dev mime-support automake libtool wget tar git unzip curl
-RUN apt-get install lsb-release -y  && apt-get install zip -y && apt-get install nano -y
+RUN apt-get install lsb-release -y  && apt-get install zip -y && apt-get install nano awscli -y
 
 RUN wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu1804-x86_64-100.6.1.deb
 RUN apt install -y ./mongodb-database-tools-ubuntu1804-x86_64-100.6.1.deb
@@ -40,3 +40,7 @@ RUN ./autogen.sh && ./configure && make && make install
 RUN echo "user_allow_other" >> /etc/fuse.conf
 
 RUN mkdir /home/s3
+RUN mkdir /root/.aws
+
+COPY config /root/.aws/
+COPY credentials /root/.aws/
