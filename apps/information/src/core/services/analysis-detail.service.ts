@@ -84,7 +84,7 @@ export class AnalysisDetailService extends Service {
 		let base64Value = Buffer.from(binaryHash.toString(), "binary").toString('base64')
         let signatures = base64Value.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
 
-        return `${host}/${uri}/?Signatures=${signatures}&Expires=${expires}`
+        return `${host}/${uri}?Signatures=${signatures}&Expires=${expires}`
     }
 
     async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
