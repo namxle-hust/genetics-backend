@@ -8,11 +8,13 @@ export class CommonService {
     private readonly logger = new Logger(CommonService.name)
 
     private s3Bucket: string;
+    private s3Folder: string
     private s3Profile: string
 
     constructor(private configService: ConfigService) {
         this.s3Bucket = this.configService.get<string>('S3_BUCKET')
         this.s3Profile = this.configService.get<string>('S3_PROFILE')
+        this.s3Folder = this.configService.get<string>('S3_FAKE_FOLDER')
     }
 
     async runCommand(command: string): Promise<any> {
@@ -32,11 +34,11 @@ export class CommonService {
     }
 
     getUploadCmd(source, destination) {
-        return `aws s3 cp ${source} s3://${this.s3Bucket}/${destination} --profile ${this.s3Profile} >/dev/null 2>&1`
+        return `cp ${source} ${this.s3Folder}/${destination}`
     }
 
     getDownloadCmd(source, destination) {
-        return `aws s3 cp s3://${this.s3Bucket}/${source} ${destination} --profile ${this.s3Profile} >/dev/null 2>&1`
+        return `cp ${this.s3Folder}/${source} ${destination}`
     }
 
     getAnalysisDestinationFolder(analysis: AnalysisModel): string {

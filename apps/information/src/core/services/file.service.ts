@@ -1,13 +1,31 @@
 import { File } from '@app/prisma';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileCreateDTO, FileFilterDTO, TableDTO } from '../dto';
 import { FileEntity, TableOutputEntity } from '../entities';
 import { IFileCreateInput, IFileFindInput, TableFindInput } from '../models';
 import { FileRepository } from '../repository';
+import { CommonService } from './common.service';
 
 @Injectable()
 export class FileService {
-    constructor(private readonly fileRepository: FileRepository) {}
+    private s3Bucket: string;
+    private s3UploadFolder: string;
+    private nodeEnv: string;
+    private localUploadFolder: string
+    private s3Profile: string
+
+    constructor(
+        private readonly fileRepository: FileRepository,
+        private readonly configService: ConfigService,
+        private readonly commonService: CommonService
+    ) { 
+        this.s3Bucket = this.configService.get<string>('S3_BUCKET');
+        this.s3UploadFolder = this.configService.get<string>('S3_UPLOAD_FOLDER')
+        this.nodeEnv = this.configService.get<string>('NODE_ENV');
+        this.localUploadFolder = this.configService.get<string>('LOCAL_UPLOAD_FOLDER')
+        this.s3Profile = this.configService.get<string>('S3_PROFILE')
+    }
 
     async getFiles(dto: TableDTO<FileFilterDTO>, sampleId: number): Promise<TableOutputEntity<FileEntity>> {
         let result: TableOutputEntity<FileEntity> = {
@@ -48,11 +66,25 @@ export class FileService {
         }
 
         const file = await this.fileRepository.create(data);
-        return file;
 
+        // Save File to local machine on production env
+        if (this.nodeEnv == 'production') {
+            await this.saveFile(data.uploadedName);
+        }
+
+        return file;
     }
 
     async removeSample(id: number) {
         // return this.workspaceRepository.update()
+    }
+
+    async saveFile(uploadedName: string) {
+        const s3UploadedPath = `s3://${this.s3Bucket}/${this.s3UploadFolder}/${uploadedName}`
+        const destination = `${this.localUploadFolder}`
+
+        let command = `aws s3 cp ${s3UploadedPath} ${destination} --profile ${this.s3Profile} >/dev/null 2>&1`
+
+        await this.commonService.runCommand(command);
     }
 }
