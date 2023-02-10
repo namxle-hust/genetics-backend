@@ -18,6 +18,7 @@ export class SampleImportService {
     private s3PublicFolder: string
 
     private s3Bucket: string
+    private s3Profile: string
 
     private pharmaGkbFileName: string
 
@@ -35,6 +36,7 @@ export class SampleImportService {
         this.s3PublicFolder = this.configService.get<string>('S3_PUBLIC_FOLDER')
         this.pharmaGkbFileName = this.configService.get<string>('PHARMAGKB_FILE_PATH')
         this.s3Bucket = this.configService.get<string>('S3_BUCKET')
+        this.s3Profile = this.configService.get<string>('S3_PROFILE')
     }
 
     getHello(): string {
@@ -122,8 +124,8 @@ export class SampleImportService {
         let tbiSource = `${vcfSource}.tbi`
 
         let commands = [
-            `aws s3 cp ${vcfSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/`,
-            `aws s3 cp ${tbiSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/`,
+            `aws s3 cp ${vcfSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/ --profile ${this.s3Profile} > /dev/null`,
+            `aws s3 cp ${tbiSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/ --profile ${this.s3Profile} > /dev/null`,
         ]
 
         let command = commands.join(' && ')
