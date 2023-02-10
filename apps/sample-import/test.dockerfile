@@ -41,6 +41,3 @@ RUN echo "user_allow_other" >> /etc/fuse.conf
 
 RUN mkdir /home/s3
 RUN mkdir /root/.aws
-
-COPY config /root/.aws/
-COPY credentials /root/.aws/
