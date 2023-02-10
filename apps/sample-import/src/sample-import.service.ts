@@ -17,6 +17,8 @@ export class SampleImportService {
     private s3AnalysesFolder: string
     private s3PublicFolder: string
 
+    private s3Bucket: string
+
     private pharmaGkbFileName: string
 
     private readonly logger = new Logger(SampleImportService.name)
@@ -32,6 +34,7 @@ export class SampleImportService {
         this.s3AnalysesFolder = this.configService.get<string>('S3_ANALYSES_FOLDER')
         this.s3PublicFolder = this.configService.get<string>('S3_PUBLIC_FOLDER')
         this.pharmaGkbFileName = this.configService.get<string>('PHARMAGKB_FILE_PATH')
+        this.s3Bucket = this.configService.get<string>('S3_BUCKET')
     }
 
     getHello(): string {
@@ -98,6 +101,8 @@ export class SampleImportService {
 
                 await this.importRepository.updateAnalysisStatus(analysis.id, data)
 
+                await this.uploadVcfFileToS3(analysis)
+
                 this.logger.log('Done import');
             }
         } catch (error) {
@@ -110,6 +115,20 @@ export class SampleImportService {
             this.logger.error(error);
         }   
         
+    }
+
+    async uploadVcfFileToS3(analysis: Analysis) {
+        let vcfSource = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${VCF_APPLIED_BED}.gz`
+        let tbiSource = `${vcfSource}.tbi`
+
+        let commands = [
+            `aws s3 cp ${vcfSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/`,
+            `aws s3 cp ${tbiSource} s3://${this.s3Bucket}/${this.s3AnalysesFolder}/${analysis.id}/`,
+        ]
+
+        let command = commands.join(' && ')
+
+        await this.commonService.runCommand(command);
     }
 
     async mongoImport(analysis: Analysis) {
