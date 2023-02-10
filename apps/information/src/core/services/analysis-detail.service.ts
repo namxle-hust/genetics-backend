@@ -88,6 +88,8 @@ export class AnalysisDetailService extends Service {
     }
 
     async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
+        this.logger.debug(clientIp);
+
         let bamPath = `${analysisId}/realigned.bam`
         let indexBamPath = `${analysisId}/realigned.bam.bai`
 
