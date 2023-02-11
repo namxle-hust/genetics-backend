@@ -98,7 +98,7 @@ export class AnalysisDetailService extends Service {
 
         let data = response.data;
 
-        this.logger.debug(data);
+        // this.logger.debug(data);
     
         return data.url
     }
