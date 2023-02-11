@@ -61,7 +61,7 @@ export class AnalysisRepository {
 
         return analysis;
     }
-    async findByIdOrFail(id: number): Promise<Analysis> {
+    async findByIdOrFail(id: number) {
         const analysis = await this.prisma.analysis.findUniqueOrThrow({
             where: { id: id },
             include: {
@@ -69,7 +69,8 @@ export class AnalysisRepository {
                     select: {
                         id: true,
                         name: true,
-                        userId: true
+                        userId: true,
+                        type: true
                     }
                 },
                 workspace: {

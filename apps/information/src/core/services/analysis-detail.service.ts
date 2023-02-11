@@ -11,6 +11,7 @@ import { CommonService } from "./common.service";
 import { S3Service } from "./s3.service";
 import { VariantService } from "./variant.service";
 import axios from 'axios';
+import { SampleType } from "@app/prisma";
 
 
 @Injectable({})
@@ -105,6 +106,11 @@ export class AnalysisDetailService extends Service {
 
     async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
         this.logger.debug(clientIp);
+
+        let analysis = await this.analysisRepository.findByIdOrFail(analysisId);
+        if (analysis.sample && analysis.sample.type == SampleType.VCF) {
+            return {}
+        }
 
         let bamPath = `${analysisId}/realigned.bam`
         let indexBamPath = `${analysisId}/realigned.bam.bai`

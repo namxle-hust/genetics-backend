@@ -8,17 +8,16 @@ export class VariantQCUrlEntity {
 }
 
 export interface IIgvUrl {
-    bamUrl: string;
-    indexBamUrl: string
+    bamUrl?: string;
+    indexBamUrl?: string
 }
 
 export class IgvUrlEntity implements IIgvUrl {
-    bamUrl: string
-    indexBamUrl: string
+    bamUrl?: string
+    indexBamUrl?: string
 
     constructor(partial: Partial<IgvUrlEntity>) {
-        this.bamUrl = partial.bamUrl;
-        this.indexBamUrl = partial.indexBamUrl
+        Object.assign(this, partial);
     }
 }
 
