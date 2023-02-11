@@ -47,7 +47,8 @@ module.exports = {
 
                 "IGV_SECRET_KEY": "itisawsomekey1599",
                 "IGV_FILE_HOST": "https://data.btgenomics.com",
-                "IGV_SERVER_FOLDER": "user_files/genetics-data"
+                "IGV_SERVER_FOLDER": "user_files/data",
+                "ENLITER_HOST": "https://enliter.btgenomics.com"
             }
         }
     ]

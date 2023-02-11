@@ -10,9 +10,7 @@ import { AnalysisRepository, VariantRepository } from "../repository";
 import { CommonService } from "./common.service";
 import { S3Service } from "./s3.service";
 import { VariantService } from "./variant.service";
-import * as crypto from 'crypto'
-import { NotFoundError } from "rxjs";
-import { Buffer } from "buffer";
+import axios from 'axios';
 
 
 @Injectable({})
@@ -70,21 +68,37 @@ export class AnalysisDetailService extends Service {
         return this.buildQCUrl(singedUrl, tbiSingedUrl)
     }
 
-    async getIgvLink(path: string, clientIp: string): Promise<string> {
-        let host = this.configService.get<string>('IGV_FILE_HOST');
-        let secret = this.configService.get<string>('IGV_SECRET_KEY');
+    // async getIgvLink(path: string, clientIp: string): Promise<string> {
+    //     let host = this.configService.get<string>('IGV_FILE_HOST');
+    //     let secret = this.configService.get<string>('IGV_SECRET_KEY');
+    //     let folder = this.configService.get<string>('IGV_SERVER_FOLDER');
+
+    //     let uri = `/${folder}/${path}`
+
+    //     let today = new Date();
+	// 	let minute_exist = today.getMinutes() + 30;
+	// 	let expires = Math.round(new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), minute_exist, today.getSeconds()).getTime() / 1000);
+	// 	let input = uri + clientIp + expires + " " + secret;
+	// 	let binaryHash = crypto.createHash("md5").update(input).digest().toString('hex');
+    //     let signatures = binaryHash.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
+
+    //     return `${host}${uri}?Signatures=${signatures}&Expires=${expires}`
+    // }
+
+    async getIgvLinkV2(path: string, clientIp: string): Promise<string> {
         let folder = this.configService.get<string>('IGV_SERVER_FOLDER');
+        let enliterHost = this.configService.get<string>('ENLITER_HOST');
+        let url = `${enliterHost}/vg/get-igv`
 
-        let uri = `/${folder}/${path}`
+        let postData = {
+            path: `${folder}/${path}`,
+            clientIp: clientIp
+        }
+        let response = await axios.post(url, postData)
 
-        let today = new Date();
-		let minute_exist = today.getMinutes() + 30;
-		let expires = Math.round(new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), minute_exist, today.getSeconds()).getTime() / 1000);
-		let input = uri + clientIp + expires + " " + secret;
-		let binaryHash = crypto.createHash("md5").update(input).digest().toString('hex');
-        let signatures = binaryHash.replace(/\+/g, "-").replace(/\//g, "_").replace(/\=/g, "")
+        let data = response.data;
 
-        return `${host}${uri}?Signatures=${signatures}&Expires=${expires}`
+        return data.url
     }
 
     async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
@@ -93,8 +107,8 @@ export class AnalysisDetailService extends Service {
         let bamPath = `${analysisId}/realigned.bam`
         let indexBamPath = `${analysisId}/realigned.bam.bai`
 
-        let bamUrl = await this.getIgvLink(bamPath, clientIp);
-        let indexBamUrl = await this.getIgvLink(indexBamPath, clientIp);
+        let bamUrl = await this.getIgvLinkV2(bamPath, clientIp);
+        let indexBamUrl = await this.getIgvLinkV2(indexBamPath, clientIp);
        
         return {
             bamUrl: bamUrl,
