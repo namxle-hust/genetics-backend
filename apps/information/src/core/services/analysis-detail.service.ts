@@ -4,7 +4,7 @@ import { Service } from "@app/common/shared/service";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TableDTO, VariantFilterDTO } from "../dto";
-import { IIgvUrl, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from "../entities";
+import { AnalysisEntity, IIgvUrl, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from "../entities";
 import { IVariantFilter, TableFindInput, VariantModel } from "../models";
 import { AnalysisRepository, VariantRepository } from "../repository";
 import { CommonService } from "./common.service";
@@ -107,7 +107,8 @@ export class AnalysisDetailService extends Service {
     async getIgvURLs(analysisId: number, clientIp: string): Promise<IIgvUrl> {         
         this.logger.debug(clientIp);
 
-        let analysis = await this.analysisRepository.findByIdOrFail(analysisId);
+        let result = await this.analysisRepository.findByIdOrFail(analysisId);
+        let analysis = new AnalysisEntity(result);
         if (analysis.sample && analysis.sample.type == SampleType.VCF) {
             return {}
         }

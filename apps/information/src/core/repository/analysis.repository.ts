@@ -2,6 +2,7 @@ import { Analysis, PrismaService, Sample } from "@app/prisma";
 import { PrismaClientKnownRequestError } from "@app/prisma";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AnalysisFilterDTO } from "../dto";
+import { AnalysisEntity } from "../entities";
 import { IAnalysisCreateInput, IAnalysisFilter, IAnalysisFindInput, IAnalysisRemoveInput, IAnalysisUpdateInput, TableFindInput } from "../models";
 
 @Injectable()
@@ -61,7 +62,7 @@ export class AnalysisRepository {
 
         return analysis;
     }
-    async findByIdOrFail(id: number) {
+    async findByIdOrFail(id: number): Promise<Analysis> {
         const analysis = await this.prisma.analysis.findUniqueOrThrow({
             where: { id: id },
             include: {
