@@ -10,8 +10,7 @@ export class PgxRepository {
             where: {
                 rsid: {
                     in: rsIds
-                },
-                drug_response_category: "Pain Medicine"
+                }
             },
         })
         return files
