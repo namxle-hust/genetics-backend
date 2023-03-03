@@ -141,7 +141,7 @@ export class ReportService extends Service{
                         evidence: pgxRecords[i].evidence,
                         related_chemicals: pgxRecords[i].related_chemicals,
                         drug_response_category: pgxRecords[i].drug_response_category,
-                        annotation_text: pgxRecords[i].annotation_text
+                        annotation_text: pgxRecords[i].clinical_annotation_types
                     })
                 }
             }
