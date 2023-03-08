@@ -14,6 +14,7 @@ export class VcfService {
 
     private s3Bucket: string
     private s3AnalysesFolder: string
+    private s3Folder: string;
     private vcfOutput = FASTQ_OUTPUT_VCF
     private vcfOutputCompressed = FASTQ_OUTPUT_VCF_COMPRESSED
 
@@ -21,6 +22,7 @@ export class VcfService {
     constructor(private commonService: CommonService, private configService: ConfigService) {
         this.s3AnalysesFolder = this.configService.get<string>('S3_ANALYSES_FOLDER')
         this.s3Bucket = this.configService.get<string>('S3_BUCKET');
+        this.s3Folder = this.configService.get<string>('S3_FAKE_FOLDER')
     }
 
     async uploadVcfFiles(analysis: AnalysisModel) {
@@ -30,9 +32,12 @@ export class VcfService {
 
         let vcfFilePath = `${analysisFolder}/${output}`
 
+        let createFolderCmd = `mkdir -p ${this.s3Folder}/${this.s3AnalysesFolder}/${analysis.id}`
+
         let uploadVcfCmd = this.commonService.getUploadCmd(vcfFilePath, `${this.s3AnalysesFolder}/${analysis.id}/${output}`)
         
         let commands = [
+            createFolderCmd,
             uploadVcfCmd
         ]
 

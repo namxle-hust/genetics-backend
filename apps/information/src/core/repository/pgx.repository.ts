@@ -8,10 +8,12 @@ export class PgxRepository {
     async findMany(rsIds: Array<string>): Promise<PGX[]> {
         const files = await this.prisma.pGX.findMany({
             where: {
-                rsid: {
-                    in: rsIds
-                },
-                drug_response_category: "Toxicity"
+                AND: {
+                    rsid: {
+                        in: rsIds
+                    },
+                    drug_response_category: "Toxicity"
+                } 
             },
         })
         return files
