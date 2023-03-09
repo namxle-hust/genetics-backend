@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Post, Req, 
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../core/decorators';
 import { AnalysisCreateDTO, AnalysisDeleteManyDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO, VariantFilterDTO } from '../core/dto';
-import { AnalysisEntity, IgvUrlEntity, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from '../core/entities';
+import { AnalysisEntity, GeneDetailEntity, IgvUrlEntity, TableOutputEntity, VariantEntity, VariantQCUrlEntity } from '../core/entities';
 import { JwtGuard } from '../core/guards';
 import { AnalysisService, AnalysisDetailService, VariantService } from '../core/services';
 import { Request } from 'express';
@@ -101,6 +101,13 @@ export class AnalysisController {
             await this.analysisService.removeAnalysis(userId, id);
         }
         return true
+    }
+
+    @Get('gene-detail/:geneName')
+    @ApiOkResponse({ type: AnalysisEntity })
+    async getGeneInfo(@GetUser('id') userId: number, @Param('geneName') geneName: string) {
+        const data = await this.analysisService.getGeneInfo(geneName);
+        return new GeneDetailEntity(data);
     }
 
 

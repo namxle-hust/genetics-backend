@@ -4,13 +4,26 @@ import { AnalysisCreateDTO, AnalysisFilterDTO, AnalysisUpdateDTO, TableDTO } fro
 import { AnalysisFindInput, IAnalysisCreateInput, IAnalysisFindInput, IAnalysisUpdateInput, TableFindInput } from '../models';
 import { TableOutputEntity, AnalysisEntity } from '../entities';
 import { AnalysisRepository, SampleRepository } from '../repository';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 @Injectable({})
 export class AnalysisService {
 
     private readonly logger = new Logger(AnalysisService.name)
 
-    constructor(private readonly analysisRepository: AnalysisRepository, private readonly sampleRepository: SampleRepository) { }
+    constructor(private readonly analysisRepository: AnalysisRepository, private readonly sampleRepository: SampleRepository, private configService: ConfigService) { }
     
+    async getGeneInfo(geneName: string) {
+        let enliterHost = this.configService.get<string>('ENLITER_HOST');
+        let url = `${enliterHost}/vg/gene-info/${geneName}`
+
+        let response = await axios.get(url);
+
+        let data = response.data;
+
+        return data.data;
+    }
+
     async getAnalyses(dto: TableDTO<AnalysisFilterDTO>, userId: number): Promise<TableOutputEntity<AnalysisEntity>> {
         let result: TableOutputEntity<AnalysisEntity> = {
             items: [],

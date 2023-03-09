@@ -1,9 +1,23 @@
-import { VariantModel } from "../models"
+import { IGeneDetail, VariantModel } from "../models"
 export class VariantQCUrlEntity {
     url: string
 
     constructor(url) {
         this.url = url
+    }
+}
+
+export class GeneDetailEntity implements IGeneDetail {
+    name: string;
+    full_name: string;
+    summary: string;
+    GHR_summary: string;
+    GHR_metadata: string;
+    NCBI_summary: string;
+    NCBI_metadata: string;
+    
+    constructor(partial: Partial<GeneDetailEntity>) {
+        Object.assign(this, partial);
     }
 }
 
