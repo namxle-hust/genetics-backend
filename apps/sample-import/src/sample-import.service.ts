@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Analysis, AnalysisStatus, NotFoundError } from '@app/prisma';
 import { InjectDb } from '@app/common/mongodb/mongo.decorators';
 import { Db } from 'mongodb'
-import { RESULT_ANNO_FILE, RESULT_ANNO_PGX_FILE, VCF_APPLIED_BED } from '@app/common';
+import { RESULT_ANNO_FILE, RESULT_ANNO_PGX_FILE, VCF_APPLIED_BED, VCF_FILE } from '@app/common';
 import { ImportRepository } from './import.repository';
 import { ConfigService } from '@nestjs/config';
 import { ANALYSIS_COLLECTION_PREFIX } from '@app/common/mongodb';
@@ -120,7 +120,7 @@ export class SampleImportService {
     }
 
     async uploadVcfFileToS3(analysis: Analysis) {
-        let vcfSource = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${VCF_APPLIED_BED}.gz`
+        let vcfSource = `${this.s3Dir}/${this.s3AnalysesFolder}/${analysis.id}/${VCF_FILE}.gz`
         let tbiSource = `${vcfSource}.tbi`
 
         let commands = [
