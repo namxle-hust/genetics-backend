@@ -8,6 +8,8 @@ export const VCF_ORIGINAL_COMPRESSED_FILE = 'analysis.original.vcf.gz'
 
 export const VCF_FILE = 'analysis.vcf'
 
+export const VCF_CANONICAL_FILE = 'analysis.cannonical'
+
 export const ANALYZING_FILE = 'analysis.analyzing'
 
 export const VCF_FORMAT_TMP_FILE = 'analysis.tmp.format.vcf'

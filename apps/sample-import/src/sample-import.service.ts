@@ -97,7 +97,7 @@ export class SampleImportService {
 
                 let data: IAnalysisUpdate = {
                     status: AnalysisStatus.ANALYZED,
-                    vcfFilePath: `${VCF_APPLIED_BED}.gz`,
+                    vcfFilePath: `${VCF_FILE}.gz`,
                     totalVariants: totalVariants
                 }
 
