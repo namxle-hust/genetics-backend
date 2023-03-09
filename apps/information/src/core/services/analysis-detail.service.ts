@@ -56,6 +56,7 @@ export class AnalysisDetailService extends Service {
         const collectionName = `${ANALYSIS_COLLECTION_PREFIX}_${analysisId}`
         const condtions = this.variantService.buildVariantDetailConditions(_id);
         const data = await this.variantRepository.find(collectionName, condtions); 
+        return data
     }
 
     async getQcUrl(analysisId: number): Promise<string> {

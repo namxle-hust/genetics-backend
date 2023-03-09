@@ -40,7 +40,7 @@ export class AnalysisController {
     @ApiCreatedResponse({ type: VariantEntity })
     async getVariantDetail(@Param('analysisId', ParseIntPipe) analysisId, @Param('variantId') variantId) {
         const data = await this.analysisDetailService.getVariantDetail(analysisId, variantId)
-        return new VariantEntity(data[0])
+        return new VariantEntity(data ? data[0]: {})
     }
 
     @Get(':analysisId/igv-url')
