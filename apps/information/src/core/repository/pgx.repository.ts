@@ -12,7 +12,7 @@ export class PgxRepository {
                     rsid: {
                         in: rsIds
                     },
-                    drug_response_category: "Toxicity"
+                    // drug_response_category: "Toxicity"
                 } 
             },
         })
